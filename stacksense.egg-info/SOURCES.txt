@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+stacksense/__init__.py
+stacksense/core.py
+stacksense.egg-info/PKG-INFO
+stacksense.egg-info/SOURCES.txt
+stacksense.egg-info/dependency_links.txt
+stacksense.egg-info/top_level.txt
