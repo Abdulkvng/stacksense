@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for StackSense
+  postgres:
+    image: postgres:15-alpine
+    container_name: stacksense-postgres
+    environment:
+      POSTGRES_USER: stacksense
+      POSTGRES_PASSWORD: stacksense
+      POSTGRES_DB: stacksense
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stacksense"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - stacksense-network
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: stacksense-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@stacksense.io
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - stacksense-network
+    profiles:
+      - tools
+
+  # Example application using StackSense
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.example
+    container_name: stacksense-app
+    environment:
+      - STACKSENSE_ENABLE_DB=true
+      - STACKSENSE_DB_URL=postgresql://stacksense:stacksense@postgres:5432/stacksense
+      - STACKSENSE_PROJECT_ID=default
+      - STACKSENSE_ENVIRONMENT=production
+      - STACKSENSE_DEBUG=false
+    command: python example_app.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - app_data:/app/data
+    networks:
+      - stacksense-network
+    profiles:
+      - app
+
+volumes:
+  postgres_data:
+    driver: local
+  app_data:
+    driver: local
+
+networks:
+  stacksense-network:
+    driver: bridge
+

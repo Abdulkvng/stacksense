@@ -49,8 +49,23 @@ class StackSense:
         )
         
         self.logger = get_logger(__name__, debug=debug)
-        self.tracker = MetricsTracker(settings=self.settings)
-        self.analytics = Analytics(tracker=self.tracker)
+        
+        # Initialize database if enabled
+        self.db_manager = None
+        if self.settings.enable_database:
+            try:
+                from stacksense.database.connection import get_db_manager
+                self.db_manager = get_db_manager(
+                    database_url=self.settings.database_url,
+                    echo=self.settings.database_echo,
+                    create_tables=self.settings.database_auto_create,
+                )
+                self.logger.info("Database initialized")
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize database: {e}. Continuing without database.")
+        
+        self.tracker = MetricsTracker(settings=self.settings, db_manager=self.db_manager)
+        self.analytics = Analytics(tracker=self.tracker, db_manager=self.db_manager)
         self.api_client = APIClient(settings=self.settings)
         
         self._monitored_clients: List[Any] = []

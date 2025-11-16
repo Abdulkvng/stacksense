@@ -6,7 +6,6 @@ import os
 from typing import Optional
 from dataclasses import dataclass, field
 
-
 @dataclass
 class Settings:
     """
@@ -42,6 +41,12 @@ class Settings:
     max_retries: int = 3
     retry_delay: float = 1.0
     
+    # Database Configuration
+    enable_database: bool = field(default_factory=lambda: os.getenv("STACKSENSE_ENABLE_DB", "true").lower() == "true")
+    database_url: Optional[str] = field(default_factory=lambda: os.getenv("STACKSENSE_DB_URL"))
+    database_echo: bool = False  # SQL query logging
+    database_auto_create: bool = True  # Auto-create tables
+    
     def __post_init__(self):
         """Validate settings after initialization."""
         if self.debug:
@@ -64,6 +69,9 @@ class Settings:
             project_id=os.getenv("STACKSENSE_PROJECT_ID", "default"),
             environment=os.getenv("STACKSENSE_ENVIRONMENT", "production"),
             debug=os.getenv("STACKSENSE_DEBUG", "false").lower() == "true",
+            enable_database=os.getenv("STACKSENSE_ENABLE_DB", "true").lower() == "true",
+            database_url=os.getenv("STACKSENSE_DB_URL"),
+            database_echo=os.getenv("STACKSENSE_DB_ECHO", "false").lower() == "true",
         )
     
     def to_dict(self) -> dict:

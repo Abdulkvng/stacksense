@@ -1,0 +1,38 @@
+# Example Dockerfile for an application using StackSense
+# Copy and customize this for your application
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Install StackSense
+RUN pip install --no-cache-dir stacksense[postgres]
+
+# Copy application code
+COPY . .
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    STACKSENSE_ENABLE_DB=true \
+    STACKSENSE_DB_URL=postgresql://stacksense:stacksense@postgres:5432/stacksense
+
+# Expose port
+EXPOSE 8000
+
+# Run application
+CMD ["python", "app.py"]
+

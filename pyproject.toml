@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stacksense"
 version = "0.1.0"
-description = "AI infrastructure monitoring for tracking usage, cost, and performance across OpenAI, Claude, ElevenLabs, Pinecone, and more"
+description = "AI infrastructure monitoring for tracking usage, cost, and performance across OpenAI, Claude, ElevenLabs, Pinecone, and more. Supports SQLite (default) and PostgreSQL databases."
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Abdulrahman Sadiq", email = "abdulkvng@gmail.com"}
 ]
 keywords = ["ai", "monitoring", "openai", "claude", "analytics", "metrics", "llm", "infrastructure"]
 classifiers = [
@@ -32,6 +32,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pydantic>=2.0.0",
     "rich>=13.0.0",
+    "sqlalchemy>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -43,15 +44,24 @@ dev = [
     "mypy>=1.0.0",
 ]
 dashboard = [
+    "flask>=3.0.0",
     "plotly>=5.0.0",
     "pandas>=2.0.0",
 ]
+postgres = [
+    "psycopg2-binary>=2.9.0",
+]
+postgresql = [
+    "psycopg2-binary>=2.9.0",
+]
+# Note: Both 'postgres' and 'postgresql' install the same PostgreSQL driver
+# Use: pip install stacksense[postgresql] or pip install stacksense[postgres]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/stacksense"
+Homepage = "https://github.com/Abdulkvng/stacksense"
 Documentation = "https://stacksense.readthedocs.io"
-Repository = "https://github.com/yourusername/stacksense"
-"Bug Tracker" = "https://github.com/yourusername/stacksense/issues"
+Repository = "https://github.com/Abdulkvng/stacksense"
+"Bug Tracker" = "https://github.com/Abdulkvng/stacksense/issues"
 
 [tool.setuptools.packages.find]
 include = ["stacksense*"]
