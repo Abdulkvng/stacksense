@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy requirements first for better caching
 COPY pyproject.toml ./
+COPY MANIFEST.in* ./
 COPY README.md ./
 
 # Install StackSense and dependencies
@@ -21,6 +22,7 @@ COPY README.md ./
 # Option 2: Install from source (for development)
 COPY stacksense/ ./stacksense/
 COPY pyproject.toml ./
+COPY MANIFEST.in* ./
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -e ".[postgres]"
 
@@ -32,6 +34,7 @@ WORKDIR /app
 
 # Install runtime dependencies for PostgreSQL (if needed)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 

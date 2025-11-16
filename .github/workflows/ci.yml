@@ -60,7 +60,7 @@ jobs:
     
     - name: Build Docker image
       run: |
-        docker build -t stacksense:test -f Dockerfile.example .
+        docker build -t stacksense:test -f docs/deployment/Dockerfile.example .
     
     - name: Test Docker image
       run: |

@@ -8,11 +8,13 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    libpq-dev \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy project files first (for better caching)
 COPY pyproject.toml ./
+COPY MANIFEST.in* ./
 COPY stacksense/ ./stacksense/
 
 # Install StackSense from source with PostgreSQL support
@@ -28,7 +30,14 @@ RUN if [ -f requirements.txt ]; then \
     fi
 
 # Copy application code
+# Option 1: Use example app (default)
 COPY docs/deployment/example_app.py ./example_app.py
+CMD ["python", "example_app.py"]
+
+# Option 2: Copy your own app (uncomment and customize)
+# COPY app.py ./
+# COPY your_app/ ./your_app/
+# CMD ["python", "app.py"]
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -38,7 +47,4 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Expose port
 EXPOSE 8000
-
-# Run application (customize for your app)
-CMD ["python", "example_app.py"]
 
