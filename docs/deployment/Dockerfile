@@ -16,9 +16,13 @@ COPY pyproject.toml ./
 COPY README.md ./
 
 # Install StackSense and dependencies
+# Option 1: Install from PyPI (if published)
+# RUN pip install --no-cache-dir stacksense[postgres]
+# Option 2: Install from source (for development)
+COPY stacksense/ ./stacksense/
+COPY pyproject.toml ./
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir stacksense[postgres] || \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir -e ".[postgres]"
 
 # Production stage
 FROM python:3.11-slim

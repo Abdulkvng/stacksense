@@ -40,8 +40,9 @@ htmlcov/
 .tox/
 
 # Documentation
-docs/_build/
-*.md.bak
+docs/
+*.md
+!README.md
 
 # Database
 *.db
@@ -79,4 +80,3 @@ logs/
 tmp/
 temp/
 *.tmp
-

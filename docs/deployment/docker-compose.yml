@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U stacksense"]
       interval: 10s
@@ -42,8 +42,8 @@ services:
   # Example application using StackSense
   app:
     build:
-      context: .
-      dockerfile: Dockerfile.example
+      context: ../..
+      dockerfile: docs/deployment/Dockerfile.example
     container_name: stacksense-app
     environment:
       - STACKSENSE_ENABLE_DB=true
@@ -51,17 +51,36 @@ services:
       - STACKSENSE_PROJECT_ID=default
       - STACKSENSE_ENVIRONMENT=production
       - STACKSENSE_DEBUG=false
-    command: python example_app.py
+    command: python docs/deployment/example_app.py
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      - ./:/app
+      - ../../:/app
       - app_data:/app/data
     networks:
       - stacksense-network
     profiles:
       - app
+
+  # StackSense Dashboard
+  dashboard:
+    build:
+      context: ../..
+      dockerfile: docs/deployment/Dockerfile.dashboard
+    container_name: stacksense-dashboard
+    environment:
+      - STACKSENSE_ENABLE_DB=true
+      - STACKSENSE_DB_URL=postgresql://stacksense:stacksense@postgres:5432/stacksense
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - stacksense-network
+    profiles:
+      - dashboard
 
 volumes:
   postgres_data:

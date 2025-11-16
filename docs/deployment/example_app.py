@@ -30,7 +30,7 @@ if ss.settings.enable_database:
 def get_metrics_summary():
     """Get and display metrics summary."""
     try:
-        metrics = ss.get_metrics(timeframe="24h", from_db=True)
+        metrics = ss.get_metrics(timeframe="24h", from_db=ss.settings.enable_database)
         
         print("\n" + "="*50)
         print("StackSense Metrics Summary (Last 24h)")
