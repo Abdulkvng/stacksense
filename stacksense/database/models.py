@@ -25,40 +25,41 @@ class Event(Base):
     """
     Event model for storing API call events.
     """
+
     __tablename__ = "events"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     project_id = Column(String(255), nullable=False, index=True)
     environment = Column(String(50), nullable=False, index=True)
-    
+
     # Event details
     event_type = Column(String(50), default="api_call", nullable=False)
     provider = Column(String(50), nullable=False, index=True)
     model = Column(String(255), nullable=True, index=True)
-    
+
     # Metrics
     input_tokens = Column(Integer, default=0)
     output_tokens = Column(Integer, default=0)
     total_tokens = Column(Integer, default=0)
     cost = Column(Float, default=0.0)
     latency = Column(Float, default=0.0)  # milliseconds
-    
+
     # Status
     success = Column(Boolean, default=True, index=True)
     error = Column(Text, nullable=True)
-    
+
     # Additional data
     metadata = Column(JSON, nullable=True)
     method = Column(String(255), nullable=True)
-    
+
     # Indexes for common queries
     __table_args__ = (
         Index("idx_provider_timestamp", "provider", "timestamp"),
         Index("idx_project_env_timestamp", "project_id", "environment", "timestamp"),
         Index("idx_model_timestamp", "model", "timestamp"),
     )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary."""
         return {
@@ -87,31 +88,32 @@ class Metric(Base):
     """
     Aggregated metrics model for storing pre-computed metrics.
     """
+
     __tablename__ = "metrics"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     project_id = Column(String(255), nullable=False, index=True)
     environment = Column(String(50), nullable=False, index=True)
-    
+
     # Time period
     period_start = Column(DateTime, nullable=False)
     period_end = Column(DateTime, nullable=False)
     period_type = Column(String(20), nullable=False)  # 'hour', 'day', 'week', 'month'
-    
+
     # Aggregated metrics
     provider = Column(String(50), nullable=True, index=True)
     model = Column(String(255), nullable=True, index=True)
-    
+
     total_calls = Column(Integer, default=0)
     total_tokens = Column(Integer, default=0)
     total_cost = Column(Float, default=0.0)
     avg_latency = Column(Float, default=0.0)
     error_count = Column(Integer, default=0)
-    
+
     # Additional aggregated data
     metrics_data = Column(JSON, nullable=True)
-    
+
     # Unique constraint to prevent duplicate metrics
     __table_args__ = (
         Index(
@@ -125,7 +127,7 @@ class Metric(Base):
             unique=True,
         ),
     )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert metric to dictionary."""
         return {
@@ -145,4 +147,3 @@ class Metric(Base):
             "error_count": self.error_count,
             "metrics_data": self.metrics_data or {},
         }
-
