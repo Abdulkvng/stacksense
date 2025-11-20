@@ -29,20 +29,45 @@ class ClientProxy:
         """Proxy attribute access to wrapped client."""
         attr = getattr(self._client, name)
         
-        # If it's a method that makes API calls, wrap it
-        if callable(attr) and self._is_api_method(name):
-            return self._wrap_method(attr, name)
+        # If it's a callable, check if we should wrap it
+        if callable(attr):
+            # For OpenAI: chat.completions.create pattern
+            # We need to return a proxy that continues wrapping
+            if not self._is_api_method(name):
+                # Return another proxy to continue the chain
+                return ClientProxy(attr, self._tracker, self._provider)
+            else:
+                # This is the final API method, wrap it
+                return self._wrap_method(attr, name)
+        
+        # If it's not callable, check if it's an object we should proxy
+        if hasattr(attr, '__dict__') or hasattr(attr, '__call__'):
+            return ClientProxy(attr, self._tracker, self._provider)
         
         return attr
+    
+    def __call__(self, *args, **kwargs):
+        """Handle direct calls to the proxy (for when the method itself is called)."""
+        if callable(self._client):
+            # Get the method name from the client
+            method_name = getattr(self._client, '__name__', 'unknown')
+            
+            # Check if this looks like an API method
+            if self._is_api_method(method_name) or 'create' in method_name.lower():
+                return self._wrap_method(self._client, method_name)(*args, **kwargs)
+            
+            return self._client(*args, **kwargs)
+        return self._client
     
     def _is_api_method(self, name: str) -> bool:
         """Check if method name suggests an API call."""
         api_methods = [
             "create", "generate", "complete", "embed",
             "query", "search", "insert", "upsert",
-            "send", "invoke"
+            "send", "invoke", "run", "execute"
         ]
-        return any(method in name.lower() for method in api_methods)
+        name_lower = name.lower()
+        return any(method in name_lower for method in api_methods)
     
     def _wrap_method(self, method: Callable, method_name: str) -> Callable:
         """Wrap a method to track metrics."""
