@@ -70,6 +70,7 @@ class ClientProxy:
             "search",
             "insert",
             "upsert",
+            "delete",
             "send",
             "invoke",
             "run",

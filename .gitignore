@@ -61,6 +61,11 @@ coverage.xml
 *.log
 .hypothesis/
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
 # Environment variables
 .env
 .env.local

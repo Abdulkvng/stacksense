@@ -15,7 +15,7 @@ from sqlalchemy import (
     JSON,
     Index,
 )
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 
 Base = declarative_base()
@@ -50,7 +50,7 @@ class Event(Base):
     error = Column(Text, nullable=True)
 
     # Additional data
-    metadata = Column(JSON, nullable=True)
+    metadata_ = Column("metadata", JSON, nullable=True)
     method = Column(String(255), nullable=True)
 
     # Indexes for common queries
@@ -79,7 +79,7 @@ class Event(Base):
             "latency": self.latency,
             "success": self.success,
             "error": self.error,
-            "metadata": self.metadata or {},
+            "metadata": self.metadata_ or {},
             "method": self.method,
         }
 

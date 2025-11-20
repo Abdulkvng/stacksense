@@ -195,7 +195,7 @@ class MetricsTracker:
                 latency=event.get("latency", 0.0),
                 success=event.get("success", True),
                 error=event.get("error"),
-                metadata=event.get("metadata", {}) or (metadata or {}),
+                metadata_=event.get("metadata", {}) or (metadata or {}),
                 method=(
                     event.get("metadata", {}).get("method")
                     if isinstance(event.get("metadata"), dict)
