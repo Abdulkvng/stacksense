@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#007AFF">
 </head>
 <body>
     <div class="app-container">
@@ -73,7 +74,7 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="refresh-btn" id="refreshBtn">
+                    <button class="refresh-btn" id="refreshBtn" aria-label="Refresh data">
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                             <path d="M9 3V9L13 5M9 15C5.686 15 3 12.314 3 9C3 5.686 5.686 3 9 3C12.314 3 15 5.686 15 9C15 12.314 12.314 15 9 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
@@ -82,51 +83,51 @@
             </header>
 
             <!-- Metrics Cards -->
-            <section class="metrics-grid" id="metricsGrid">
+            <section class="metrics-grid" id="metricsGrid" aria-label="Key Metrics">
                 <div class="metric-card">
                     <div class="metric-header">
                         <span class="metric-label">Total Calls</span>
-                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                             <path d="M10 2L12 8L18 8L13 12L15 18L10 14L5 18L7 12L2 8L8 8L10 2Z" fill="currentColor" opacity="0.3"/>
                         </svg>
                     </div>
-                    <div class="metric-value" id="totalCalls">0</div>
-                    <div class="metric-change positive">+12% from last period</div>
+                    <div class="metric-value" id="totalCalls" aria-live="polite">0</div>
+                    <div class="metric-change positive" id="totalCallsChange" aria-hidden="true">Loading...</div>
                 </div>
 
                 <div class="metric-card">
                     <div class="metric-header">
                         <span class="metric-label">Total Cost</span>
-                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                             <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" opacity="0.3"/>
                             <path d="M10 6V10L13 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </div>
-                    <div class="metric-value" id="totalCost">$0.00</div>
-                    <div class="metric-change positive">+8% from last period</div>
+                    <div class="metric-value" id="totalCost" aria-live="polite">$0.00</div>
+                    <div class="metric-change positive" id="totalCostChange" aria-hidden="true">Loading...</div>
                 </div>
 
                 <div class="metric-card">
                     <div class="metric-header">
                         <span class="metric-label">Avg Latency</span>
-                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                             <path d="M10 2L12 8L18 8L13 12L15 18L10 14L5 18L7 12L2 8L8 8L10 2Z" fill="currentColor" opacity="0.3"/>
                         </svg>
                     </div>
-                    <div class="metric-value" id="avgLatency">0ms</div>
-                    <div class="metric-change negative">-5% from last period</div>
+                    <div class="metric-value" id="avgLatency" aria-live="polite">0ms</div>
+                    <div class="metric-change negative" id="avgLatencyChange" aria-hidden="true">Loading...</div>
                 </div>
 
                 <div class="metric-card">
                     <div class="metric-header">
                         <span class="metric-label">Error Rate</span>
-                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <svg class="metric-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                             <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" opacity="0.3"/>
                             <path d="M10 6V10M10 14H10.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </div>
-                    <div class="metric-value" id="errorRate">0%</div>
-                    <div class="metric-change positive">-2% from last period</div>
+                    <div class="metric-value" id="errorRate" aria-live="polite">0%</div>
+                    <div class="metric-change positive" id="errorRateChange" aria-hidden="true">Loading...</div>
                 </div>
             </section>
 

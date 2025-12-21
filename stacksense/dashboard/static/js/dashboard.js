@@ -26,8 +26,13 @@ class StackSenseDashboard {
         });
 
         // Refresh button
-        document.getElementById('refreshBtn').addEventListener('click', () => {
+        const refreshBtn = document.getElementById('refreshBtn');
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.style.transform = 'rotate(180deg)';
             this.loadData();
+            setTimeout(() => {
+                refreshBtn.style.transform = '';
+            }, 300);
         });
 
         // Navigation
@@ -43,14 +48,31 @@ class StackSenseDashboard {
 
     async loadData() {
         try {
+            // Show loading state
+            const metricsCards = document.querySelectorAll('.metric-value');
+            metricsCards.forEach(card => {
+                card.style.opacity = '0.5';
+            });
+            
             await Promise.all([
                 this.loadMetrics(),
                 this.loadCostBreakdown(),
                 this.loadUsageOverTime(),
                 this.loadRecentEvents()
             ]);
+            
+            // Restore opacity
+            metricsCards.forEach(card => {
+                card.style.opacity = '1';
+                card.style.transition = 'opacity 0.3s ease';
+            });
         } catch (error) {
             console.error('Error loading data:', error);
+            // Restore opacity on error
+            const metricsCards = document.querySelectorAll('.metric-value');
+            metricsCards.forEach(card => {
+                card.style.opacity = '1';
+            });
         }
     }
 
@@ -58,11 +80,45 @@ class StackSenseDashboard {
         const response = await fetch(`/api/metrics/summary?timeframe=${this.currentTimeframe}`);
         const data = await response.json();
 
-        // Update metric cards
-        document.getElementById('totalCalls').textContent = this.formatNumber(data.total_calls);
-        document.getElementById('totalCost').textContent = this.formatCurrency(data.total_cost);
-        document.getElementById('avgLatency').textContent = `${Math.round(data.avg_latency)}ms`;
-        document.getElementById('errorRate').textContent = `${data.error_rate.toFixed(2)}%`;
+        // Animate number updates
+        this.animateValue('totalCalls', 0, data.total_calls, 800);
+        this.animateValue('totalCost', 0, data.total_cost, 800, true);
+        this.animateValue('avgLatency', 0, Math.round(data.avg_latency), 800, false, 'ms');
+        this.animateValue('errorRate', 0, parseFloat(data.error_rate.toFixed(2)), 800, false, '%');
+    }
+
+    animateValue(elementId, start, end, duration, isCurrency = false, suffix = '') {
+        const element = document.getElementById(elementId);
+        const startTime = performance.now();
+        
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+            const current = start + (end - start) * easeOutCubic;
+            
+            if (isCurrency) {
+                element.textContent = this.formatCurrency(current);
+            } else if (suffix) {
+                element.textContent = Math.round(current) + suffix;
+            } else {
+                element.textContent = this.formatNumber(Math.round(current));
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                if (isCurrency) {
+                    element.textContent = this.formatCurrency(end);
+                } else if (suffix) {
+                    element.textContent = end + suffix;
+                } else {
+                    element.textContent = this.formatNumber(end);
+                }
+            }
+        };
+        
+        requestAnimationFrame(animate);
     }
 
     async loadCostBreakdown() {
@@ -103,18 +159,40 @@ class StackSenseDashboard {
                 labels: providers,
                 datasets: [{
                     data: costs,
-                    backgroundColor: colors.slice(0, providers.length),
+                    backgroundColor: colors.slice(0, providers.length).map(c => c + 'E6'),
                     borderWidth: 0,
+                    hoverOffset: 8,
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1000,
+                    easing: 'easeOutCubic'
+                },
                 plugins: {
                     legend: {
                         display: false
                     },
                     tooltip: {
+                        backgroundColor: 'rgba(29, 29, 31, 0.95)',
+                        padding: 12,
+                        titleFont: {
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                            size: 13,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                            size: 14
+                        },
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        displayColors: true,
                         callbacks: {
                             label: (context) => {
                                 const label = context.label || '';
@@ -126,7 +204,7 @@ class StackSenseDashboard {
                         }
                     }
                 },
-                cutout: '70%'
+                cutout: '75%'
             }
         });
     }
@@ -157,20 +235,30 @@ class StackSenseDashboard {
                         label: 'API Calls',
                         data: calls,
                         borderColor: '#007AFF',
-                        backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                        borderWidth: 3,
                         fill: true,
-                        tension: 0.4,
+                        tension: 0.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#007AFF',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 2,
                         yAxisID: 'y'
                     },
                     {
                         label: 'Cost',
                         data: costs,
                         borderColor: '#5856D6',
-                        backgroundColor: 'rgba(88, 86, 214, 0.1)',
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(88, 86, 214, 0.08)',
+                        borderWidth: 3,
                         fill: true,
-                        tension: 0.4,
+                        tension: 0.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#5856D6',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 2,
                         yAxisID: 'y1'
                     }
                 ]
@@ -178,6 +266,10 @@ class StackSenseDashboard {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutCubic'
+                },
                 interaction: {
                     mode: 'index',
                     intersect: false,
@@ -186,8 +278,33 @@ class StackSenseDashboard {
                     legend: {
                         display: true,
                         position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                                size: 13,
+                                weight: '500'
+                            },
+                            color: '#86868b'
+                        }
                     },
                     tooltip: {
+                        backgroundColor: 'rgba(29, 29, 31, 0.95)',
+                        padding: 12,
+                        titleFont: {
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                            size: 13,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                            size: 14
+                        },
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        displayColors: true,
                         callbacks: {
                             label: (context) => {
                                 let label = context.dataset.label || '';
@@ -205,12 +322,36 @@ class StackSenseDashboard {
                     }
                 },
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                                size: 12
+                            },
+                            color: '#86868b'
+                        },
+                        border: {
+                            display: false
+                        }
+                    },
                     y: {
                         type: 'linear',
                         display: true,
                         position: 'left',
                         beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.04)',
+                            drawBorder: false
+                        },
                         ticks: {
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                                size: 12
+                            },
+                            color: '#86868b',
                             callback: (value) => this.formatNumber(value)
                         }
                     },
@@ -220,9 +361,15 @@ class StackSenseDashboard {
                         position: 'right',
                         beginAtZero: true,
                         grid: {
-                            drawOnChartArea: false,
+                            display: false,
+                            drawBorder: false
                         },
                         ticks: {
+                            font: {
+                                family: '-apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif',
+                                size: 12
+                            },
+                            color: '#86868b',
                             callback: (value) => this.formatCurrency(value)
                         }
                     }
@@ -242,14 +389,15 @@ class StackSenseDashboard {
             return;
         }
 
-        tbody.innerHTML = data.map(event => {
+        // Add fade-in animation to rows
+        tbody.innerHTML = data.map((event, index) => {
             const date = new Date(event.timestamp);
             const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             const statusClass = event.success ? 'success' : 'error';
             const statusText = event.success ? 'Success' : 'Error';
             
             return `
-                <tr>
+                <tr style="animation: fadeIn 0.4s ease-out ${index * 0.03}s backwards">
                     <td>${time}</td>
                     <td><strong>${event.provider}</strong></td>
                     <td>${event.model || 'N/A'}</td>
