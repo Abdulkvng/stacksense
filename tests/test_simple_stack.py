@@ -146,4 +146,3 @@ print("  • Try test_openai.py with real OpenAI API")
 print("  • Enable database: export STACKSENSE_ENABLE_DB=true")
 print("  • Run dashboard: pip install stacksense[dashboard]")
 print("\n" + "=" * 60)
-EOF

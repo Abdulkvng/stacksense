@@ -41,6 +41,7 @@ Provides-Extra: dashboard
 Requires-Dist: flask>=3.0.0; extra == "dashboard"
 Requires-Dist: plotly>=5.0.0; extra == "dashboard"
 Requires-Dist: pandas>=2.0.0; extra == "dashboard"
+Requires-Dist: cryptography>=42.0.0; extra == "dashboard"
 Provides-Extra: postgres
 Requires-Dist: psycopg2-binary>=2.9.0; extra == "postgres"
 Provides-Extra: postgresql

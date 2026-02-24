@@ -50,7 +50,9 @@ dashboard = [
     "flask>=3.0.0",
     "plotly>=5.0.0",
     "pandas>=2.0.0",
+    "cryptography>=42.0.0",
 ]
+
 postgres = [
     "psycopg2-binary>=2.9.0",
 ]
@@ -90,3 +92,5 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

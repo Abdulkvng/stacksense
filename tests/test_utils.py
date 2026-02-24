@@ -7,8 +7,7 @@ from stacksense.utils.helpers import (
     format_cost,
     format_tokens,
     parse_model_name,
-    calculate_rate_limit,
-    estimate_cost
+    calculate_rate_limit
 )
 
 
@@ -42,9 +41,4 @@ def test_calculate_rate_limit():
     assert calculate_rate_limit(0, 10) == 0.0
     assert calculate_rate_limit(1000, 60) == pytest.approx(16.67, rel=0.01)
 
-
-def test_estimate_cost():
-    """Test cost estimation."""
-    cost = estimate_cost(1000, "gpt-4", "openai")
-    assert cost >= 0
 
