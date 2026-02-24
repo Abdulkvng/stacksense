@@ -4,6 +4,7 @@ Helper utilities and functions
 
 import time
 import functools
+import asyncio
 from typing import Any, Callable, Dict, Optional
 
 
@@ -94,6 +95,9 @@ class ClientProxy:
                 # Make the actual API call
                 result = method(*args, **kwargs)
 
+                if kwargs.get("stream") is True:
+                    return self._handle_stream(result, start_time, model, method_name)
+
                 # Extract metrics from response
                 tokens = self._extract_tokens(result, self._provider)
 
@@ -108,16 +112,17 @@ class ClientProxy:
                 # Calculate latency
                 latency = (time.time() - start_time) * 1000  # ms
 
-                # Track the call
-                self._tracker.track_call(
-                    provider=self._provider,
-                    model=model,
-                    tokens=tokens,
-                    latency=latency,
-                    success=success,
-                    error=error,
-                    metadata={"method": method_name},
-                )
+                # Track the call only if not streaming (streams track themselves when they end)
+                if not kwargs.get("stream"):
+                    self._tracker.track_call(
+                        provider=self._provider,
+                        model=model,
+                        tokens=tokens,
+                        latency=latency,
+                        success=success,
+                        error=error,
+                        metadata={"method": method_name},
+                    )
 
         return wrapper
 
@@ -151,6 +156,146 @@ class ClientProxy:
             pass
 
         return None
+
+    def _handle_stream(
+        self, response_generator: Any, start_time: float, model: str, method_name: str
+    ) -> Any:
+        """Handle streaming response and track metrics when stream finishes."""
+        chunks = []
+        try:
+            for chunk in response_generator:
+                chunks.append(chunk)
+                yield chunk
+        finally:
+            latency = (time.time() - start_time) * 1000  # ms
+
+            # Extract tokens depending on provider from chunks
+            tokens = self._extract_stream_tokens(chunks, self._provider)
+
+            self._tracker.track_call(
+                provider=self._provider,
+                model=model,
+                tokens=tokens,
+                latency=latency,
+                success=True,
+                error=None,
+                metadata={"method": method_name, "stream": True},
+            )
+
+    def _extract_stream_tokens(self, chunks: list, provider: str) -> Optional[Dict[str, int]]:
+        """Extract or estimate tokens from streaming chunks."""
+        if not chunks:
+            return {"input": 0, "output": 0}
+
+        if provider == "openai":
+            last_chunk = chunks[-1]
+            if hasattr(last_chunk, "usage") and last_chunk.usage:
+                return {
+                    "input": getattr(last_chunk.usage, "prompt_tokens", 0),
+                    "output": getattr(last_chunk.usage, "completion_tokens", 0),
+                }
+            return {"input": 0, "output": len(chunks)}
+
+        elif provider == "anthropic":
+            input_tokens = 0
+            output_tokens = 0
+            for chunk in chunks:
+                if hasattr(chunk, "type"):
+                    if (
+                        chunk.type == "message_start"
+                        and hasattr(chunk, "message")
+                        and hasattr(chunk.message, "usage")
+                    ):
+                        input_tokens += getattr(chunk.message.usage, "input_tokens", 0)
+                    elif chunk.type == "message_delta" and hasattr(chunk, "usage"):
+                        output_tokens += getattr(chunk.usage, "output_tokens", 0)
+            if input_tokens > 0 or output_tokens > 0:
+                return {"input": input_tokens, "output": output_tokens}
+            return {"input": 0, "output": len(chunks)}
+
+        return None
+
+
+class AsyncClientProxy(ClientProxy):
+    """
+    Async proxy wrapper for AI API clients to enable automatic tracking.
+    """
+
+    def __getattr__(self, name: str) -> Any:
+        attr = getattr(self._client, name)
+
+        if callable(attr):
+            if not self._is_api_method(name):
+                return AsyncClientProxy(attr, self._tracker, self._provider)
+            else:
+                return self._wrap_method(attr, name)
+
+        if hasattr(attr, "__dict__") or hasattr(attr, "__call__"):
+            return AsyncClientProxy(attr, self._tracker, self._provider)
+
+        return attr
+
+    def _wrap_method(self, method: Callable, method_name: str) -> Callable:
+        """Wrap an async method to track metrics."""
+
+        @functools.wraps(method)
+        async def wrapper(*args, **kwargs):
+            start_time = time.time()
+            success = True
+            error = None
+            tokens = None
+            model = kwargs.get("model", "unknown")
+
+            try:
+                result = await method(*args, **kwargs)
+
+                if kwargs.get("stream") is True:
+                    return self._handle_async_stream(result, start_time, model, method_name)
+
+                tokens = self._extract_tokens(result, self._provider)
+                return result
+
+            except Exception as e:
+                success = False
+                error = str(e)
+                raise
+            finally:
+                if not kwargs.get("stream"):
+                    latency = (time.time() - start_time) * 1000
+                    self._tracker.track_call(
+                        provider=self._provider,
+                        model=model,
+                        tokens=tokens,
+                        latency=latency,
+                        success=success,
+                        error=error,
+                        metadata={"method": method_name},
+                    )
+
+        return wrapper
+
+    async def _handle_async_stream(
+        self, response_generator: Any, start_time: float, model: str, method_name: str
+    ) -> Any:
+        """Handle async streaming response."""
+        chunks = []
+        try:
+            async for chunk in response_generator:
+                chunks.append(chunk)
+                yield chunk
+        finally:
+            latency = (time.time() - start_time) * 1000
+            tokens = self._extract_stream_tokens(chunks, self._provider)
+
+            self._tracker.track_call(
+                provider=self._provider,
+                model=model,
+                tokens=tokens,
+                latency=latency,
+                success=True,
+                error=None,
+                metadata={"method": method_name, "stream": True},
+            )
 
 
 def format_cost(cost: float) -> str:
@@ -221,31 +366,3 @@ def calculate_rate_limit(calls: int, timeframe_seconds: int) -> float:
     if timeframe_seconds == 0:
         return 0.0
     return calls / timeframe_seconds
-
-
-def estimate_cost(tokens: int, model: str, provider: str) -> float:
-    """
-    Estimate cost for a given token count.
-
-    Args:
-        tokens: Number of tokens
-        model: Model name
-        provider: Provider name
-
-    Returns:
-        Estimated cost
-    """
-    # Simplified cost estimation
-    # In practice, this would use the pricing from tracker
-    base_rates = {
-        "openai": {"gpt-4": 0.03, "gpt-3.5": 0.002},
-        "anthropic": {"claude-3": 0.015},
-    }
-
-    provider_rates = base_rates.get(provider, {})
-
-    for model_key, rate in provider_rates.items():
-        if model_key in model.lower():
-            return (tokens / 1000) * rate
-
-    return 0.0

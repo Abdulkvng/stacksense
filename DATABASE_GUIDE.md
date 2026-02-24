@@ -231,3 +231,34 @@ If you were using StackSense without a database, your existing code will continu
 - Create custom analytics queries
 - Set up database monitoring
 
+
+## Dashboard Authentication Tables
+
+The dashboard now includes account and key-management persistence:
+
+### users
+Stores dashboard users created through Google OAuth:
+- `id` (primary key)
+- `google_sub` (unique Google user ID)
+- `email` (unique)
+- `name`
+- `avatar_url`
+- `created_at`
+- `last_login_at`
+- `is_active`
+
+### user_api_keys
+Stores per-user provider API keys:
+- `id` (primary key)
+- `user_id` (foreign key to `users.id`)
+- `provider`
+- `label`
+- `encrypted_key`
+- `key_hint` (masked display value)
+- `created_at`
+- `updated_at`
+- `is_active`
+
+Notes:
+- Keys are encrypted before storage using `STACKSENSE_ENCRYPTION_KEY`.
+- Keys are returned to the UI only as masked hints (not plaintext).

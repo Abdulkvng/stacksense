@@ -52,4 +52,3 @@ def test_settings_to_dict():
     assert "environment" in result
     assert result["project_id"] == "test"
     assert result["environment"] == "dev"
-

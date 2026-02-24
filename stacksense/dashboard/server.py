@@ -1,16 +1,25 @@
 """
-Flask server for StackSense dashboard
+Flask server for StackSense dashboard.
 """
 
 import os
-from flask import Flask, jsonify, send_from_directory, request
-from typing import Optional
+import secrets
+from datetime import datetime, timedelta
+from functools import wraps
 from pathlib import Path
+from urllib.parse import urlencode
+
+import requests
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from sqlalchemy import Integer, desc, func
 
 from stacksense.database import get_db_manager
-from stacksense.database.models import Event, Metric
-from sqlalchemy import func, desc, Integer
-from datetime import datetime, timedelta
+from stacksense.database.models import Event, User, UserAPIKey
+from stacksense.dashboard.security import EncryptionError, encrypt_secret, mask_secret
+
+GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
 
 def create_app(db_manager=None, debug=False):
@@ -30,29 +39,385 @@ def create_app(db_manager=None, debug=False):
         template_folder=Path(__file__).parent / "templates",
     )
     app.config["DEBUG"] = debug
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = (
+        os.getenv("STACKSENSE_SECURE_COOKIES", "false").lower() == "true"
+    )
+    app.secret_key = os.getenv("STACKSENSE_SESSION_SECRET", "stacksense-dashboard-dev-secret")
 
     if not db_manager:
         db_manager = get_db_manager()
 
+    def _google_oauth_config():
+        return {
+            "client_id": os.getenv("STACKSENSE_GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("STACKSENSE_GOOGLE_CLIENT_SECRET"),
+            "redirect_uri": os.getenv("STACKSENSE_GOOGLE_REDIRECT_URI")
+            or url_for("google_callback", _external=True),
+        }
+
+    def _google_oauth_ready() -> bool:
+        config = _google_oauth_config()
+        return bool(config["client_id"] and config["client_secret"])
+
+    def _current_user(session_db):
+        user_id = session.get("user_id")
+        if not user_id:
+            return None
+        return (
+            session_db.query(User)
+            .filter(User.id == user_id, User.is_active.is_(True))
+            .one_or_none()
+        )
+
+    def login_required(view_func):
+        @wraps(view_func)
+        def wrapped(*args, **kwargs):
+            user_id = session.get("user_id")
+            if not user_id:
+                if request.path.startswith("/api/"):
+                    return jsonify({"error": "Authentication required"}), 401
+                return redirect(url_for("login"))
+
+            with db_manager.get_session() as session_db:
+                user = _current_user(session_db)
+                if not user:
+                    session.clear()
+                    if request.path.startswith("/api/"):
+                        return jsonify({"error": "Session expired"}), 401
+                    return redirect(url_for("login"))
+
+            return view_func(*args, **kwargs)
+
+        return wrapped
+
     @app.route("/")
-    def index():
-        """Serve dashboard HTML."""
-        return send_from_directory(app.template_folder, "index.html")
+    def root():
+        if session.get("user_id"):
+            return redirect(url_for("dashboard"))
+        return redirect(url_for("login"))
+
+    @app.route("/dashboard")
+    @login_required
+    def dashboard():
+        """Render dashboard shell."""
+        return render_template("index.html")
+
+    @app.route("/login")
+    def login():
+        """Render Google sign-in page."""
+        if session.get("user_id"):
+            return redirect(url_for("dashboard"))
+
+        return render_template(
+            "login.html",
+            google_ready=_google_oauth_ready(),
+            error_message=request.args.get("error"),
+        )
+
+    @app.route("/auth/google")
+    def google_auth():
+        """Start Google OAuth flow."""
+        if not _google_oauth_ready():
+            return redirect(
+                url_for(
+                    "login",
+                    error="Google OAuth is not configured. Set STACKSENSE_GOOGLE_CLIENT_ID and STACKSENSE_GOOGLE_CLIENT_SECRET.",
+                )
+            )
+
+        config = _google_oauth_config()
+        state = secrets.token_urlsafe(24)
+        session["oauth_state"] = state
+
+        query = urlencode(
+            {
+                "client_id": config["client_id"],
+                "redirect_uri": config["redirect_uri"],
+                "response_type": "code",
+                "scope": "openid email profile",
+                "state": state,
+                "prompt": "select_account",
+                "access_type": "offline",
+            }
+        )
+
+        return redirect(f"{GOOGLE_AUTH_URL}?{query}")
+
+    @app.route("/auth/google/callback")
+    def google_callback():
+        """Complete Google OAuth and persist user account."""
+        if request.args.get("error"):
+            return redirect(url_for("login", error="Google sign-in was cancelled."))
+
+        state = request.args.get("state")
+        expected_state = session.pop("oauth_state", None)
+        if not state or not expected_state or state != expected_state:
+            return redirect(url_for("login", error="Invalid sign-in state. Please try again."))
+
+        code = request.args.get("code")
+        if not code:
+            return redirect(url_for("login", error="Missing authorization code from Google."))
+
+        config = _google_oauth_config()
+        if not _google_oauth_ready():
+            return redirect(url_for("login", error="Google OAuth is not configured."))
+
+        try:
+            token_response = requests.post(
+                GOOGLE_TOKEN_URL,
+                data={
+                    "code": code,
+                    "client_id": config["client_id"],
+                    "client_secret": config["client_secret"],
+                    "redirect_uri": config["redirect_uri"],
+                    "grant_type": "authorization_code",
+                },
+                timeout=12,
+            )
+            token_response.raise_for_status()
+            token_data = token_response.json()
+            access_token = token_data.get("access_token")
+
+            if not access_token:
+                return redirect(url_for("login", error="Unable to get Google access token."))
+
+            user_response = requests.get(
+                GOOGLE_USERINFO_URL,
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=12,
+            )
+            user_response.raise_for_status()
+            profile = user_response.json()
+        except requests.RequestException:
+            return redirect(url_for("login", error="Google sign-in failed. Please try again."))
+
+        google_sub = profile.get("sub")
+        email = profile.get("email")
+        name = profile.get("name") or email
+        avatar = profile.get("picture")
+
+        if not google_sub or not email:
+            return redirect(url_for("login", error="Google profile is missing required fields."))
+
+        with db_manager.get_session() as session_db:
+            user = session_db.query(User).filter(User.google_sub == google_sub).one_or_none()
+            now = datetime.utcnow()
+
+            if user is None:
+                user = User(
+                    google_sub=google_sub,
+                    email=email,
+                    name=name,
+                    avatar_url=avatar,
+                    last_login_at=now,
+                )
+                session_db.add(user)
+                session_db.flush()
+            else:
+                user.email = email
+                user.name = name
+                user.avatar_url = avatar
+                user.last_login_at = now
+                session_db.flush()
+
+            session.clear()
+            session["user_id"] = user.id
+
+        return redirect(url_for("dashboard"))
+
+    @app.route("/logout", methods=["GET", "POST"])
+    def logout():
+        """Sign user out of dashboard."""
+        session.clear()
+        return redirect(url_for("login"))
+
+    @app.route("/api/me")
+    @login_required
+    def get_me():
+        """Return current signed in user."""
+        with db_manager.get_session() as session_db:
+            user = _current_user(session_db)
+            if not user:
+                session.clear()
+                return jsonify({"error": "Session expired"}), 401
+
+            return jsonify(
+                {
+                    "user": user.to_dict(),
+                    "google_oauth_configured": _google_oauth_ready(),
+                }
+            )
+
+    @app.route("/api/user/api-keys", methods=["GET"])
+    @login_required
+    def list_api_keys():
+        """List API keys for the current user."""
+        with db_manager.get_session() as session_db:
+            user = _current_user(session_db)
+            if not user:
+                session.clear()
+                return jsonify({"error": "Session expired"}), 401
+
+            keys = (
+                session_db.query(UserAPIKey)
+                .filter(UserAPIKey.user_id == user.id)
+                .order_by(desc(UserAPIKey.updated_at))
+                .all()
+            )
+            return jsonify([key.to_dict() for key in keys])
+
+    @app.route("/api/user/api-keys", methods=["POST"])
+    @login_required
+    def create_or_rotate_api_key():
+        """Create or update an API key for the current user."""
+        payload = request.get_json(silent=True) or {}
+
+        provider = _normalize_provider(payload.get("provider"))
+        label = str(payload.get("label") or "").strip()
+        secret = str(payload.get("api_key") or "").strip()
+
+        if not provider:
+            return jsonify({"error": "Provider is required"}), 400
+        if not secret:
+            return jsonify({"error": "API key value is required"}), 400
+
+        safe_label = label[:120] if label else provider.upper()
+
+        try:
+            encrypted = encrypt_secret(secret)
+            hint = mask_secret(secret)
+        except EncryptionError as exc:
+            return jsonify({"error": str(exc)}), 500
+
+        with db_manager.get_session() as session_db:
+            user = _current_user(session_db)
+            if not user:
+                session.clear()
+                return jsonify({"error": "Session expired"}), 401
+
+            existing = (
+                session_db.query(UserAPIKey)
+                .filter(
+                    UserAPIKey.user_id == user.id,
+                    UserAPIKey.provider == provider,
+                    UserAPIKey.label == safe_label,
+                )
+                .one_or_none()
+            )
+
+            if existing:
+                existing.encrypted_key = encrypted
+                existing.key_hint = hint
+                existing.is_active = True
+                existing.updated_at = datetime.utcnow()
+                session_db.flush()
+                return jsonify(existing.to_dict()), 200
+
+            record = UserAPIKey(
+                user_id=user.id,
+                provider=provider,
+                label=safe_label,
+                encrypted_key=encrypted,
+                key_hint=hint,
+            )
+            session_db.add(record)
+            session_db.flush()
+            return jsonify(record.to_dict()), 201
+
+    @app.route("/api/user/api-keys/<int:key_id>", methods=["PUT"])
+    @login_required
+    def update_api_key(key_id: int):
+        """Update label and/or rotate key value."""
+        payload = request.get_json(silent=True) or {}
+        new_label = str(payload.get("label") or "").strip()
+        new_secret = str(payload.get("api_key") or "").strip()
+
+        with db_manager.get_session() as session_db:
+            user = _current_user(session_db)
+            if not user:
+                session.clear()
+                return jsonify({"error": "Session expired"}), 401
+
+            key_record = (
+                session_db.query(UserAPIKey)
+                .filter(UserAPIKey.id == key_id, UserAPIKey.user_id == user.id)
+                .one_or_none()
+            )
+
+            if not key_record:
+                return jsonify({"error": "API key not found"}), 404
+
+            changed = False
+            if new_label:
+                safe_label = new_label[:120]
+                duplicate = (
+                    session_db.query(UserAPIKey)
+                    .filter(
+                        UserAPIKey.user_id == user.id,
+                        UserAPIKey.provider == key_record.provider,
+                        UserAPIKey.label == safe_label,
+                        UserAPIKey.id != key_record.id,
+                    )
+                    .one_or_none()
+                )
+                if duplicate:
+                    return jsonify({"error": "Another key already uses this label"}), 409
+
+                key_record.label = safe_label
+                changed = True
+
+            if new_secret:
+                try:
+                    key_record.encrypted_key = encrypt_secret(new_secret)
+                    key_record.key_hint = mask_secret(new_secret)
+                    changed = True
+                except EncryptionError as exc:
+                    return jsonify({"error": str(exc)}), 500
+
+            if not changed:
+                return jsonify({"error": "No updates provided"}), 400
+
+            key_record.updated_at = datetime.utcnow()
+            session_db.flush()
+            return jsonify(key_record.to_dict())
+
+    @app.route("/api/user/api-keys/<int:key_id>", methods=["DELETE"])
+    @login_required
+    def delete_api_key(key_id: int):
+        """Delete API key owned by current user."""
+        with db_manager.get_session() as session_db:
+            user = _current_user(session_db)
+            if not user:
+                session.clear()
+                return jsonify({"error": "Session expired"}), 401
+
+            key_record = (
+                session_db.query(UserAPIKey)
+                .filter(UserAPIKey.id == key_id, UserAPIKey.user_id == user.id)
+                .one_or_none()
+            )
+
+            if not key_record:
+                return jsonify({"error": "API key not found"}), 404
+
+            session_db.delete(key_record)
+            return jsonify({"success": True})
 
     @app.route("/api/metrics/summary")
+    @login_required
     def get_metrics_summary():
         """Get metrics summary."""
         try:
             timeframe = request.args.get("timeframe", "24h")
 
-            with db_manager.get_session() as session:
-                # Calculate timeframe
+            with db_manager.get_session() as session_db:
                 delta = _parse_timeframe(timeframe)
                 cutoff = datetime.utcnow() - delta
 
-                # Get aggregated stats
                 stats = (
-                    session.query(
+                    session_db.query(
                         func.count(Event.id).label("total_calls"),
                         func.sum(Event.total_tokens).label("total_tokens"),
                         func.sum(Event.cost).label("total_cost"),
@@ -82,10 +447,11 @@ def create_app(db_manager=None, debug=False):
                         "error_rate": round(error_rate, 2),
                     }
                 )
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+        except Exception as exc:  # pragma: no cover
+            return jsonify({"error": str(exc)}), 500
 
     @app.route("/api/metrics/cost-breakdown")
+    @login_required
     def get_cost_breakdown():
         """Get cost breakdown by provider."""
         try:
@@ -93,9 +459,9 @@ def create_app(db_manager=None, debug=False):
             delta = _parse_timeframe(timeframe)
             cutoff = datetime.utcnow() - delta
 
-            with db_manager.get_session() as session:
+            with db_manager.get_session() as session_db:
                 breakdown = (
-                    session.query(Event.provider, func.sum(Event.cost).label("total_cost"))
+                    session_db.query(Event.provider, func.sum(Event.cost).label("total_cost"))
                     .filter(Event.timestamp >= cutoff)
                     .group_by(Event.provider)
                     .all()
@@ -103,10 +469,11 @@ def create_app(db_manager=None, debug=False):
 
                 result = {provider: float(cost) for provider, cost in breakdown}
                 return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+        except Exception as exc:  # pragma: no cover
+            return jsonify({"error": str(exc)}), 500
 
     @app.route("/api/metrics/usage-over-time")
+    @login_required
     def get_usage_over_time():
         """Get usage metrics over time."""
         try:
@@ -116,15 +483,14 @@ def create_app(db_manager=None, debug=False):
             delta = _parse_timeframe(timeframe)
             cutoff = datetime.utcnow() - delta
 
-            with db_manager.get_session() as session:
+            with db_manager.get_session() as session_db:
                 events = (
-                    session.query(Event)
+                    session_db.query(Event)
                     .filter(Event.timestamp >= cutoff)
                     .order_by(Event.timestamp)
                     .all()
                 )
 
-                # Group by time buckets
                 buckets = {}
                 for event in events:
                     bucket_key = _get_time_bucket(event.timestamp, interval)
@@ -134,37 +500,48 @@ def create_app(db_manager=None, debug=False):
                     buckets[bucket_key]["tokens"] += event.total_tokens or 0
                     buckets[bucket_key]["cost"] += event.cost or 0.0
 
-                result = [{"timestamp": k, **v} for k, v in sorted(buckets.items())]
+                result = [{"timestamp": key, **value} for key, value in sorted(buckets.items())]
                 return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+        except Exception as exc:  # pragma: no cover
+            return jsonify({"error": str(exc)}), 500
 
     @app.route("/api/events/recent")
+    @login_required
     def get_recent_events():
         """Get recent events."""
         try:
             limit = int(request.args.get("limit", 50))
 
-            with db_manager.get_session() as session:
-                events = session.query(Event).order_by(desc(Event.timestamp)).limit(limit).all()
+            with db_manager.get_session() as session_db:
+                events = session_db.query(Event).order_by(desc(Event.timestamp)).limit(limit).all()
 
-                result = [event.to_dict() for event in events]
-                return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+                return jsonify([event.to_dict() for event in events])
+        except Exception as exc:  # pragma: no cover
+            return jsonify({"error": str(exc)}), 500
 
     return app
 
 
+def _normalize_provider(provider: str) -> str:
+    """Normalize provider labels from user input."""
+    cleaned = (provider or "").strip().lower().replace(" ", "-")
+    allowed = "abcdefghijklmnopqrstuvwxyz0123456789-_"
+    return "".join(ch for ch in cleaned if ch in allowed)[:80]
+
+
 def _parse_timeframe(timeframe: str) -> timedelta:
-    """Parse timeframe string."""
-    unit = timeframe[-1]
-    value = int(timeframe[:-1])
+    """Parse timeframe string to timedelta."""
+    try:
+        unit = timeframe[-1]
+        value = int(timeframe[:-1])
+    except (TypeError, ValueError):
+        return timedelta(hours=24)
+
     if unit == "h":
         return timedelta(hours=value)
-    elif unit == "d":
+    if unit == "d":
         return timedelta(days=value)
-    elif unit == "w":
+    if unit == "w":
         return timedelta(weeks=value)
     return timedelta(hours=24)
 
@@ -189,5 +566,5 @@ def run_server(host="127.0.0.1", port=5000, debug=False, db_manager=None):
         db_manager: DatabaseManager instance
     """
     app = create_app(db_manager=db_manager, debug=debug)
-    print(f"🚀 StackSense Dashboard running at http://{host}:{port}")
+    print(f"StackSense Dashboard running at http://{host}:{port}")
     app.run(host=host, port=port, debug=debug)

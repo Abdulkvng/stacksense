@@ -1,105 +1,101 @@
-# StackSense Dashboard - Setup & Run Guide
+# StackSense Dashboard Setup (Auth + API Key Manager)
 
-## Quick Start
+This dashboard now includes:
+- Google Sign-In authentication
+- Persistent user accounts in the database
+- Per-user encrypted API key storage
+- Usage analytics (calls, cost, latency, error rate)
 
-The dashboard is now ready with beautiful Apple-like aesthetics! Here's how to run it:
-
-### 1. Install Dependencies
-
-First, make sure Flask is installed. If you have a virtual environment, activate it first:
+## 1. Install dependencies
 
 ```bash
-# Activate virtual environment (if using one)
-source stacksense-venv/bin/activate  # or: source venv/bin/activate
-
-# Install Flask (required for dashboard)
-pip install flask
-
-# Or install all dashboard dependencies
-pip install "stacksense[dashboard]"
+# from the stacksense project root
+pip install -e ".[dashboard]"
 ```
 
-### 2. Run the Dashboard
+## 2. Create Google OAuth credentials
 
-You have several options to start the dashboard:
+1. Open Google Cloud Console.
+2. Create or choose a project.
+3. Enable the Google Identity / OAuth consent screen.
+4. Create an **OAuth 2.0 Client ID** (Web application).
+5. Add an authorized redirect URI:
+   - `http://127.0.0.1:5000/auth/google/callback`
 
-**Option A: Using the run script**
+## 3. Set environment variables
+
+```bash
+export STACKSENSE_GOOGLE_CLIENT_ID="your_google_client_id"
+export STACKSENSE_GOOGLE_CLIENT_SECRET="your_google_client_secret"
+
+# Session secret for Flask cookies
+export STACKSENSE_SESSION_SECRET="replace_with_long_random_secret"
+
+# Key used to encrypt API keys at rest
+# (can be any strong secret string)
+export STACKSENSE_ENCRYPTION_KEY="replace_with_long_random_secret"
+
+# Optional: secure cookies when behind HTTPS
+# export STACKSENSE_SECURE_COOKIES=true
+```
+
+## 4. Run the dashboard
+
 ```bash
 python3 run_dashboard.py
 ```
 
-**Option B: Using Python directly**
-```bash
-python3 -c "from stacksense.dashboard.server import run_server; from stacksense.database import get_db_manager; run_server(host='127.0.0.1', port=5000, debug=True, db_manager=get_db_manager())"
-```
+Open:
+- `http://127.0.0.1:5000`
 
-**Option C: Using the CLI command (if set up)**
-```bash
-python3 -m stacksense.dashboard.cli dashboard
-```
+## 5. First-time usage flow
 
-### 3. Access the Dashboard
+1. Click **Continue with Google**.
+2. On successful callback, StackSense creates/updates your user account in `users`.
+3. Open the **API Keys** tab.
+4. Add provider keys (OpenAI, Anthropic, ElevenLabs, Pinecone, or custom).
+5. Keys are encrypted before being written to `user_api_keys`.
 
-Once the server starts, you'll see:
-```
-🚀 StackSense Dashboard running at http://127.0.0.1:5000
-```
+## Database tables used
 
-Open your web browser and navigate to:
-**http://127.0.0.1:5000**
+- `users`: authenticated dashboard users
+- `user_api_keys`: per-user provider keys (encrypted)
+- `events`: existing usage/cost/latency logs
+- `metrics`: existing aggregated metrics table
 
-## Features
+## API endpoints
 
-The dashboard includes:
+Auth:
+- `GET /login`
+- `GET /auth/google`
+- `GET /auth/google/callback`
+- `POST /logout`
+- `GET /api/me`
 
-- ✨ **Apple-like Design**: Clean, modern interface with glass-morphism effects
-- 📊 **Real-time Metrics**: View total calls, costs, latency, and error rates
-- 📈 **Interactive Charts**: Cost breakdown and usage over time visualizations
-- 🔄 **Auto-refresh**: Updates every 30 seconds
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- ⚡ **Smooth Animations**: Beautiful transitions and micro-interactions
+User API keys:
+- `GET /api/user/api-keys`
+- `POST /api/user/api-keys`
+- `PUT /api/user/api-keys/<id>`
+- `DELETE /api/user/api-keys/<id>`
 
-## Dashboard Endpoints
-
-The dashboard provides the following API endpoints:
-
-- `GET /` - Main dashboard page
-- `GET /api/metrics/summary?timeframe=24h` - Get metrics summary
-- `GET /api/metrics/cost-breakdown?timeframe=24h` - Get cost breakdown by provider
-- `GET /api/metrics/usage-over-time?timeframe=24h&interval=1h` - Get usage over time
-- `GET /api/events/recent?limit=50` - Get recent events
-
-## Timeframes
-
-You can filter data by timeframe using:
-- `1h` - Last hour
-- `24h` - Last 24 hours (default)
-- `7d` - Last 7 days
-- `30d` - Last 30 days
+Metrics/events (auth required):
+- `GET /api/metrics/summary?timeframe=24h`
+- `GET /api/metrics/cost-breakdown?timeframe=24h`
+- `GET /api/metrics/usage-over-time?timeframe=24h&interval=1h`
+- `GET /api/events/recent?limit=20`
 
 ## Troubleshooting
 
-**Issue: ModuleNotFoundError: No module named 'flask'**
-- Solution: Install Flask with `pip install flask` or `pip install "stacksense[dashboard]"`
+- **Google sign-in says not configured**
+  - Check `STACKSENSE_GOOGLE_CLIENT_ID` and `STACKSENSE_GOOGLE_CLIENT_SECRET`.
 
-**Issue: Database connection errors**
-- Solution: Make sure your database is set up. The dashboard uses the default SQLite database unless configured otherwise.
+- **OAuth redirect mismatch**
+  - Ensure Google console redirect URI exactly matches:
+    - `http://127.0.0.1:5000/auth/google/callback`
 
-**Issue: No data showing**
-- Solution: Make sure you have tracked some events using StackSense. The dashboard displays data from your database.
+- **Encryption error**
+  - Install dashboard extras: `pip install -e ".[dashboard]"`
+  - Set `STACKSENSE_ENCRYPTION_KEY`
 
-## Design Features
-
-The dashboard features:
-- Glass-morphism effects with backdrop blur
-- Smooth animations and transitions
-- Apple-inspired color palette
-- Gradient accents
-- Refined shadows and depth
-- Modern typography (SF Pro Display system fonts)
-- Responsive grid layouts
-- Interactive hover states
-
-Enjoy your beautiful StackSense dashboard! 🎨✨
-
-
+- **No metrics visible**
+  - Ensure events exist in `stacksense.db`.

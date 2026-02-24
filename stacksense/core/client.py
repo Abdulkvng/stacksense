@@ -114,7 +114,10 @@ class StackSense:
 
     def _wrap_client(self, client: Any, provider: str) -> Any:
         """Wrap client with monitoring proxy."""
-        from stacksense.utils.helpers import ClientProxy
+        from stacksense.utils.helpers import ClientProxy, AsyncClientProxy
+
+        if "Async" in type(client).__name__:
+            return AsyncClientProxy(client, self.tracker, provider)
 
         return ClientProxy(client, self.tracker, provider)
 
