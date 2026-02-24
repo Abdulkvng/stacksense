@@ -1,5 +1,6 @@
 # stacksense/utils/__init__.py
 """Utility functions"""
+
 from stacksense.utils.helpers import (
     ClientProxy,
     format_cost,
