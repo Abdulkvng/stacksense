@@ -12,7 +12,7 @@ def test_settings_defaults():
     settings = Settings()
     assert settings.environment == "production"
     assert settings.auto_track is True
-    assert settings.enable_database is False
+    assert settings.enable_database is True
     assert settings.debug is False
 
 
@@ -52,4 +52,3 @@ def test_settings_to_dict():
     assert "environment" in result
     assert result["project_id"] == "test"
     assert result["environment"] == "dev"
-

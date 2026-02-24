@@ -50,16 +50,18 @@ Dynamic: license-file
 
 # StackSense
 
-AI infrastructure monitoring for tracking usage, cost, and performance across OpenAI, Claude, ElevenLabs, Pinecone, and more.
+AI Economic Intelligence Layer. StackSense goes beyond observability—it is an active optimization engine that automatically reduces AI spend, routes requests intelligently, and acts as a CFO for your AI infrastructure.
 
 ## Features
 
-- 🔍 **Automatic Tracking**: Monitor AI API calls without code changes
-- 💰 **Cost Tracking**: Real-time cost calculation and breakdowns
-- 📊 **Performance Metrics**: Latency, error rates, and usage analytics
-- 🗄️ **Database Persistence**: SQLite (default) or PostgreSQL support
-- 🔌 **Multi-Provider**: OpenAI, Anthropic, ElevenLabs, Pinecone, and more
-- 📈 **Analytics**: Time-series data, top models, cost breakdowns
+- 🧠 **Smart Model Routing**: Dynamically route prompts to the most cost-effective model based on task complexity.
+- ♻️ **Token Waste Detection**: Identify inefficient prompt structures and recurrent context to recover wasted tokens.
+- 📉 **Automatic Cost Downgrading**: Set budget circuit breakers that auto-downgrade model tiers when approaching limits.
+- 🎯 **Prompt Efficiency Scoring**: Score prompts based on token ratio, retry rates, and cost per successful outcome.
+- 💸 **AI Unit Economics**: Track AI cost per user, feature, or workflow to accurately measure margin impact.
+- ⚖️ **Cross-Vendor Arbitrage**: Automatically shift traffic between providers based on real-time pricing and latency gaps.
+- 🔍 **Automatic Tracking**: Monitor API calls across OpenAI, Anthropic, ElevenLabs, Pinecone, and more without code changes.
+- 📊 **Performance Metrics**: Latency, error rates, and hallucination cost detection.
 
 ## Quick Start
 

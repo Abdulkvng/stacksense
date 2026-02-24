@@ -36,6 +36,7 @@ stacksense/utils/__init__.py
 stacksense/utils/helpers.py
 tests/test_analytics.py
 tests/test_anthropic.py
+tests/test_async_client.py
 tests/test_client.py
 tests/test_database.py
 tests/test_edge_cases.py
@@ -45,5 +46,6 @@ tests/test_openai_integration.py
 tests/test_pinecone.py
 tests/test_settings.py
 tests/test_simple_stack.py
+tests/test_streaming.py
 tests/test_tracker.py
 tests/test_utils.py
