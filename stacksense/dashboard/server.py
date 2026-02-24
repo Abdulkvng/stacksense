@@ -65,7 +65,11 @@ def create_app(db_manager=None, debug=False):
         user_id = session.get("user_id")
         if not user_id:
             return None
-        return session_db.query(User).filter(User.id == user_id, User.is_active.is_(True)).one_or_none()
+        return (
+            session_db.query(User)
+            .filter(User.id == user_id, User.is_active.is_(True))
+            .one_or_none()
+        )
 
     def login_required(view_func):
         @wraps(view_func)
@@ -509,12 +513,7 @@ def create_app(db_manager=None, debug=False):
             limit = int(request.args.get("limit", 50))
 
             with db_manager.get_session() as session_db:
-                events = (
-                    session_db.query(Event)
-                    .order_by(desc(Event.timestamp))
-                    .limit(limit)
-                    .all()
-                )
+                events = session_db.query(Event).order_by(desc(Event.timestamp)).limit(limit).all()
 
                 return jsonify([event.to_dict() for event in events])
         except Exception as exc:  # pragma: no cover

@@ -188,7 +188,9 @@ class UserAPIKey(Base):
     __tablename__ = "user_api_keys"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     provider = Column(String(80), nullable=False, index=True)
     label = Column(String(120), nullable=False)
     encrypted_key = Column(Text, nullable=False)

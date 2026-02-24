@@ -157,7 +157,9 @@ class ClientProxy:
 
         return None
 
-    def _handle_stream(self, response_generator: Any, start_time: float, model: str, method_name: str) -> Any:
+    def _handle_stream(
+        self, response_generator: Any, start_time: float, model: str, method_name: str
+    ) -> Any:
         """Handle streaming response and track metrics when stream finishes."""
         chunks = []
         try:
@@ -166,10 +168,10 @@ class ClientProxy:
                 yield chunk
         finally:
             latency = (time.time() - start_time) * 1000  # ms
-            
+
             # Extract tokens depending on provider from chunks
             tokens = self._extract_stream_tokens(chunks, self._provider)
-            
+
             self._tracker.track_call(
                 provider=self._provider,
                 model=model,
@@ -184,7 +186,7 @@ class ClientProxy:
         """Extract or estimate tokens from streaming chunks."""
         if not chunks:
             return {"input": 0, "output": 0}
-            
+
         if provider == "openai":
             last_chunk = chunks[-1]
             if hasattr(last_chunk, "usage") and last_chunk.usage:
@@ -193,20 +195,24 @@ class ClientProxy:
                     "output": getattr(last_chunk.usage, "completion_tokens", 0),
                 }
             return {"input": 0, "output": len(chunks)}
-            
+
         elif provider == "anthropic":
             input_tokens = 0
             output_tokens = 0
             for chunk in chunks:
                 if hasattr(chunk, "type"):
-                    if chunk.type == "message_start" and hasattr(chunk, "message") and hasattr(chunk.message, "usage"):
+                    if (
+                        chunk.type == "message_start"
+                        and hasattr(chunk, "message")
+                        and hasattr(chunk.message, "usage")
+                    ):
                         input_tokens += getattr(chunk.message.usage, "input_tokens", 0)
                     elif chunk.type == "message_delta" and hasattr(chunk, "usage"):
                         output_tokens += getattr(chunk.usage, "output_tokens", 0)
             if input_tokens > 0 or output_tokens > 0:
                 return {"input": input_tokens, "output": output_tokens}
             return {"input": 0, "output": len(chunks)}
-            
+
         return None
 
 
@@ -214,24 +220,24 @@ class AsyncClientProxy(ClientProxy):
     """
     Async proxy wrapper for AI API clients to enable automatic tracking.
     """
-    
+
     def __getattr__(self, name: str) -> Any:
         attr = getattr(self._client, name)
-        
+
         if callable(attr):
             if not self._is_api_method(name):
                 return AsyncClientProxy(attr, self._tracker, self._provider)
             else:
                 return self._wrap_method(attr, name)
-                
+
         if hasattr(attr, "__dict__") or hasattr(attr, "__call__"):
             return AsyncClientProxy(attr, self._tracker, self._provider)
-            
+
         return attr
-        
+
     def _wrap_method(self, method: Callable, method_name: str) -> Callable:
         """Wrap an async method to track metrics."""
-        
+
         @functools.wraps(method)
         async def wrapper(*args, **kwargs):
             start_time = time.time()
@@ -267,8 +273,10 @@ class AsyncClientProxy(ClientProxy):
                     )
 
         return wrapper
-        
-    async def _handle_async_stream(self, response_generator: Any, start_time: float, model: str, method_name: str) -> Any:
+
+    async def _handle_async_stream(
+        self, response_generator: Any, start_time: float, model: str, method_name: str
+    ) -> Any:
         """Handle async streaming response."""
         chunks = []
         try:
@@ -278,7 +286,7 @@ class AsyncClientProxy(ClientProxy):
         finally:
             latency = (time.time() - start_time) * 1000
             tokens = self._extract_stream_tokens(chunks, self._provider)
-            
+
             self._tracker.track_call(
                 provider=self._provider,
                 model=model,
@@ -358,6 +366,3 @@ def calculate_rate_limit(calls: int, timeframe_seconds: int) -> float:
     if timeframe_seconds == 0:
         return 0.0
     return calls / timeframe_seconds
-
-
-
