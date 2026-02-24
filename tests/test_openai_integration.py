@@ -3,6 +3,11 @@
 """StackSense + OpenAI API Test"""
 import os
 import sys
+import pytest
+
+
+if not os.getenv("OPENAI_API_KEY"):
+    pytest.skip("OPENAI_API_KEY not set; skipping OpenAI integration test", allow_module_level=True)
 
 print("=" * 60)
 print("🤖 StackSense + OpenAI API Test")
