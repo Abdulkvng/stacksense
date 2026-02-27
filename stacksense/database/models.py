@@ -222,8 +222,6 @@ class UserAPIKey(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
-<<<<<<< Updated upstream
-=======
 
 
 class RoutingRule(Base):
@@ -500,4 +498,3 @@ class Policy(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
->>>>>>> Stashed changes
