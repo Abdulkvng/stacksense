@@ -52,6 +52,23 @@ def create_app(db_manager=None, debug=False):
     if not db_manager:
         db_manager = get_db_manager()
 
+    # Development mode: auto-create test user
+    DEV_MODE = os.getenv("STACKSENSE_DEV_MODE", "false").lower() == "true"
+    if DEV_MODE:
+        with db_manager.get_session() as session_db:
+            test_user = session_db.query(User).filter(User.email == "test@stacksense.dev").first()
+            if not test_user:
+                test_user = User(
+                    google_sub="dev-test-user",
+                    email="test@stacksense.dev",
+                    name="Test User",
+                    avatar_url=None,
+                    last_login_at=datetime.utcnow(),
+                )
+                session_db.add(test_user)
+                session_db.flush()
+                print(f"✅ Created test user: test@stacksense.dev (ID: {test_user.id})")
+
     def _google_oauth_config():
         return {
             "client_id": os.getenv("STACKSENSE_GOOGLE_CLIENT_ID"),
@@ -117,7 +134,23 @@ def create_app(db_manager=None, debug=False):
             "login.html",
             google_ready=_google_oauth_ready(),
             error_message=request.args.get("error"),
+            dev_mode=DEV_MODE,
         )
+
+    @app.route("/dev/login")
+    def dev_login():
+        """Development mode auto-login."""
+        if not DEV_MODE:
+            return redirect(url_for("login", error="Development mode not enabled"))
+
+        with db_manager.get_session() as session_db:
+            test_user = session_db.query(User).filter(User.email == "test@stacksense.dev").first()
+            if not test_user:
+                return redirect(url_for("login", error="Test user not found"))
+
+            session.clear()
+            session["user_id"] = test_user.id
+            return redirect(url_for("dashboard"))
 
     @app.route("/auth/google")
     def google_auth():
@@ -475,6 +508,106 @@ def create_app(db_manager=None, debug=False):
         except Exception as exc:  # pragma: no cover
             return jsonify({"error": str(exc)}), 500
 
+    @app.route("/api/metrics/detailed")
+    @login_required
+    def get_detailed_metrics():
+        """Get detailed telemetry metrics."""
+        try:
+            timeframe = request.args.get("timeframe", "24h")
+            delta = _parse_timeframe(timeframe)
+            cutoff = datetime.utcnow() - delta
+
+            with db_manager.get_session() as session_db:
+                # Model breakdown
+                model_breakdown = (
+                    session_db.query(
+                        Event.model,
+                        func.count(Event.id).label("count"),
+                        func.sum(Event.cost).label("total_cost"),
+                        func.sum(Event.total_tokens).label("total_tokens")
+                    )
+                    .filter(Event.timestamp >= cutoff)
+                    .group_by(Event.model)
+                    .all()
+                )
+
+                # Provider breakdown with details
+                provider_breakdown = (
+                    session_db.query(
+                        Event.provider,
+                        func.count(Event.id).label("count"),
+                        func.sum(Event.cost).label("total_cost"),
+                        func.avg(Event.latency).label("avg_latency"),
+                        func.sum(Event.total_tokens).label("total_tokens")
+                    )
+                    .filter(Event.timestamp >= cutoff)
+                    .group_by(Event.provider)
+                    .all()
+                )
+
+                # Top expensive calls
+                expensive_calls = (
+                    session_db.query(Event)
+                    .filter(Event.timestamp >= cutoff)
+                    .order_by(desc(Event.cost))
+                    .limit(5)
+                    .all()
+                )
+
+                # Token usage stats
+                token_stats = (
+                    session_db.query(
+                        func.sum(Event.prompt_tokens).label("total_prompt_tokens"),
+                        func.sum(Event.completion_tokens).label("total_completion_tokens"),
+                        func.avg(Event.prompt_tokens).label("avg_prompt_tokens"),
+                        func.avg(Event.completion_tokens).label("avg_completion_tokens")
+                    )
+                    .filter(Event.timestamp >= cutoff)
+                    .first()
+                )
+
+                return jsonify({
+                    "models": [
+                        {
+                            "model": row.model,
+                            "calls": row.count,
+                            "cost": float(row.total_cost or 0),
+                            "tokens": int(row.total_tokens or 0)
+                        }
+                        for row in model_breakdown
+                    ],
+                    "providers": [
+                        {
+                            "provider": row.provider,
+                            "calls": row.count,
+                            "cost": float(row.total_cost or 0),
+                            "avg_latency": float(row.avg_latency or 0),
+                            "tokens": int(row.total_tokens or 0)
+                        }
+                        for row in provider_breakdown
+                    ],
+                    "expensive_calls": [
+                        {
+                            "timestamp": event.timestamp.isoformat() if event.timestamp else None,
+                            "model": event.model,
+                            "provider": event.provider,
+                            "cost": float(event.cost or 0),
+                            "tokens": int(event.total_tokens or 0),
+                            "latency": float(event.latency or 0)
+                        }
+                        for event in expensive_calls
+                    ],
+                    "token_stats": {
+                        "total_prompt_tokens": int(token_stats.total_prompt_tokens or 0),
+                        "total_completion_tokens": int(token_stats.total_completion_tokens or 0),
+                        "avg_prompt_tokens": float(token_stats.avg_prompt_tokens or 0),
+                        "avg_completion_tokens": float(token_stats.avg_completion_tokens or 0)
+                    } if token_stats else {}
+                })
+
+        except Exception as exc:  # pragma: no cover
+            return jsonify({"error": str(exc)}), 500
+
     @app.route("/api/metrics/usage-over-time")
     @login_required
     def get_usage_over_time():
@@ -520,6 +653,224 @@ def create_app(db_manager=None, debug=False):
 
                 return jsonify([event.to_dict() for event in events])
         except Exception as exc:  # pragma: no cover
+            return jsonify({"error": str(exc)}), 500
+
+    # ==================== LIVE MONITORING ENDPOINTS ====================
+
+    @app.route("/metrics")
+    def prometheus_metrics():
+        """Expose Prometheus metrics in exposition format."""
+        metrics_data = monitor.get_metrics()
+        return Response(metrics_data, mimetype="text/plain; version=0.0.4")
+
+    @app.route("/api/live/health")
+    @login_required
+    def get_health():
+        """Get system health status."""
+        try:
+            metrics_dict = monitor.get_metrics_dict()
+            return jsonify({
+                "status": "healthy",
+                "timestamp": datetime.utcnow().isoformat(),
+                "components": metrics_dict.get("health_checks", {}),
+                "prometheus_available": metrics_dict.get("prometheus_available", False)
+            })
+        except Exception as exc:
+            return jsonify({
+                "status": "unhealthy",
+                "error": str(exc),
+                "timestamp": datetime.utcnow().isoformat()
+            }), 500
+
+    @app.route("/api/live/metrics")
+    @login_required
+    def get_live_metrics():
+        """Get current live monitoring metrics as JSON."""
+        try:
+            metrics_dict = monitor.get_metrics_dict()
+
+            # Get recent alerts
+            severity = request.args.get("severity")
+            limit = int(request.args.get("limit", 100))
+            alerts = monitor.get_alerts(limit=limit, severity=severity)
+
+            return jsonify({
+                "timestamp": datetime.utcnow().isoformat(),
+                "prometheus_available": metrics_dict.get("prometheus_available", False),
+                "alerts": alerts,
+                "alerts_count": len(alerts),
+                "health_checks": metrics_dict.get("health_checks", {})
+            })
+        except Exception as exc:
+            return jsonify({"error": str(exc)}), 500
+
+    @app.route("/api/live/stream")
+    @login_required
+    def live_metrics_stream():
+        """
+        Server-Sent Events stream for real-time metrics updates.
+
+        Usage from frontend:
+            const eventSource = new EventSource('/api/live/stream');
+            eventSource.onmessage = (event) => {
+                const metrics = JSON.parse(event.data);
+                updateDashboard(metrics);
+            };
+        """
+        def generate_metrics():
+            """Generate metrics stream."""
+            while True:
+                try:
+                    metrics_dict = monitor.get_metrics_dict()
+                    alerts = monitor.get_alerts(limit=10)
+
+                    data = {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "prometheus_available": metrics_dict.get("prometheus_available", False),
+                        "recent_alerts": alerts,
+                        "alerts_count": metrics_dict.get("alerts_count", 0),
+                        "health_checks": metrics_dict.get("health_checks", {})
+                    }
+
+                    yield f"data: {json.dumps(data)}\n\n"
+                    time.sleep(5)  # Update every 5 seconds
+
+                except GeneratorExit:
+                    break
+                except Exception as e:
+                    yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+                    time.sleep(5)
+
+        return Response(
+            generate_metrics(),
+            mimetype="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no"
+            }
+        )
+
+    @app.route("/api/live/alerts", methods=["GET"])
+    @login_required
+    def get_live_alerts():
+        """Get current alerts."""
+        try:
+            severity = request.args.get("severity")
+            limit = int(request.args.get("limit", 100))
+            alerts = monitor.get_alerts(limit=limit, severity=severity)
+
+            return jsonify({
+                "alerts": alerts,
+                "count": len(alerts)
+            })
+        except Exception as exc:
+            return jsonify({"error": str(exc)}), 500
+
+    @app.route("/api/live/alerts", methods=["DELETE"])
+    @login_required
+    def clear_live_alerts():
+        """Clear all alerts."""
+        try:
+            monitor.clear_alerts()
+            return jsonify({"success": True, "message": "All alerts cleared"})
+        except Exception as exc:
+            return jsonify({"error": str(exc)}), 500
+
+    # ==================== ENTERPRISE METRICS ENDPOINTS ====================
+
+    @app.route("/api/enterprise/stats")
+    @login_required
+    def get_enterprise_stats():
+        """Get enterprise feature statistics."""
+        try:
+            with db_manager.get_session() as session_db:
+                user = _current_user(session_db)
+                if not user:
+                    return jsonify({"error": "User not found"}), 404
+
+                from stacksense.database.models import (
+                    RoutingRule, Budget, SLAConfig, AuditLog,
+                    AgentRun, Policy
+                )
+
+                # Count configured features
+                routing_rules_count = session_db.query(RoutingRule).filter(
+                    RoutingRule.user_id == user.id,
+                    RoutingRule.is_active == True
+                ).count()
+
+                budgets_count = session_db.query(Budget).filter(
+                    Budget.user_id == user.id,
+                    Budget.is_active == True
+                ).count()
+
+                sla_configs_count = session_db.query(SLAConfig).filter(
+                    SLAConfig.user_id == user.id,
+                    SLAConfig.is_active == True
+                ).count()
+
+                policies_count = session_db.query(Policy).filter(
+                    Policy.user_id == user.id,
+                    Policy.is_active == True
+                ).count()
+
+                audit_events_count = session_db.query(AuditLog).filter(
+                    AuditLog.user_id == user.id
+                ).count()
+
+                # Get active agent runs
+                active_agent_runs = session_db.query(AgentRun).filter(
+                    AgentRun.user_id == user.id,
+                    AgentRun.status == "running"
+                ).count()
+
+                # Get loop detections
+                loop_detections = session_db.query(AgentRun).filter(
+                    AgentRun.user_id == user.id,
+                    AgentRun.loop_detected == True
+                ).count()
+
+                # Calculate cost optimization metrics
+                from sqlalchemy import func
+                from stacksense.database.models import Event
+
+                # Get events for analysis
+                total_events = session_db.query(Event).count()
+
+                # Simple waste estimation (events with high cost per token)
+                if total_events > 0:
+                    avg_cost_per_token = session_db.query(
+                        func.avg(Event.cost / func.nullif(Event.total_tokens, 0))
+                    ).filter(Event.total_tokens > 0).scalar() or 0.0
+
+                    # Find inefficient calls (2x+ above average cost per token)
+                    threshold = avg_cost_per_token * 2
+                    wasteful_events = session_db.query(
+                        func.sum(Event.cost)
+                    ).filter(
+                        Event.total_tokens > 0,
+                        (Event.cost / Event.total_tokens) > threshold
+                    ).scalar() or 0.0
+
+                    total_cost = session_db.query(func.sum(Event.cost)).scalar() or 0.0
+                    waste_percentage = (wasteful_events / total_cost * 100) if total_cost > 0 else 0.0
+                else:
+                    wasteful_events = 0.0
+                    waste_percentage = 0.0
+
+                return jsonify({
+                    "routing_rules": routing_rules_count,
+                    "budgets": budgets_count,
+                    "sla_configs": sla_configs_count,
+                    "policies": policies_count,
+                    "audit_events": audit_events_count,
+                    "active_agent_runs": active_agent_runs,
+                    "loop_detections": loop_detections,
+                    "estimated_waste": round(wasteful_events, 2),
+                    "waste_percentage": round(waste_percentage, 1)
+                })
+
+        except Exception as exc:
             return jsonify({"error": str(exc)}), 500
 
     return app

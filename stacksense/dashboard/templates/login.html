@@ -32,6 +32,23 @@
             <p class="alert danger">{{ error_message }}</p>
             {% endif %}
 
+            {% if dev_mode %}
+            <p class="alert info">
+                🧪 Development Mode Enabled
+            </p>
+            <a class="dev-btn" href="/dev/login">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <polyline points="17 11 19 13 23 9"></polyline>
+                </svg>
+                Sign In as Test User
+            </a>
+            <p class="body-muted" style="margin-top: 12px; font-size: 0.82rem;">
+                Email: <code>test@stacksense.dev</code>
+            </p>
+            {% endif %}
+
             {% if google_ready %}
             <a class="google-btn" href="/auth/google">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -40,7 +57,7 @@
                 </svg>
                 Continue with Google
             </a>
-            {% else %}
+            {% elif not dev_mode %}
             <p class="alert warning">
                 Google OAuth is not configured yet. Add client credentials and restart dashboard.
             </p>

@@ -4,6 +4,8 @@ class StackSenseDashboard {
         this.costChart = null;
         this.usageChart = null;
         this.palette = ["#0f766e", "#0d9488", "#14b8a6", "#f97316", "#ea580c", "#115e59"];
+        this.liveStream = null;
+        this.liveMonitoringEnabled = false;
     }
 
     init() {
@@ -49,6 +51,13 @@ class StackSenseDashboard {
         this.apiKeysList = document.getElementById("apiKeysList");
         this.apiKeysEmpty = document.getElementById("apiKeysEmpty");
         this.refreshKeysBtn = document.getElementById("refreshKeysBtn");
+
+        // Live monitoring elements
+        this.liveHealthStatus = document.getElementById("liveHealthStatus");
+        this.liveAlertsList = document.getElementById("liveAlertsList");
+        this.liveAlertsEmpty = document.getElementById("liveAlertsEmpty");
+        this.clearAlertsBtn = document.getElementById("clearAlertsBtn");
+        this.liveStreamStatus = document.getElementById("liveStreamStatus");
     }
 
     bindEvents() {
@@ -115,6 +124,12 @@ class StackSenseDashboard {
                 await this.deleteApiKey(Number(button.dataset.keyId));
             });
         }
+
+        if (this.clearAlertsBtn) {
+            this.clearAlertsBtn.addEventListener("click", async () => {
+                await this.clearAlerts();
+            });
+        }
     }
 
     switchSection(section) {
@@ -131,6 +146,14 @@ class StackSenseDashboard {
         }
         if (section === "overview") {
             this.loadData();
+        }
+        if (section === "enterprise") {
+            this.loadEnterpriseStats();
+        }
+        if (section === "monitoring") {
+            this.startLiveMonitoring();
+        } else {
+            this.stopLiveMonitoring();
         }
     }
 
@@ -205,17 +228,95 @@ class StackSenseDashboard {
 
     async loadData() {
         this.setMetricsLoading(true);
-        try {
+        try:
             await Promise.all([
                 this.loadMetrics(),
                 this.loadCostBreakdown(),
                 this.loadUsageOverTime(),
                 this.loadRecentEvents(),
+                this.loadDetailedMetrics(),
             ]);
         } catch (error) {
             console.error("Failed to load dashboard data", error);
         } finally {
             this.setMetricsLoading(false);
+        }
+    }
+
+    async loadDetailedMetrics() {
+        const data = await this.fetchJSON(`/api/metrics/detailed?timeframe=${this.currentTimeframe}`);
+        if (!data) {
+            return;
+        }
+
+        // Update token stats
+        const tokenStats = data.token_stats || {};
+        this.updateElement("totalPromptTokens", this.formatNumber(tokenStats.total_prompt_tokens || 0));
+        this.updateElement("totalCompletionTokens", this.formatNumber(tokenStats.total_completion_tokens || 0));
+        this.updateElement("avgPromptTokens", this.formatNumber(Math.round(tokenStats.avg_prompt_tokens || 0)));
+        this.updateElement("avgCompletionTokens", this.formatNumber(Math.round(tokenStats.avg_completion_tokens || 0)));
+
+        // Render top models
+        this.renderTopModels(data.models || []);
+
+        // Render expensive calls
+        this.renderExpensiveCalls(data.expensive_calls || []);
+    }
+
+    renderTopModels(models) {
+        const container = document.getElementById("topModels");
+        if (!container) return;
+
+        if (!models.length) {
+            container.innerHTML = '<p class="no-data">No data available</p>';
+            return;
+        }
+
+        // Sort by cost descending and take top 5
+        const topModels = models.sort((a, b) => b.cost - a.cost).slice(0, 5);
+
+        container.innerHTML = topModels.map(model => `
+            <div class="list-item">
+                <div class="list-item-header">
+                    <span class="list-item-name">${model.model || 'Unknown'}</span>
+                    <span class="list-item-value">${this.formatCurrency(model.cost)}</span>
+                </div>
+                <div class="list-item-meta">
+                    <span>${this.formatNumber(model.calls)} calls</span>
+                    <span>${this.formatNumber(model.tokens)} tokens</span>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    renderExpensiveCalls(calls) {
+        const container = document.getElementById("expensiveCalls");
+        if (!container) return;
+
+        if (!calls.length) {
+            container.innerHTML = '<p class="no-data">No data available</p>';
+            return;
+        }
+
+        container.innerHTML = calls.map(call => `
+            <div class="list-item">
+                <div class="list-item-header">
+                    <span class="list-item-name">${call.model || 'Unknown'}</span>
+                    <span class="list-item-value">${this.formatCurrency(call.cost)}</span>
+                </div>
+                <div class="list-item-meta">
+                    <span>${call.provider || 'Unknown'}</span>
+                    <span>${this.formatNumber(call.tokens)} tokens</span>
+                    <span>${Math.round(call.latency)}ms</span>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
         }
     }
 
@@ -663,6 +764,257 @@ class StackSenseDashboard {
             }
         }, 30000);
     }
+
+    // ==================== ENTERPRISE STATS ====================
+
+    async loadEnterpriseStats() {
+        try {
+            const stats = await this.fetchJSON("/api/enterprise/stats");
+            if (!stats) {
+                return;
+            }
+
+            // Update routing rules count
+            const routingElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(1)');
+            if (routingElement) {
+                routingElement.textContent = `${stats.routing_rules} Rules Configured`;
+            }
+
+            // Update budgets count
+            const budgetsElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(2)');
+            if (budgetsElement) {
+                budgetsElement.textContent = `${stats.budgets} Budgets Set`;
+            }
+
+            // Update waste metrics
+            const wasteElement = document.getElementById("estimatedWaste");
+            if (wasteElement) {
+                wasteElement.textContent = this.formatCurrency(stats.estimated_waste);
+            }
+
+            const wastePercentageElement = document.getElementById("wastePercentage");
+            if (wastePercentageElement) {
+                wastePercentageElement.textContent = `${stats.waste_percentage}%`;
+            }
+
+            // Update SLA configs count
+            const slaElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(3)');
+            if (slaElement) {
+                slaElement.textContent = `${stats.sla_configs} SLA Configs`;
+            }
+
+            // Update audit events
+            const auditCountElement = document.getElementById("auditEventCount");
+            if (auditCountElement) {
+                auditCountElement.textContent = this.formatNumber(stats.audit_events);
+            }
+
+            // Update violations (placeholder - would need actual violation tracking)
+            const violationElement = document.getElementById("violationCount");
+            if (violationElement) {
+                violationElement.textContent = "0";
+            }
+
+            // Update agent stats
+            const activeRunsElement = document.getElementById("activeAgentRuns");
+            if (activeRunsElement) {
+                activeRunsElement.textContent = this.formatNumber(stats.active_agent_runs);
+            }
+
+            const loopDetectionsElement = document.getElementById("loopDetections");
+            if (loopDetectionsElement) {
+                loopDetectionsElement.textContent = this.formatNumber(stats.loop_detections);
+            }
+
+            // Update policies count
+            const policiesElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(4)');
+            if (policiesElement) {
+                policiesElement.textContent = `${stats.policies} Policies Set`;
+            }
+
+        } catch (error) {
+            console.error("Failed to load enterprise stats", error);
+        }
+    }
+
+    // ==================== LIVE MONITORING ====================
+
+    startLiveMonitoring() {
+        if (this.liveMonitoringEnabled) {
+            return;
+        }
+
+        this.liveMonitoringEnabled = true;
+        this.loadLiveMetrics();
+        this.connectLiveStream();
+    }
+
+    stopLiveMonitoring() {
+        if (!this.liveMonitoringEnabled) {
+            return;
+        }
+
+        this.liveMonitoringEnabled = false;
+        this.disconnectLiveStream();
+    }
+
+    connectLiveStream() {
+        if (this.liveStream) {
+            this.liveStream.close();
+        }
+
+        this.liveStream = new EventSource("/api/live/stream");
+
+        this.liveStream.onopen = () => {
+            this.updateStreamStatus("connected");
+        };
+
+        this.liveStream.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                this.handleLiveUpdate(data);
+            } catch (error) {
+                console.error("Failed to parse live metrics", error);
+            }
+        };
+
+        this.liveStream.onerror = () => {
+            this.updateStreamStatus("disconnected");
+            setTimeout(() => {
+                if (this.liveMonitoringEnabled) {
+                    this.connectLiveStream();
+                }
+            }, 5000);
+        };
+    }
+
+    disconnectLiveStream() {
+        if (this.liveStream) {
+            this.liveStream.close();
+            this.liveStream = null;
+        }
+        this.updateStreamStatus("disconnected");
+    }
+
+    updateStreamStatus(status) {
+        if (!this.liveStreamStatus) {
+            return;
+        }
+
+        const statusMap = {
+            "connected": { text: "Connected", class: "status-success" },
+            "disconnected": { text: "Disconnected", class: "status-error" },
+        };
+
+        const config = statusMap[status] || statusMap["disconnected"];
+        this.liveStreamStatus.textContent = config.text;
+        this.liveStreamStatus.className = `stream-status ${config.class}`;
+    }
+
+    handleLiveUpdate(data) {
+        if (data.error) {
+            console.error("Live monitoring error:", data.error);
+            return;
+        }
+
+        // Update health checks
+        if (data.health_checks) {
+            this.updateHealthStatus(data.health_checks);
+        }
+
+        // Update alerts
+        if (data.recent_alerts) {
+            this.renderLiveAlerts(data.recent_alerts);
+        }
+    }
+
+    async loadLiveMetrics() {
+        try {
+            const data = await this.fetchJSON("/api/live/metrics");
+            if (!data) {
+                return;
+            }
+
+            if (data.health_checks) {
+                this.updateHealthStatus(data.health_checks);
+            }
+
+            if (data.alerts) {
+                this.renderLiveAlerts(data.alerts);
+            }
+        } catch (error) {
+            console.error("Failed to load live metrics", error);
+        }
+    }
+
+    updateHealthStatus(healthChecks) {
+        if (!this.liveHealthStatus) {
+            return;
+        }
+
+        const components = Object.keys(healthChecks);
+        if (components.length === 0) {
+            this.liveHealthStatus.innerHTML = "<p class=\"no-data\">No health data available</p>";
+            return;
+        }
+
+        this.liveHealthStatus.innerHTML = components.map(component => {
+            const status = healthChecks[component];
+            const isHealthy = status.healthy;
+            const statusClass = isHealthy ? "success" : "error";
+            const statusText = isHealthy ? "Healthy" : "Unhealthy";
+            const lastCheck = status.last_check ? this.formatDateTime(status.last_check) : "Unknown";
+
+            return `
+                <div class="health-item">
+                    <div class="health-header">
+                        <span class="health-component">${component}</span>
+                        <span class="status-pill ${statusClass}">${statusText}</span>
+                    </div>
+                    <p class="health-timestamp">Last check: ${lastCheck}</p>
+                </div>
+            `;
+        }).join("");
+    }
+
+    renderLiveAlerts(alerts) {
+        if (!this.liveAlertsList || !this.liveAlertsEmpty) {
+            return;
+        }
+
+        if (!Array.isArray(alerts) || alerts.length === 0) {
+            this.liveAlertsList.innerHTML = "";
+            this.liveAlertsEmpty.hidden = false;
+            return;
+        }
+
+        this.liveAlertsEmpty.hidden = true;
+        this.liveAlertsList.innerHTML = alerts.map(alert => {
+            const severityClass = alert.severity === "critical" ? "error" : alert.severity === "warning" ? "warning" : "info";
+            const timestamp = alert.timestamp ? this.formatDateTime(alert.timestamp) : "Unknown";
+
+            return `
+                <li class="alert-item ${severityClass}">
+                    <div class="alert-header">
+                        <span class="alert-severity">${alert.severity.toUpperCase()}</span>
+                        <span class="alert-time">${timestamp}</span>
+                    </div>
+                    <p class="alert-message">${alert.message}</p>
+                </li>
+            `;
+        }).join("");
+    }
+
+    async clearAlerts() {
+        try {
+            await this.fetchJSON("/api/live/alerts", { method: "DELETE" });
+            this.renderLiveAlerts([]);
+        } catch (error) {
+            console.error("Failed to clear alerts", error);
+        }
+    }
+
+    // ==================== FORMATTING ====================
 
     formatNumber(value) {
         return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value || 0);
