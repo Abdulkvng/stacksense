@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StackSense — AI Economic Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --ink: #0f0e0c;
+      --paper: #f5f2ec;
+      --cream: #ede9e0;
+      --amber: #d4820a;
+      --amber-l: #f5a623;
+      --blue: #1a3a6e;
+      --blue-l: #2d5be3;
+      --rule: #0f0e0c;
+      --rule-l: rgba(15, 14, 12, 0.12);
+      --rule-m: rgba(15, 14, 12, 0.25);
+      --oss: #1c6e3d;
+      --oss-l: #e8f5ee;
+      --ent: #1a3a6e;
+      --ent-l: #e8eef8;
+      --mono: 'IBM Plex Mono', monospace;
+      --serif: 'Libre Baskerville', serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--mono);
+      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(var(--rule-l) 1px, transparent 1px),
+        linear-gradient(90deg, var(--rule-l) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: var(--ink);
+      color: var(--paper);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 32px;
+      height: 52px;
+      border-bottom: 2px solid var(--amber);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 24px
+    }
+
+    .nav-logo {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      letter-spacing: 0.06em;
+      color: var(--amber);
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .nav-ticker {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: rgba(245, 242, 236, 0.35);
+      font-style: italic;
+      border-left: 1px solid rgba(245, 242, 236, 0.12);
+      padding-left: 20px;
+    }
+
+    .nav-center {
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(245, 242, 236, 0.3);
+      text-align: center;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end
+    }
+
+    .nav-tag {
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border: 1px solid rgba(245, 242, 236, 0.18);
+      color: rgba(245, 242, 236, 0.55);
+      text-decoration: none;
+      transition: all 0.15s;
+      font-weight: 500;
+    }
+
+    .nav-tag:hover {
+      background: rgba(245, 242, 236, 0.07);
+      color: var(--paper)
+    }
+
+    .nav-tag.primary {
+      background: var(--amber);
+      color: var(--ink);
+      border-color: var(--amber);
+      font-weight: 700
+    }
+
+    .nav-tag.primary:hover {
+      background: var(--amber-l)
+    }
+
+    /* ── LAYOUT ── */
+    .w {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 1
+    }
+
+    /* ── TICKER ── */
+    .ticker-wrap {
+      overflow: hidden;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      background: var(--amber);
+      border-bottom: 1px solid rgba(15, 14, 12, 0.2);
+    }
+
+    .ticker {
+      display: flex;
+      white-space: nowrap;
+      animation: scroll-left 32s linear infinite
+    }
+
+    .ticker-item {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0 32px;
+      color: var(--ink);
+      border-right: 1px solid rgba(15, 14, 12, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+    }
+
+    .ticker-item span {
+      opacity: 0.5;
+      font-weight: 400
+    }
+
+    @keyframes scroll-left {
+      from {
+        transform: translateX(0)
+      }
+
+      to {
+        transform: translateX(-50%)
+      }
+    }
+
+    /* ── HERO ── */
+    #hero {
+      padding-top: 52px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 2px solid var(--rule);
+    }
+
+    .hero-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      border-left: 2px solid var(--rule);
+      border-right: 2px solid var(--rule);
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .hero-main {
+      padding: 64px 56px 64px 48px;
+      border-right: 1px solid var(--rule-m);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-kicker {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 700;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-kicker::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 2px;
+      background: var(--amber)
+    }
+
+    .hero-h1 {
+      font-family: var(--display);
+      font-size: clamp(4rem, 8.5vw, 8.5rem);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      margin-bottom: 32px;
+    }
+
+    .h1-outline {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--ink);
+    }
+
+    .h1-sub {
+      display: block;
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: 0.14em;
+      letter-spacing: 0.06em;
+      color: rgba(15, 14, 12, 0.35);
+      -webkit-text-stroke: 0;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    .hero-desc {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: rgba(15, 14, 12, 0.6);
+      max-width: 520px;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 14px 28px;
+      border: 2px solid var(--ink);
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .cta-primary {
+      background: var(--ink);
+      color: var(--paper)
+    }
+
+    .cta-primary:hover {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: var(--ink)
+    }
+
+    .cta-secondary {
+      background: transparent;
+      color: var(--ink);
+      margin-left: -2px
+    }
+
+    .cta-secondary:hover {
+      background: var(--ink);
+      color: var(--paper)
+    }
+
+    .cta-ent {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+      margin-left: -2px
+    }
+
+    .cta-ent:hover {
+      background: var(--blue-l);
+      border-color: var(--blue-l)
+    }
+
+    .hero-sidebar {
+      display: flex;
+      flex-direction: column;
+      background: var(--cream);
+    }
+
+    .sb {
+      padding: 28px;
+      border-bottom: 1px solid var(--rule-m);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .sb-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(15, 14, 12, 0.38);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .sb-val {
+      font-family: var(--display);
+      font-size: 3rem;
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+
+    .sb-val.amber {
+      color: var(--amber)
+    }
+
+    .sb-val.oss {
+      color: var(--oss)
+    }
+
+    .sb-sub {
+      font-size: 0.64rem;
+      color: rgba(15, 14, 12, 0.42);
+      margin-top: 5px;
+      letter-spacing: 0.03em
+    }
+
+    .sb-code {
+      font-size: 0.7rem;
+      color: rgba(15, 14, 12, 0.5);
+      line-height: 1.9;
+      margin-top: 4px;
+    }
+
+    .sb-code .comment {
+      color: rgba(15, 14, 12, 0.28);
+      font-style: italic
+    }
+
+    .hero-foot {
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      background: var(--ink);
+      padding: 18px 48px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      border-left: 2px solid var(--amber);
+      border-right: 2px solid var(--amber);
+    }
+
+    .hf-item {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(245, 242, 236, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .hf-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .dot-live {
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80
+    }
+
+    .dot-pg {
+      background: var(--blue-l)
+    }
+
+    .dot-ent {
+      background: var(--amber)
+    }
+
+    .dot-dk {
+      background: #60a5fa
+    }
+
+    .hf-item strong {
+      color: var(--paper)
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      padding: 80px 0;
+      border-bottom: 2px solid var(--rule)
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0;
+      margin-bottom: 52px;
+      border-bottom: 1px solid var(--rule-m);
+      padding-bottom: 20px;
+      align-items: end;
+    }
+
+    .sec-num {
+      font-family: var(--display);
+      font-size: 5rem;
+      letter-spacing: 0.04em;
+      line-height: 0.85;
+      color: rgba(15, 14, 12, 0.06);
+    }
+
+    .sec-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .sec-title {
+      font-family: var(--display);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: 0.04em;
+      line-height: 0.95;
+    }
+
+    /* ── TIERS ── */
+    .tiers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 2px solid var(--rule)
+    }
+
+    .tier {
+      display: flex;
+      flex-direction: column
+    }
+
+    .tier-oss {
+      border-right: 1px solid var(--rule)
+    }
+
+    .tier-head {
+      padding: 36px 40px 28px;
+      border-bottom: 1px solid var(--rule-m)
+    }
+
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 4px 12px;
+      margin-bottom: 20px;
+    }
+
+    .badge-oss {
+      background: var(--oss-l);
+      color: var(--oss);
+      border: 1px solid rgba(28, 110, 61, 0.22)
+    }
+
+    .badge-ent {
+      background: var(--ent-l);
+      color: var(--ent);
+      border: 1px solid rgba(26, 58, 110, 0.22)
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%
+    }
+
+    .bd-oss {
+      background: var(--oss)
+    }
+
+    .bd-ent {
+      background: var(--ent)
+    }
+
+    .tier-name {
+      font-family: var(--display);
+      font-size: 3rem;
+      letter-spacing: 0.04em;
+      line-height: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .tier-sub {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.88rem;
+      color: rgba(15, 14, 12, 0.45)
+    }
+
+    .tier-body {
+      padding: 32px 40px;
+      flex: 1
+    }
+
+    .tier-purpose {
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      color: rgba(15, 14, 12, 0.48);
+      line-height: 1.7;
+      border-left: 3px solid var(--rule-l);
+      padding-left: 16px;
+      margin-bottom: 32px;
+      font-style: italic;
+    }
+
+    .tier-feats {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0
+    }
+
+    .feat {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--rule-l);
+      align-items: start;
+    }
+
+    .feat:last-child {
+      border-bottom: none
+    }
+
+    .feat-mark {
+      font-size: 0.68rem;
+      font-weight: 700;
+      margin-top: 1px
+    }
+
+    .fm-oss {
+      color: var(--oss)
+    }
+
+    .fm-ent {
+      color: var(--ent)
+    }
+
+    .feat-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 2px
+    }
+
+    .feat-desc {
+      font-size: 0.68rem;
+      color: rgba(15, 14, 12, 0.48);
+      line-height: 1.55
+    }
+
+    .tier-foot {
+      padding: 24px 40px;
+      border-top: 2px solid var(--rule)
+    }
+
+    .tier-price {
+      font-family: var(--display);
+      font-size: 2.2rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 3px
+    }
+
+    .tier-price-sub {
+      font-size: 0.6rem;
+      color: rgba(15, 14, 12, 0.38);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px
+    }
+
+    .tier-cta {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 13px 20px;
+      border: 2px solid;
+      transition: all 0.15s;
+    }
+
+    .tc-oss {
+      border-color: var(--oss);
+      color: var(--oss)
+    }
+
+    .tc-oss:hover {
+      background: var(--oss);
+      color: #fff
+    }
+
+    .tc-ent {
+      border-color: var(--ent);
+      color: var(--ent)
+    }
+
+    .tc-ent:hover {
+      background: var(--ent);
+      color: #fff
+    }
+
+    /* ── GRAFANA CALLOUT ── */
+    .grafana {
+      background: var(--ink);
+      border: 2px solid var(--rule);
+      margin-top: 48px;
+      padding: 56px 64px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grafana::before {
+      content: 'GRAFANA FOR AI';
+      position: absolute;
+      right: -30px;
+      top: 50%;
+      transform: translateY(-50%) rotate(90deg);
+      font-family: var(--display);
+      font-size: 6rem;
+      letter-spacing: 0.1em;
+      color: rgba(245, 242, 236, 0.025);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .g-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 700;
+      margin-bottom: 16px
+    }
+
+    .g-title {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      letter-spacing: 0.04em;
+      line-height: 0.9;
+      color: var(--paper);
+      margin-bottom: 16px;
+    }
+
+    .g-title em {
+      font-style: normal;
+      -webkit-text-stroke: 1.5px var(--amber);
+      color: transparent
+    }
+
+    .g-desc {
+      font-size: 0.8rem;
+      color: rgba(245, 242, 236, 0.45);
+      line-height: 1.75;
+      max-width: 560px
+    }
+
+    .g-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 210px
+    }
+
+    .g-actions .cta {
+      justify-content: center;
+      font-size: 0.7rem
+    }
+
+    .g-cta-alt {
+      color: rgba(245, 242, 236, 0.45);
+      border-color: rgba(245, 242, 236, 0.15)
+    }
+
+    .g-cta-alt:hover {
+      background: rgba(245, 242, 236, 0.07);
+      color: var(--paper)
+    }
+
+    /* ── INTEGRATIONS ── */
+    .int-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      border: 2px solid var(--rule);
+    }
+
+    .int-cell {
+      padding: 28px 18px;
+      border-right: 1px solid var(--rule-m);
+      border-bottom: 1px solid var(--rule-m);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+
+    .int-cell:hover {
+      background: var(--cream)
+    }
+
+    .int-cell:nth-child(6n) {
+      border-right: none
+    }
+
+    .int-icon {
+      font-size: 1.6rem;
+      line-height: 1
+    }
+
+    .int-name {
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase
+    }
+
+    .int-status {
+      font-size: 0.58rem;
+      letter-spacing: 0.05em;
+      padding: 2px 8px
+    }
+
+    .status-live {
+      color: var(--oss);
+      background: var(--oss-l);
+      border: 1px solid rgba(28, 110, 61, 0.2)
+    }
+
+    .status-wip {
+      color: var(--amber);
+      background: rgba(212, 130, 10, 0.1);
+      border: 1px solid rgba(212, 130, 10, 0.22)
+    }
+
+    .status-planned {
+      color: rgba(15, 14, 12, 0.35);
+      background: rgba(15, 14, 12, 0.04);
+      border: 1px solid var(--rule-l)
+    }
+
+    /* ── ENT FEATURES ── */
+    .ent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 2px solid var(--rule);
+    }
+
+    .ef {
+      padding: 36px 32px;
+      border-right: 1px solid var(--rule-m);
+      border-bottom: 1px solid var(--rule-m);
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .ef:hover {
+      background: var(--cream)
+    }
+
+    .ef:nth-child(3n) {
+      border-right: none
+    }
+
+    .ef-num {
+      font-family: var(--display);
+      font-size: 4rem;
+      line-height: 1;
+      color: rgba(15, 14, 12, 0.05);
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      letter-spacing: 0.04em;
+    }
+
+    .ef-icon {
+      font-size: 1.2rem;
+      margin-bottom: 14px
+    }
+
+    .ef-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px
+    }
+
+    .ef-desc {
+      font-size: 0.7rem;
+      color: rgba(15, 14, 12, 0.48);
+      line-height: 1.65
+    }
+
+    .ef-tag {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 0.57rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ent);
+      background: var(--ent-l);
+      border: 1px solid rgba(26, 58, 110, 0.2);
+      padding: 3px 10px;
+    }
+
+    /* ── COMPARE TABLE ── */
+    .ctable {
+      width: 100%;
+      border-collapse: collapse;
+      border: 2px solid var(--rule)
+    }
+
+    .ctable th {
+      padding: 14px 20px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-align: left;
+      border-right: 1px solid rgba(245, 242, 236, 0.08);
+    }
+
+    .ctable th:nth-child(2) {
+      color: rgba(134, 239, 172, 0.9)
+    }
+
+    .ctable th:nth-child(3) {
+      color: rgba(147, 197, 253, 0.9)
+    }
+
+    .ctable td {
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--rule-l);
+      border-right: 1px solid var(--rule-l);
+      font-size: 0.74rem;
+      vertical-align: middle;
+    }
+
+    .ctable tr:hover td {
+      background: var(--cream)
+    }
+
+    .ctable td:first-child {
+      color: rgba(15, 14, 12, 0.55);
+      font-size: 0.7rem
+    }
+
+    .ctable td:last-child {
+      border-right: none
+    }
+
+    .tick {
+      color: var(--oss);
+      font-weight: 700
+    }
+
+    .tick-ent {
+      color: var(--blue-l);
+      font-weight: 700
+    }
+
+    .nd {
+      color: rgba(15, 14, 12, 0.2)
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      background: rgba(212, 130, 10, 0.1);
+      color: var(--amber);
+      border: 1px solid rgba(212, 130, 10, 0.25);
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 2px solid var(--rule)
+    }
+
+    .fc {
+      padding: 56px 52px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .fc-oss {
+      border-right: 1px solid var(--rule)
+    }
+
+    .fc-oss::after {
+      content: 'OSS';
+      font-family: var(--display);
+      font-size: 11rem;
+      position: absolute;
+      bottom: -20px;
+      right: -6px;
+      color: rgba(15, 14, 12, 0.04);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .fc-ent {
+      background: var(--ink);
+      color: var(--paper)
+    }
+
+    .fc-ent::after {
+      content: 'ENT';
+      font-family: var(--display);
+      font-size: 11rem;
+      position: absolute;
+      bottom: -20px;
+      right: -6px;
+      color: rgba(245, 242, 236, 0.04);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .fc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 4px 12px;
+      margin-bottom: 22px;
+    }
+
+    .fcb-oss {
+      background: var(--oss-l);
+      color: var(--oss);
+      border: 1px solid rgba(28, 110, 61, 0.22)
+    }
+
+    .fcb-ent {
+      background: rgba(245, 242, 236, 0.07);
+      color: rgba(245, 242, 236, 0.6);
+      border: 1px solid rgba(245, 242, 236, 0.14)
+    }
+
+    .fc-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      letter-spacing: 0.04em;
+      line-height: 0.95;
+      margin-bottom: 14px;
+    }
+
+    .fc-ent .fc-title {
+      color: var(--paper)
+    }
+
+    .fc-desc {
+      font-size: 0.78rem;
+      line-height: 1.75;
+      color: rgba(15, 14, 12, 0.52);
+      max-width: 360px;
+      margin-bottom: 32px
+    }
+
+    .fc-ent .fc-desc {
+      color: rgba(245, 242, 236, 0.42)
+    }
+
+    .fc-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .fc-actions .cta {
+      justify-content: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em
+    }
+
+    .fc-ent .cta-primary {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: var(--ink)
+    }
+
+    .fc-ent .cta-primary:hover {
+      background: var(--amber-l);
+      border-color: var(--amber-l)
+    }
+
+    .fc-ent .cta-secondary {
+      color: rgba(245, 242, 236, 0.42);
+      border-color: rgba(245, 242, 236, 0.14)
+    }
+
+    .fc-ent .cta-secondary:hover {
+      background: rgba(245, 242, 236, 0.07);
+      color: var(--paper)
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+      border-top: 3px solid var(--amber);
+    }
+
+    .foot-brand {
+      font-family: var(--display);
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      color: var(--amber)
+    }
+
+    .foot-center {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: rgba(245, 242, 236, 0.22);
+      text-align: center;
+      font-style: italic
+    }
+
+    .foot-right {
+      display: flex;
+      gap: 20px;
+      justify-content: flex-end
+    }
+
+    .foot-right a {
+      font-size: 0.63rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(245, 242, 236, 0.32);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .foot-right a:hover {
+      color: var(--paper)
+    }
+
+    /* ── REVEAL ── */
+    .r {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.65s ease, transform 0.65s ease
+    }
+
+    .r.in {
+      opacity: 1;
+      transform: none
+    }
+
+    .r2 {
+      transition-delay: 0.08s
+    }
+
+    .r3 {
+      transition-delay: 0.16s
+    }
+
+    /* ── MOBILE ── */
+    @media(max-width:900px) {
+      nav {
+        grid-template-columns: auto 1fr;
+        padding: 0 16px
+      }
+
+      .nav-center,
+      .nav-ticker {
+        display: none
+      }
+
+      .w {
+        padding: 0 16px
+      }
+
+      .hero-body {
+        grid-template-columns: 1fr
+      }
+
+      .hero-sidebar {
+        display: none
+      }
+
+      .hero-main {
+        padding: 40px 20px
+      }
+
+      .hero-h1 {
+        font-size: 3.5rem
+      }
+
+      .hero-foot {
+        padding: 16px 20px
+      }
+
+      .tiers,
+      .final-cta {
+        grid-template-columns: 1fr
+      }
+
+      .tier-oss,
+      .fc-oss {
+        border-right: none;
+        border-bottom: 1px solid var(--rule)
+      }
+
+      .int-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+
+      .ent-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .grafana {
+        grid-template-columns: 1fr;
+        padding: 40px 24px
+      }
+
+      .section-head {
+        grid-template-columns: 80px 1fr
+      }
+
+      .sec-num {
+        font-size: 3rem
+      }
+
+      footer {
+        grid-template-columns: 1fr;
+        text-align: center
+      }
+
+      .foot-right {
+        justify-content: center
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a href="#" class="nav-logo">StackSense</a>
+      <span class="nav-ticker">AI Economic Intelligence Layer · v0.1.0 · MIT</span>
+    </div>
+    <div class="nav-center">OPENAI · ANTHROPIC · ELEVENLABS · PINECONE · AWS BEDROCK</div>
+    <div class="nav-right">
+      <a href="https://github.com/Abdulkvng/stacksense" class="nav-tag">GitHub</a>
+      <a href="#compare" class="nav-tag">Compare</a>
+      <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise" class="nav-tag">Enterprise</a>
+      {% if session.get("user_id") %}
+      <a href="/dashboard" class="nav-tag primary">Dashboard →</a>
+      {% else %}
+      <a href="/login" class="nav-tag primary">Sign In →</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="ticker-wrap" style="margin-top:52px">
+    <div class="ticker">
+      <div class="ticker-item">🟢 Open Source <span>Free · MIT · Self-hosted</span></div>
+      <div class="ticker-item">Cost Tracking <span>Per call · Per model · Per provider</span></div>
+      <div class="ticker-item">🔵 Enterprise <span>Routing · Budgets · Governance</span></div>
+      <div class="ticker-item">Latency Monitoring <span>P50 · P95 · P99</span></div>
+      <div class="ticker-item">Token Analytics <span>Input · Output · Efficiency Score</span></div>
+      <div class="ticker-item">Agent Tracking <span>End-to-end · Cost per run</span></div>
+      <div class="ticker-item">🟢 Open Source <span>Free · MIT · Self-hosted</span></div>
+      <div class="ticker-item">Cost Tracking <span>Per call · Per model · Per provider</span></div>
+      <div class="ticker-item">🔵 Enterprise <span>Routing · Budgets · Governance</span></div>
+      <div class="ticker-item">Latency Monitoring <span>P50 · P95 · P99</span></div>
+      <div class="ticker-item">Token Analytics <span>Input · Output · Efficiency Score</span></div>
+      <div class="ticker-item">Agent Tracking <span>End-to-end · Cost per run</span></div>
+    </div>
+  </div>
+
+  <section id="hero">
+    <div class="hero-body">
+      <div class="hero-main">
+        <div class="hero-kicker">AI Economic Intelligence</div>
+        <h1 class="hero-h1">
+          <span>STACK</span>
+          <span>SENSE</span>
+          <span class="h1-sub">THE GRAFANA FOR AI WORKLOADS</span>
+        </h1>
+        <p class="hero-desc">
+          Full observability for your AI infrastructure — free, open source, and self-hosted.
+          Track cost, latency, and token usage across every provider.
+          Scale to enterprise with dynamic routing, budget enforcement, and governance.
+        </p>
+        <div class="hero-actions">
+          <a href="https://github.com/Abdulkvng/stacksense" class="cta cta-primary">⬡ Get Started Free</a>
+          <a href="#tiers" class="cta cta-secondary">See Tiers</a>
+          <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise Demo" class="cta cta-ent">Enterprise
+            Demo</a>
+        </div>
+      </div>
+      <div class="hero-sidebar">
+        <div class="sb">
+          <div class="sb-label">OSS Tier Price</div>
+          <div class="sb-val amber">$0.00</div>
+          <div class="sb-sub">Forever free · MIT License</div>
+        </div>
+        <div class="sb">
+          <div class="sb-label">Providers Supported</div>
+          <div class="sb-val">5+</div>
+          <div class="sb-sub">OpenAI, Anthropic, ElevenLabs, Pinecone…</div>
+        </div>
+        <div class="sb">
+          <div class="sb-label">Instrumentation Overhead</div>
+          <div class="sb-val oss">&lt;50ms</div>
+          <div class="sb-sub">Proxy wrapping, non-blocking</div>
+        </div>
+        <div class="sb">
+          <div class="sb-label">Quick Install</div>
+          <div class="sb-code">
+            <div>$ pip install stacksense</div>
+            <div class="comment"># wrap in one line:</div>
+            <div>client = ss.monitor(client)</div>
+            <div class="comment"># that's it.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-foot">
+      <div class="hf-item"><span class="hf-dot dot-live"></span><strong>Live</strong> real-time cost stream</div>
+      <div class="hf-item"><span class="hf-dot dot-pg"></span><strong>PostgreSQL</strong> for production</div>
+      <div class="hf-item"><span class="hf-dot dot-ent"></span><strong>Enterprise</strong> routing engine available
+      </div>
+      <div class="hf-item"><span class="hf-dot dot-dk"></span><strong>Docker</strong> Compose included</div>
+    </div>
+  </section>
+
+  <!-- 01 TIERS -->
+  <section class="section" id="tiers">
+    <div class="w">
+      <div class="section-head r">
+        <div class="sec-num">01</div>
+        <div>
+          <div class="sec-label">Two-Tier Strategy</div>
+          <div class="sec-title">VISIBILITY → OPTIMIZATION</div>
+        </div>
+      </div>
+
+      <div class="tiers r">
+        <div class="tier tier-oss">
+          <div class="tier-head">
+            <div class="tier-badge badge-oss"><span class="badge-dot bd-oss"></span>Open Source</div>
+            <div class="tier-name">VISIBILITY<br>LAYER</div>
+            <div class="tier-sub">Free · Community-driven · Developer-friendly</div>
+          </div>
+          <div class="tier-body">
+            <div class="tier-purpose">Goal: Become the default AI usage dashboard. Not monetized directly — used to
+              drive adoption into enterprise.</div>
+            <ul class="tier-feats">
+              <li class="feat"><span class="feat-mark fm-oss">◈</span>
+                <div>
+                  <div class="feat-name">Unified AI Dashboard</div>
+                  <div class="feat-desc">Cost, latency, tokens, model distribution — one view across all providers</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-oss">◈</span>
+                <div>
+                  <div class="feat-name">Multi-Provider Monitoring</div>
+                  <div class="feat-desc">OpenAI, Anthropic, ElevenLabs, Pinecone, AWS Bedrock and more</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-oss">◈</span>
+                <div>
+                  <div class="feat-name">Zero-Code Instrumentation</div>
+                  <div class="feat-desc">Wrap existing clients in one line — no SDK changes required</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-oss">◈</span>
+                <div>
+                  <div class="feat-name">Kubernetes + Cloud Log Integration</div>
+                  <div class="feat-desc">Plug into your existing observability stack</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-oss">◈</span>
+                <div>
+                  <div class="feat-name">SQLite + PostgreSQL Storage</div>
+                  <div class="feat-desc">Local dev with SQLite, production-ready with Postgres</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-oss">◈</span>
+                <div>
+                  <div class="feat-name">Google OAuth Dashboard</div>
+                  <div class="feat-desc">Encrypted API key vault, per-user accounts, self-hosted</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="tier-foot">
+            <div class="tier-price">FREE</div>
+            <div class="tier-price-sub">MIT License · Forever · No Limits</div>
+            <a href="https://github.com/Abdulkvng/stacksense" class="tier-cta tc-oss">⬡ Get Started on GitHub</a>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-head">
+            <div class="tier-badge badge-ent"><span class="badge-dot bd-ent"></span>Enterprise</div>
+            <div class="tier-name">OPTIMIZATION<br>ENGINE</div>
+            <div class="tier-sub">Closed source · Paid · Embedded in production</div>
+          </div>
+          <div class="tier-body">
+            <div class="tier-purpose">Goal: Act as the CFO for your AI infrastructure — route, optimize, enforce, govern
+              at scale.</div>
+            <ul class="tier-feats">
+              <li class="feat"><span class="feat-mark fm-ent">◆</span>
+                <div>
+                  <div class="feat-name">Dynamic Model Routing</div>
+                  <div class="feat-desc">Route prompts to the most cost-effective model based on task complexity</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-ent">◆</span>
+                <div>
+                  <div class="feat-name">Budget Circuit Breakers</div>
+                  <div class="feat-desc">Auto-downgrade model tiers when approaching per-team or per-feature limits
+                  </div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-ent">◆</span>
+                <div>
+                  <div class="feat-name">Token Waste Detection</div>
+                  <div class="feat-desc">Identify inefficient prompts, redundant context, and high retry rates</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-ent">◆</span>
+                <div>
+                  <div class="feat-name">Cross-Vendor Arbitrage</div>
+                  <div class="feat-desc">Shift traffic between providers on real-time pricing and latency gaps</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-ent">◆</span>
+                <div>
+                  <div class="feat-name">Governance + Audit Logs</div>
+                  <div class="feat-desc">Enterprise policy engine, agent tracking, SOC 2 compliance support</div>
+                </div>
+              </li>
+              <li class="feat"><span class="feat-mark fm-ent">◆</span>
+                <div>
+                  <div class="feat-name">AI Unit Economics</div>
+                  <div class="feat-desc">Cost-per-user, cost-per-feature, margin impact analysis</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="tier-foot">
+            <div class="tier-price">CUSTOM</div>
+            <div class="tier-price-sub">Talk to us · Enterprise Pricing</div>
+            <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise Demo" class="tier-cta tc-ent">Request
+              Enterprise Demo</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="grafana r r2">
+        <div>
+          <div class="g-label">The Vision</div>
+          <div class="g-title">Be the <em>Grafana</em><br>for AI workloads.</div>
+          <p class="g-desc">Grafana became the default observability layer by being free, beautiful, and integrating
+            with everything. StackSense OSS follows the same playbook — not monetized directly, used to drive adoption
+            into enterprise.</p>
+        </div>
+        <div class="g-actions">
+          <a href="https://github.com/Abdulkvng/stacksense" class="cta cta-primary">⬡ Start Free</a>
+          <a href="#compare" class="cta g-cta-alt">Full Compare →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 INTEGRATIONS -->
+  <section class="section" id="integrations">
+    <div class="w">
+      <div class="section-head r">
+        <div class="sec-num">02</div>
+        <div>
+          <div class="sec-label">Built-in support</div>
+          <div class="sec-title">PLUG INTO YOUR ENTIRE STACK</div>
+        </div>
+      </div>
+      <div class="int-grid r">
+        <div class="int-cell">
+          <div class="int-icon">🤖</div>
+          <div class="int-name">OpenAI</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🧠</div>
+          <div class="int-name">Anthropic</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🔊</div>
+          <div class="int-name">ElevenLabs</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🌲</div>
+          <div class="int-name">Pinecone</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">☁️</div>
+          <div class="int-name">AWS Bedrock</div>
+          <div class="int-status status-wip">⟳ Building</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🧬</div>
+          <div class="int-name">Google AI</div>
+          <div class="int-status status-wip">⟳ Building</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">☸️</div>
+          <div class="int-name">Kubernetes</div>
+          <div class="int-status status-wip">⟳ Beta</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">📊</div>
+          <div class="int-name">Grafana</div>
+          <div class="int-status status-planned">Planned</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">📈</div>
+          <div class="int-name">Datadog</div>
+          <div class="int-status status-planned">Planned</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🐋</div>
+          <div class="int-name">Docker</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🗄️</div>
+          <div class="int-name">PostgreSQL</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+        <div class="int-cell">
+          <div class="int-icon">🪶</div>
+          <div class="int-name">SQLite</div>
+          <div class="int-status status-live">✓ Live</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 ENTERPRISE -->
+  <section class="section" id="enterprise" style="background:var(--cream)">
+    <div class="w">
+      <div class="section-head r">
+        <div class="sec-num">03</div>
+        <div>
+          <div class="sec-label">Enterprise tier · Closed source</div>
+          <div class="sec-title">OPTIMIZATION &amp; ORCHESTRATION</div>
+        </div>
+      </div>
+      <div class="ent-grid r">
+        <div class="ef">
+          <div class="ef-num">01</div>
+          <div class="ef-icon">⚡</div>
+          <div class="ef-title">Dynamic Model Routing</div>
+          <div class="ef-desc">Route each prompt to the right model based on task complexity, cost thresholds, and
+            latency requirements. Automatic fallback when quality permits.</div><span class="ef-tag">Routing</span>
+        </div>
+        <div class="ef">
+          <div class="ef-num">02</div>
+          <div class="ef-icon">🔬</div>
+          <div class="ef-title">Token Waste Detection</div>
+          <div class="ef-desc">Score prompts for efficiency. Detect redundant context injection, bloated system prompts,
+            and high retry rates. Actionable recommendations to cut spend.</div><span class="ef-tag">Cost
+            Intelligence</span>
+        </div>
+        <div class="ef">
+          <div class="ef-num">03</div>
+          <div class="ef-icon">🛑</div>
+          <div class="ef-title">Budget Circuit Breakers</div>
+          <div class="ef-desc">Per-team, per-feature, or global spend limits. When limits are hit, StackSense
+            auto-downgrades model tiers or rate-limits requests — no service disruption.</div><span
+            class="ef-tag">Budget Enforcement</span>
+        </div>
+        <div class="ef">
+          <div class="ef-num">04</div>
+          <div class="ef-icon">⚖️</div>
+          <div class="ef-title">Cross-Vendor Arbitrage</div>
+          <div class="ef-desc">Monitor real-time pricing and latency across all providers. Automatically shift traffic
+            to maximize value without degrading user experience.</div><span class="ef-tag">Multi-Provider</span>
+        </div>
+        <div class="ef">
+          <div class="ef-num">05</div>
+          <div class="ef-icon">📋</div>
+          <div class="ef-title">Governance &amp; Audit Logs</div>
+          <div class="ef-desc">Tamper-evident audit trail of every AI call. Model allowlists, PII detection, data
+            residency enforcement, compliance reporting for SOC 2.</div><span class="ef-tag">Governance</span>
+        </div>
+        <div class="ef">
+          <div class="ef-num">06</div>
+          <div class="ef-icon">🤖</div>
+          <div class="ef-title">Agent Tracking</div>
+          <div class="ef-desc">Track multi-step agentic workflows end-to-end. Total cost per agent run, infinite loop
+            detection, task-level token budgets.</div><span class="ef-tag">Agent Intelligence</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 COMPARE -->
+  <section class="section" id="compare">
+    <div class="w">
+      <div class="section-head r">
+        <div class="sec-num">04</div>
+        <div>
+          <div class="sec-label">Full comparison</div>
+          <div class="sec-title">OSS vs ENTERPRISE</div>
+        </div>
+      </div>
+      <div class="r">
+        <table class="ctable">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>🟢 Open Source</th>
+              <th>🔵 Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cost &amp; token tracking</td>
+              <td><span class="tick">✓</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Latency &amp; error monitoring</td>
+              <td><span class="tick">✓</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Multi-provider dashboard</td>
+              <td><span class="tick">✓</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>SQLite + PostgreSQL</td>
+              <td><span class="tick">✓</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Docker / self-hosted</td>
+              <td><span class="tick">✓</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Kubernetes integration</td>
+              <td><span class="tick">✓ <span class="pill">Beta</span></span></td>
+              <td><span class="tick-ent">✓ Full</span></td>
+            </tr>
+            <tr>
+              <td>Google OAuth + user accounts</td>
+              <td><span class="tick">✓</span></td>
+              <td><span class="tick-ent">✓ + SSO/SAML</span></td>
+            </tr>
+            <tr>
+              <td>Dynamic model routing</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Budget circuit breakers</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Token waste detection</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Cross-vendor arbitrage</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>SLA-aware routing</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Agent workflow tracking</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Enterprise policy engine</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Audit logs &amp; governance</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>AI unit economics</td>
+              <td><span class="nd">—</span></td>
+              <td><span class="tick-ent">✓</span></td>
+            </tr>
+            <tr>
+              <td>Dedicated support &amp; SLA</td>
+              <td>Community</td>
+              <td><span class="tick-ent">✓ Enterprise SLA</span></td>
+            </tr>
+            <tr>
+              <td>Source code</td>
+              <td><span class="tick">MIT Open Source</span></td>
+              <td>Closed Source</td>
+            </tr>
+            <tr>
+              <td>Pricing</td>
+              <td><span class="tick">Free</span></td>
+              <td>Custom</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 FINAL CTA -->
+  <section class="section" style="border-bottom:none">
+    <div class="w">
+      <div class="section-head r">
+        <div class="sec-num">05</div>
+        <div>
+          <div class="sec-label">Get started today</div>
+          <div class="sec-title">CHOOSE YOUR TIER</div>
+        </div>
+      </div>
+      <div class="final-cta r">
+        <div class="fc fc-oss">
+          <div class="fc-badge fcb-oss"><span class="badge-dot bd-oss"></span>Open Source</div>
+          <div class="fc-title">START MONITORING IN 5 MINUTES.</div>
+          <p class="fc-desc">pip install stacksense. Wrap your clients. See your costs. No signup, no credit card, no
+            limits. MIT licensed and fully self-hosted.</p>
+          <div class="fc-actions">
+            <a href="https://github.com/Abdulkvng/stacksense" class="cta cta-primary">⬡ Get on GitHub</a>
+            <a href="/dashboard" class="cta cta-secondary">View Live Dashboard →</a>
+          </div>
+        </div>
+        <div class="fc fc-ent">
+          <div class="fc-badge fcb-ent"><span class="badge-dot"
+              style="width:5px;height:5px;border-radius:50%;background:rgba(245,242,236,0.5)"></span>Enterprise</div>
+          <div class="fc-title">READY TO OPTIMIZE AT SCALE?</div>
+          <p class="fc-desc">Talk to us about dynamic routing, budget enforcement, and governance. We'll show you
+            exactly how much you're leaving on the table.</p>
+          <div class="fc-actions">
+            <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise Demo" class="cta cta-primary">Book an
+              Enterprise Demo</a>
+            <a href="#compare" class="cta cta-secondary">Compare all features →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-brand">STACKSENSE</div>
+    <div class="foot-center">MIT License · v0.1.0 · Built by Abdulrahman Sadiq</div>
+    <div class="foot-right">
+      <a href="https://github.com/Abdulkvng/stacksense">GitHub</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="mailto:abdulkvng@gmail.com">Contact</a>
+      <a href="https://github.com/Abdulkvng/stacksense/issues">Issues</a>
+    </div>
+  </footer>
+
+  <script>
+    const obs = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in') }),
+      { threshold: 0.07 }
+    );
+    document.querySelectorAll('.r').forEach(el => obs.observe(el));
+  </script>
+</body>
+
+</html>
