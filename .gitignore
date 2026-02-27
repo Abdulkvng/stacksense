@@ -87,3 +87,5 @@ coverage.xml
 .dmypy.json
 dmypy.json
 
+# Internal Documentation
+INTERNAL_README.md
