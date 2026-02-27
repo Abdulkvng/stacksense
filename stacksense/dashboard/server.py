@@ -114,9 +114,7 @@ def create_app(db_manager=None, debug=False):
 
     @app.route("/")
     def root():
-        if session.get("user_id"):
-            return redirect(url_for("dashboard"))
-        return redirect(url_for("login"))
+        return render_template("landing.html")
 
     @app.route("/dashboard")
     @login_required

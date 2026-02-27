@@ -23,6 +23,7 @@ share/python-wheels/
 MANIFEST
 
 # Virtual Environments
+.venv/
 venv/
 env/
 ENV/
@@ -30,6 +31,7 @@ env.bak/
 venv.bak/
 stacksense-venv/
 *.venv/
+.testvenv/
 
 # IDE
 .vscode/
@@ -87,3 +89,5 @@ coverage.xml
 .dmypy.json
 dmypy.json
 
+# Internal Documentation
+INTERNAL_README.md
