@@ -46,6 +46,7 @@
 
         <nav class="section-nav" aria-label="Dashboard sections">
             <button class="section-tab active" data-section="overview">Overview</button>
+            <button class="section-tab" data-section="enterprise">Enterprise</button>
             <button class="section-tab" data-section="keys">API Keys</button>
             <button class="section-tab" data-section="setup">Setup</button>
         </nav>
@@ -174,6 +175,121 @@
                         <p class="body-muted">Stored keys are shown as masked values only.</p>
                         <p id="apiKeysEmpty" class="empty-state">No API keys saved yet.</p>
                         <ul id="apiKeysList" class="key-list"></ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section-pane" data-pane="enterprise">
+                <div class="enterprise-grid">
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>⚡ Dynamic Model Routing</h3>
+                        </div>
+                        <p class="body-muted">Route prompts to cost-effective models based on task complexity</p>
+                        <div class="feature-status">
+                            <span class="status-badge active">Active</span>
+                            <span class="metric-value">0 Rules Configured</span>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>🛑 Budget Enforcement</h3>
+                        </div>
+                        <p class="body-muted">Set spend limits with automatic circuit breakers</p>
+                        <div class="feature-status">
+                            <span class="status-badge active">Active</span>
+                            <span class="metric-value">0 Budgets Set</span>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>💰 Cost Optimization</h3>
+                        </div>
+                        <p class="body-muted">Identify token waste and inefficient prompts</p>
+                        <div class="optimization-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Estimated Waste</span>
+                                <span class="stat-value" id="estimatedWaste">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Waste %</span>
+                                <span class="stat-value" id="wastePercentage">0%</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>⏱️ SLA-Aware Routing</h3>
+                        </div>
+                        <p class="body-muted">Route based on latency requirements and SLA guarantees</p>
+                        <div class="feature-status">
+                            <span class="status-badge active">Active</span>
+                            <span class="metric-value">0 SLA Configs</span>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>📋 Governance & Audit Logs</h3>
+                        </div>
+                        <p class="body-muted">Tamper-proof audit trail for compliance</p>
+                        <div class="audit-summary">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Events</span>
+                                <span class="stat-value" id="auditEventCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Violations</span>
+                                <span class="stat-value critical" id="violationCount">0</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>🤖 Agent Tracking</h3>
+                        </div>
+                        <p class="body-muted">Track multi-step workflows and detect infinite loops</p>
+                        <div class="agent-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Active Runs</span>
+                                <span class="stat-value" id="activeAgentRuns">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Loop Detections</span>
+                                <span class="stat-value warning" id="loopDetections">0</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3>🔒 Enterprise Policy Engine</h3>
+                        </div>
+                        <p class="body-muted">Model allowlists, PII detection, data residency</p>
+                        <div class="feature-status">
+                            <span class="status-badge active">Active</span>
+                            <span class="metric-value">0 Policies Set</span>
+                        </div>
+                    </article>
+
+                    <article class="card full-width">
+                        <div class="card-header">
+                            <h3>Enterprise Features Overview</h3>
+                        </div>
+                        <p class="body-muted">
+                            All enterprise features are now available in your StackSense instance.
+                            These features help you optimize costs, enforce budgets, maintain compliance,
+                            and track complex AI workflows. Configure each feature using the backend API or
+                            contact support for assistance.
+                        </p>
+                        <div class="enterprise-links">
+                            <a href="https://github.com/Abdulkvng/stacksense/blob/main/docs/" class="text-btn">View Documentation</a>
+                            <a href="mailto:abdulkvng@gmail.com?subject=Enterprise Features Help" class="text-btn">Get Support</a>
+                        </div>
                     </article>
                 </div>
             </section>
