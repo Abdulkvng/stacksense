@@ -61,6 +61,35 @@ class MetricsTracker:
             "deepseek-chat": {"input": 0.14, "output": 0.28},
             "deepseek-reasoner": {"input": 0.55, "output": 2.19},
         },
+        "ai21": {
+            "jamba-1.5-large": {"input": 2.0, "output": 8.0},
+            "jamba-1.5-mini": {"input": 0.20, "output": 0.40},
+            "jamba-instruct": {"input": 0.50, "output": 0.70},
+        },
+        "together": {
+            "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo": {"input": 3.50, "output": 3.50},
+            "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo": {"input": 0.88, "output": 0.88},
+            "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo": {"input": 0.18, "output": 0.18},
+            "mistralai/Mixtral-8x22B-Instruct-v0.1": {"input": 1.20, "output": 1.20},
+        },
+        "groq": {
+            "llama-3.3-70b-versatile": {"input": 0.59, "output": 0.79},
+            "llama-3.1-8b-instant": {"input": 0.05, "output": 0.08},
+            "mixtral-8x7b-32768": {"input": 0.24, "output": 0.24},
+            "gemma2-9b-it": {"input": 0.20, "output": 0.20},
+        },
+        "perplexity": {
+            "sonar-pro": {"input": 3.0, "output": 15.0},
+            "sonar": {"input": 1.0, "output": 1.0},
+            "sonar-reasoning-pro": {"input": 2.0, "output": 8.0},
+            "sonar-reasoning": {"input": 1.0, "output": 5.0},
+        },
+        "replicate": {
+            "meta/meta-llama-3-70b-instruct": {"input": 0.65, "output": 2.75},
+            "meta/meta-llama-3-8b-instruct": {"input": 0.05, "output": 0.25},
+            "stability-ai/sdxl": {"input": 0.0, "output": 0.0},
+            "default": {"input": 0.30, "output": 1.05},
+        },
         "elevenlabs": {
             "default": {"characters": 0.30},  # per 1000 characters
         },

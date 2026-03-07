@@ -109,6 +109,11 @@ class StackSense:
             "mistralai": "mistral",
             "cohere": "cohere",
             "deepseek": "deepseek",
+            "ai21": "ai21",
+            "together": "together",
+            "groq": "groq",
+            "perplexity": "perplexity",
+            "replicate": "replicate",
             "elevenlabs": "elevenlabs",
             "pinecone": "pinecone",
         }

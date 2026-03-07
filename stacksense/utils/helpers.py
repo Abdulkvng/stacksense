@@ -171,6 +171,46 @@ class ClientProxy:
                         "output": response.usage.completion_tokens,
                     }
 
+            elif provider == "ai21":
+                if hasattr(response, "usage"):
+                    return {
+                        "input": getattr(response.usage, "prompt_tokens", 0),
+                        "output": getattr(response.usage, "completion_tokens", 0),
+                    }
+
+            elif provider == "together":
+                if hasattr(response, "usage"):
+                    return {
+                        "input": getattr(response.usage, "prompt_tokens", 0),
+                        "output": getattr(response.usage, "completion_tokens", 0),
+                    }
+
+            elif provider == "groq":
+                if hasattr(response, "usage"):
+                    return {
+                        "input": response.usage.prompt_tokens,
+                        "output": response.usage.completion_tokens,
+                    }
+
+            elif provider == "perplexity":
+                if hasattr(response, "usage"):
+                    return {
+                        "input": response.usage.prompt_tokens,
+                        "output": response.usage.completion_tokens,
+                    }
+
+            elif provider == "replicate":
+                if hasattr(response, "metrics") and hasattr(response.metrics, "input_token_count"):
+                    return {
+                        "input": response.metrics.input_token_count,
+                        "output": getattr(response.metrics, "output_token_count", 0),
+                    }
+                if hasattr(response, "usage"):
+                    return {
+                        "input": getattr(response.usage, "input_tokens", 0),
+                        "output": getattr(response.usage, "output_tokens", 0),
+                    }
+
             elif provider == "elevenlabs":
                 if hasattr(response, "character_count"):
                     return {"characters": response.character_count}
@@ -237,6 +277,15 @@ class ClientProxy:
                         output_tokens += getattr(chunk.usage, "output_tokens", 0)
             if input_tokens > 0 or output_tokens > 0:
                 return {"input": input_tokens, "output": output_tokens}
+            return {"input": 0, "output": len(chunks)}
+
+        elif provider in ("groq", "together", "perplexity", "ai21"):
+            last_chunk = chunks[-1]
+            if hasattr(last_chunk, "usage") and last_chunk.usage:
+                return {
+                    "input": getattr(last_chunk.usage, "prompt_tokens", 0),
+                    "output": getattr(last_chunk.usage, "completion_tokens", 0),
+                }
             return {"input": 0, "output": len(chunks)}
 
         return None
@@ -383,6 +432,12 @@ def parse_model_name(model: str) -> Dict[str, str]:
         result["provider"] = "cohere"
     elif "deepseek" in model_lower:
         result["provider"] = "deepseek"
+    elif "jamba" in model_lower:
+        result["provider"] = "ai21"
+    elif "llama" in model_lower and "/" in model_lower:
+        result["provider"] = "together"
+    elif "sonar" in model_lower:
+        result["provider"] = "perplexity"
 
     return result
 
