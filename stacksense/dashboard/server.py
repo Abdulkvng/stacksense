@@ -92,7 +92,7 @@ def create_app(db_manager=None, debug=False):
                 .first()
             )
         except Exception as e:
-            logger.error(f"Error fetching current user: {e}")
+            app.logger.error(f"Error fetching current user: {e}")
             return None
 
     def login_required(view_func):
