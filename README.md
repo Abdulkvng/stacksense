@@ -1,6 +1,34 @@
 # StackSense
 
 AI Economic Intelligence Layer. StackSense goes beyond observability—it is an **AI Operating System** with runtime control over all LLM requests, automatically reducing spend, routing intelligently, and acting as a CFO for your AI infrastructure.
+<<<<<<< Updated upstream
+=======
+
+## 🚀 AI Gateway - Runtime Control Layer
+
+StackSense intercepts **every LLM request** before it reaches the provider and applies intelligent controls:
+
+- **Dynamic Model Routing** - Switch between GPT-4 ↔ GPT-4o-mini based on quality needs
+- **Vendor Switching** - Failover to different providers on latency spikes
+- **Model Tier Dropping** - Automatically downgrade when quality threshold is met
+- **Budget Blocking** - Hard stop requests that exceed budgets
+- **Prompt Rewriting** - Reduce tokens while preserving meaning (15-30% savings)
+- **Cost Simulation** - "What if" scenarios for different strategies
+- **Monthly Prediction** - Forecast overruns before they happen
+- **Auto-Throttling** - Prevent runaway agent costs with circuit breakers
+
+📘 **[Read the AI Gateway Guide](AI_GATEWAY_GUIDE.md)** | 💻 **[See Integration Example](examples/gateway_integration_example.py)** | ⚡ **[Performance Guide](PERFORMANCE.md)** | ✅ **[Production Readiness](PRODUCTION_READINESS.md)**
+
+### ⚡ Performance
+
+| Version | Latency | Throughput | Overhead |
+|---------|---------|------------|----------|
+| Async Gateway | 2-6ms | 500 req/s | < 0.5% |
+| Async + Redis | 1-3ms | 1000+ req/s | < 0.2% |
+| Cache Hit | < 1ms | - | 100x faster |
+
+**Compared to LLM latency (1500-3000ms), gateway adds negligible overhead while saving 25-35% on costs.**
+>>>>>>> Stashed changes
 
 ## Supported Providers
 
@@ -67,6 +95,7 @@ metrics = ss.get_metrics(timeframe="24h")
 print(f"Total cost: ${metrics['total_cost']}")
 ```
 
+<<<<<<< Updated upstream
 ### Multi-Provider Monitoring
 
 ```python
@@ -151,6 +180,17 @@ Intercept and control all LLM requests:
 ```python
 from stacksense.gateway import AIGateway
 
+=======
+### AI Gateway Usage
+
+Intercept and control all LLM requests with the AI Gateway:
+
+```python
+from stacksense.gateway import AIGateway
+import openai
+
+# Initialize gateway with runtime controls
+>>>>>>> Stashed changes
 gateway = AIGateway(
     db_session=db_session,
     user_id=user_id,
@@ -161,6 +201,7 @@ gateway = AIGateway(
 
 messages = [{"role": "user", "content": "Explain quantum computing"}]
 
+<<<<<<< Updated upstream
 intercepted = gateway.intercept(
     messages=messages,
     model="gpt-4",
@@ -238,6 +279,43 @@ stacksense export json -o metrics.json
 stacksense db init
 stacksense db health
 ```
+=======
+# Intercept request before sending to LLM
+intercepted = gateway.intercept(
+    messages=messages,
+    model="gpt-4",
+    max_latency_ms=2000,  # Switch provider if slow
+    min_quality_score=0.80  # Drop tier if quality met
+)
+
+# Check if allowed
+if "error" in intercepted:
+    print(f"Blocked: {intercepted['message']}")
+else:
+    # Execute with potentially modified model/messages
+    response = openai.ChatCompletion.create(
+        model=intercepted["model"],  # May be downgraded
+        messages=intercepted["messages"]  # May be optimized
+    )
+
+    # Track performance (enables learning)
+    gateway.post_execution_tracking(
+        request=intercepted,
+        response=response,
+        actual_cost=0.002,
+        latency=1200
+    )
+```
+
+**What the Gateway does:**
+1. ✅ Checks budget and throttling limits
+2. ✂️ Optimizes prompts to reduce tokens (15-30% savings)
+3. 💾 Returns cached responses for identical queries
+4. 🔀 Routes to best provider based on latency/cost/quality
+5. 📊 Tracks quality for future tier recommendations
+
+📘 **[Full AI Gateway Guide](AI_GATEWAY_GUIDE.md)** with cost prediction, quality tracking, and more.
+>>>>>>> Stashed changes
 
 ## Database Support
 
@@ -278,8 +356,14 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment guide.
 
 ## Documentation
 
+<<<<<<< Updated upstream
 - [docs/AI_GATEWAY_GUIDE.md](docs/AI_GATEWAY_GUIDE.md) - AI Gateway runtime control layer
 - [docs/TELEMETRY_GUIDE.md](docs/TELEMETRY_GUIDE.md) - Telemetry and monitoring guide
+=======
+- **[AI_GATEWAY_GUIDE.md](AI_GATEWAY_GUIDE.md)** - AI Gateway runtime control layer
+- **[TELEMETRY_GUIDE.md](TELEMETRY_GUIDE.md)** - Complete telemetry and monitoring guide
+- [docs/QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide
+>>>>>>> Stashed changes
 - [docs/DATABASE_GUIDE.md](docs/DATABASE_GUIDE.md) - Database setup and usage
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - Production deployment
 - [docs/QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide

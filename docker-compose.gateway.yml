@@ -1,0 +1,184 @@
+# Docker Compose for StackSense AI Gateway (Production)
+#
+# This configuration optimizes for low latency and high throughput:
+# - Redis for 1-2ms cache lookups
+# - PostgreSQL with connection pooling
+# - Multiple gateway instances for horizontal scaling
+#
+# Expected Performance:
+# - Gateway latency: 2-6ms (uncached)
+# - Gateway latency: 1-2ms (cached)
+# - Throughput: 500-1000 req/s per instance
+
+version: '3.8'
+
+services:
+  # Redis - Ultra-fast caching (1-2ms latency)
+  redis:
+    image: redis:7-alpine
+    container_name: stacksense-redis
+    command: >
+      redis-server
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --save 60 1
+      --loglevel warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - stacksense-network
+
+  # PostgreSQL - Budget and configuration data
+  postgres:
+    image: postgres:15-alpine
+    container_name: stacksense-postgres
+    environment:
+      POSTGRES_DB: stacksense
+      POSTGRES_USER: stacksense
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stacksense"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - stacksense-network
+    # Performance tuning
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c max_connections=200
+      -c effective_cache_size=1GB
+
+  # StackSense Gateway (can scale horizontally)
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: stacksense-gateway
+    environment:
+      # Database
+      STACKSENSE_DB_URL: postgresql://stacksense:${POSTGRES_PASSWORD:-changeme}@postgres:5432/stacksense
+      STACKSENSE_DB_POOL_SIZE: 20
+      STACKSENSE_DB_MAX_OVERFLOW: 40
+
+      # Redis
+      STACKSENSE_REDIS_URL: redis://redis:6379/0
+      STACKSENSE_REDIS_POOL_SIZE: 20
+      STACKSENSE_REDIS_TIMEOUT_MS: 100
+
+      # Gateway Performance
+      STACKSENSE_GATEWAY_ASYNC: "true"
+      STACKSENSE_GATEWAY_TIMEOUT_MS: 100
+      STACKSENSE_GATEWAY_FAIL_OPEN: "true"
+
+      # Cache Settings
+      STACKSENSE_BUDGET_CACHE_TTL: 60
+      STACKSENSE_RESPONSE_CACHE_TTL: 3600
+
+      # Environment
+      STACKSENSE_ENVIRONMENT: production
+      STACKSENSE_DEBUG: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - stacksense-network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+      # Horizontal scaling (uncomment to add replicas)
+      # replicas: 3
+
+  # StackSense Dashboard
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stacksense-dashboard
+    environment:
+      STACKSENSE_DB_URL: postgresql://stacksense:${POSTGRES_PASSWORD:-changeme}@postgres:5432/stacksense
+      STACKSENSE_REDIS_URL: redis://redis:6379/0
+      DEV_MODE: "false"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - stacksense-network
+
+  # Prometheus (optional - for metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: stacksense-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    networks:
+      - stacksense-network
+
+  # Grafana (optional - for visualization)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: stacksense-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: redis-datasource
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - stacksense-network
+
+networks:
+  stacksense-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

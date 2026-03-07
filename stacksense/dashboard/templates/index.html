@@ -337,6 +337,7 @@
             </section>
 
             <section class="section-pane" data-pane="monitoring">
+<<<<<<< Updated upstream
                 <div class="monitoring-header" style="margin-bottom: 24px;">
                     <div class="card">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -345,6 +346,16 @@
                         </div>
                         <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">
                             Real-time metrics, alerts, and system health monitoring.
+=======
+                <div class="monitoring-header">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📡 Live Monitoring</h3>
+                            <span id="liveStreamStatus" class="stream-status status-disconnected">Disconnected</span>
+                        </div>
+                        <p class="body-muted">
+                            Real-time metrics, alerts, and system health monitoring powered by Prometheus.
+>>>>>>> Stashed changes
                         </p>
                     </div>
                 </div>
@@ -352,19 +363,33 @@
                 <div class="monitoring-grid">
                     <article class="card">
                         <div class="card-header">
+<<<<<<< Updated upstream
                             <h3 style="font-size: 16px;">🏥 System Health</h3>
                         </div>
                         <div id="liveHealthStatus" class="health-status" style="margin-top: 16px; min-height: 100px;">
+=======
+                            <h3>🏥 System Health</h3>
+                        </div>
+                        <div id="liveHealthStatus" class="health-status">
+>>>>>>> Stashed changes
                             <p class="no-data">Loading health status...</p>
                         </div>
                     </article>
 
                     <article class="card full-width">
+<<<<<<< Updated upstream
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                             <h3 style="font-size: 16px;">🚨 Live Alerts</h3>
                             <button id="clearAlertsBtn" class="ghost-btn" style="font-size: 13px;">Clear All</button>
                         </div>
                         <div class="alerts-container" style="margin-top: 16px;">
+=======
+                        <div class="card-header">
+                            <h3>🚨 Live Alerts</h3>
+                            <button id="clearAlertsBtn" class="ghost-btn">Clear All</button>
+                        </div>
+                        <div class="alerts-container">
+>>>>>>> Stashed changes
                             <ul id="liveAlertsList" class="alerts-list"></ul>
                             <p id="liveAlertsEmpty" class="no-data" hidden>No active alerts</p>
                         </div>
@@ -372,6 +397,7 @@
 
                     <article class="card full-width">
                         <div class="card-header">
+<<<<<<< Updated upstream
                             <h3 style="font-size: 16px;">📊 Prometheus Metrics</h3>
                         </div>
                         <p class="body-muted" style="margin: 12px 0; line-height: 1.5; word-wrap: break-word;">
@@ -395,6 +421,31 @@
                                     <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_routing_decisions_total - Routing decisions</li>
                                     <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_agent_cost_dollars - Agent costs</li>
                                     <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_policy_violations_total - Policy violations</li>
+=======
+                            <h3>📊 Prometheus Metrics</h3>
+                        </div>
+                        <p class="body-muted">
+                            Access raw Prometheus metrics at <code><a href="/metrics" target="_blank">/metrics</a></code>
+                        </p>
+                        <div class="metrics-info">
+                            <div class="info-item">
+                                <span class="info-label">Endpoint:</span>
+                                <code class="info-value">/metrics</code>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Format:</span>
+                                <code class="info-value">Prometheus Exposition Format</code>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Available Metrics:</span>
+                                <ul class="metrics-list">
+                                    <li>stacksense_requests_total - Total requests by feature</li>
+                                    <li>stacksense_request_duration_seconds - Request latency</li>
+                                    <li>stacksense_budget_utilization_ratio - Budget utilization</li>
+                                    <li>stacksense_routing_decisions_total - Routing decisions</li>
+                                    <li>stacksense_agent_cost_dollars - Agent costs</li>
+                                    <li>stacksense_policy_violations_total - Policy violations</li>
+>>>>>>> Stashed changes
                                 </ul>
                             </div>
                         </div>

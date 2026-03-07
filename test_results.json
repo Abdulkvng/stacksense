@@ -1,0 +1,430 @@
+{
+  "summary": {
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "duration_ms": 10448.431730270386
+  },
+  "results": [
+    {
+      "test_name": "Gateway Initialization",
+      "status": "passed",
+      "duration_ms": 0.08416175842285156,
+      "metrics": {
+        "init_time_ms": 0.08177757263183594,
+        "components_loaded": 6,
+        "status": "initialized"
+      },
+      "timestamp": "2026-02-27T17:56:23.740160",
+      "error": null
+    },
+    {
+      "test_name": "Basic Request Interception",
+      "status": "passed",
+      "duration_ms": 0.11610984802246094,
+      "metrics": {
+        "latency_ms": 0.09107589721679688,
+        "intercepted": true,
+        "model": "gpt-4",
+        "optimized": false,
+        "from_cache": false
+      },
+      "timestamp": "2026-02-27T17:56:23.740548",
+      "error": null
+    },
+    {
+      "test_name": "Cache Hit Performance",
+      "status": "passed",
+      "duration_ms": 0.2467632293701172,
+      "metrics": {
+        "cache_miss_latency_ms": 0.07081031799316406,
+        "cache_hit_latency_ms": 0.09512901306152344,
+        "speedup": "0.7x",
+        "cache_hit": true
+      },
+      "timestamp": "2026-02-27T17:56:23.740767",
+      "error": null
+    },
+    {
+      "test_name": "Prompt Optimization",
+      "status": "passed",
+      "duration_ms": 0.09489059448242188,
+      "metrics": {
+        "optimized": false,
+        "original_length": 71,
+        "optimized_length": 71,
+        "reduction": 0,
+        "reduction_percent": 0.0
+      },
+      "timestamp": "2026-02-27T17:56:23.741109",
+      "error": null
+    },
+    {
+      "test_name": "Smart Routing Decision",
+      "status": "passed",
+      "duration_ms": 0.08916854858398438,
+      "metrics": {
+        "original_model": "gpt-4",
+        "selected_model": "gpt-4",
+        "switched": false,
+        "provider": null
+      },
+      "timestamp": "2026-02-27T17:56:23.741284",
+      "error": null
+    },
+    {
+      "test_name": "Budget Enforcement",
+      "status": "passed",
+      "duration_ms": 0.08893013000488281,
+      "metrics": {
+        "budget_action": "allow",
+        "estimated_cost": 0.0,
+        "allowed": true
+      },
+      "timestamp": "2026-02-27T17:56:23.741446",
+      "error": null
+    },
+    {
+      "test_name": "Request Throttling",
+      "status": "passed",
+      "duration_ms": 1.1792182922363281,
+      "metrics": {
+        "total_requests": 10,
+        "throttled": 0,
+        "allowed": 10,
+        "throttle_rate": 0.0
+      },
+      "timestamp": "2026-02-27T17:56:23.741619",
+      "error": null
+    },
+    {
+      "test_name": "Selective Gateway (Cheap Model Skip)",
+      "status": "passed",
+      "duration_ms": 0.4031658172607422,
+      "metrics": {
+        "cheap_model_skipped": true,
+        "expensive_model_optimized": false,
+        "skip_rate": 50.0,
+        "gateway_used": 1,
+        "gateway_skipped": 1
+      },
+      "timestamp": "2026-02-27T17:56:23.743027",
+      "error": null
+    },
+    {
+      "test_name": "Concurrent Requests (100 concurrent)",
+      "status": "passed",
+      "duration_ms": 2.7179718017578125,
+      "metrics": {
+        "concurrency": 100,
+        "total_duration_ms": 2.5708675384521484,
+        "throughput_rps": 38897.37549846982,
+        "avg_latency_ms": 1.4733314514160156,
+        "p50_latency_ms": 1.4225244522094727,
+        "p95_latency_ms": 1.9299983978271484
+      },
+      "timestamp": "2026-02-27T17:56:23.743609",
+      "error": null
+    },
+    {
+      "test_name": "Latency Benchmark (1000 iterations)",
+      "status": "passed",
+      "duration_ms": 63.45391273498535,
+      "metrics": {
+        "iterations": 1000,
+        "min_ms": 0.052928924560546875,
+        "max_ms": 0.28204917907714844,
+        "mean_ms": 0.06152153015136719,
+        "median_ms": 0.05817413330078125,
+        "p50_ms": 0.05817413330078125,
+        "p75_ms": 0.06103515625,
+        "p90_ms": 0.06699562072753906,
+        "p95_ms": 0.07390975952148438,
+        "p99_ms": 0.1239776611328125,
+        "stdev_ms": 0.01413844890597533
+      },
+      "timestamp": "2026-02-27T17:56:23.746548",
+      "error": null
+    },
+    {
+      "test_name": "Gateway Initialization",
+      "status": "passed",
+      "duration_ms": 0.17309188842773438,
+      "metrics": {
+        "init_time_ms": 0.1690387725830078,
+        "components_loaded": 6,
+        "status": "initialized"
+      },
+      "timestamp": "2026-02-27T17:58:07.100692",
+      "error": null
+    },
+    {
+      "test_name": "Gateway Initialization",
+      "status": "passed",
+      "duration_ms": 0.03409385681152344,
+      "metrics": {
+        "init_time_ms": 0.03314018249511719,
+        "components_loaded": 6,
+        "status": "initialized"
+      },
+      "timestamp": "2026-02-27T17:58:07.101430",
+      "error": null
+    },
+    {
+      "test_name": "Basic Request Interception",
+      "status": "passed",
+      "duration_ms": 5.364894866943359,
+      "metrics": {
+        "latency_ms": 5.312204360961914,
+        "intercepted": true,
+        "model": "gpt-4",
+        "optimized": false,
+        "from_cache": false
+      },
+      "timestamp": "2026-02-27T17:58:07.101065",
+      "error": null
+    },
+    {
+      "test_name": "Basic Request Interception",
+      "status": "passed",
+      "duration_ms": 5.201101303100586,
+      "metrics": {
+        "latency_ms": 5.176067352294922,
+        "intercepted": true,
+        "model": "gpt-4",
+        "optimized": false,
+        "from_cache": false
+      },
+      "timestamp": "2026-02-27T17:58:07.101569",
+      "error": null
+    },
+    {
+      "test_name": "Cache Hit Performance",
+      "status": "passed",
+      "duration_ms": 0.7469654083251953,
+      "metrics": {
+        "cache_miss_latency_ms": 0.4088878631591797,
+        "cache_hit_latency_ms": 0.22292137145996094,
+        "speedup": "1.8x",
+        "cache_hit": true
+      },
+      "timestamp": "2026-02-27T17:58:07.106664",
+      "error": null
+    },
+    {
+      "test_name": "Cache Hit Performance",
+      "status": "passed",
+      "duration_ms": 0.6740093231201172,
+      "metrics": {
+        "cache_miss_latency_ms": 0.29087066650390625,
+        "cache_hit_latency_ms": 0.33211708068847656,
+        "speedup": "0.9x",
+        "cache_hit": true
+      },
+      "timestamp": "2026-02-27T17:58:07.106882",
+      "error": null
+    },
+    {
+      "test_name": "Prompt Optimization",
+      "status": "passed",
+      "duration_ms": 0.2808570861816406,
+      "metrics": {
+        "optimized": false,
+        "original_length": 71,
+        "optimized_length": 71,
+        "reduction": 0,
+        "reduction_percent": 0.0
+      },
+      "timestamp": "2026-02-27T17:58:07.107508",
+      "error": null
+    },
+    {
+      "test_name": "Prompt Optimization",
+      "status": "passed",
+      "duration_ms": 0.26106834411621094,
+      "metrics": {
+        "optimized": false,
+        "original_length": 71,
+        "optimized_length": 71,
+        "reduction": 0,
+        "reduction_percent": 0.0
+      },
+      "timestamp": "2026-02-27T17:58:07.107641",
+      "error": null
+    },
+    {
+      "test_name": "Smart Routing Decision",
+      "status": "passed",
+      "duration_ms": 0.25200843811035156,
+      "metrics": {
+        "original_model": "gpt-4",
+        "selected_model": "gpt-4",
+        "switched": false,
+        "provider": null
+      },
+      "timestamp": "2026-02-27T17:58:07.107868",
+      "error": null
+    },
+    {
+      "test_name": "Smart Routing Decision",
+      "status": "passed",
+      "duration_ms": 0.2529621124267578,
+      "metrics": {
+        "original_model": "gpt-4",
+        "selected_model": "gpt-4",
+        "switched": false,
+        "provider": null
+      },
+      "timestamp": "2026-02-27T17:58:07.107977",
+      "error": null
+    },
+    {
+      "test_name": "Budget Enforcement",
+      "status": "passed",
+      "duration_ms": 0.24819374084472656,
+      "metrics": {
+        "budget_action": "allow",
+        "estimated_cost": 0.0,
+        "allowed": true
+      },
+      "timestamp": "2026-02-27T17:58:07.108195",
+      "error": null
+    },
+    {
+      "test_name": "Budget Enforcement",
+      "status": "passed",
+      "duration_ms": 0.25391578674316406,
+      "metrics": {
+        "budget_action": "allow",
+        "estimated_cost": 0.0,
+        "allowed": true
+      },
+      "timestamp": "2026-02-27T17:58:07.108298",
+      "error": null
+    },
+    {
+      "test_name": "Request Throttling",
+      "status": "passed",
+      "duration_ms": 1.7120838165283203,
+      "metrics": {
+        "total_requests": 10,
+        "throttled": 0,
+        "allowed": 10,
+        "throttle_rate": 0.0
+      },
+      "timestamp": "2026-02-27T17:58:07.108517",
+      "error": null
+    },
+    {
+      "test_name": "Request Throttling",
+      "status": "passed",
+      "duration_ms": 1.8868446350097656,
+      "metrics": {
+        "total_requests": 10,
+        "throttled": 0,
+        "allowed": 10,
+        "throttle_rate": 0.0
+      },
+      "timestamp": "2026-02-27T17:58:07.108618",
+      "error": null
+    },
+    {
+      "test_name": "Selective Gateway (Cheap Model Skip)",
+      "status": "passed",
+      "duration_ms": 0.4799365997314453,
+      "metrics": {
+        "cheap_model_skipped": true,
+        "expensive_model_optimized": false,
+        "skip_rate": 50.0,
+        "gateway_used": 1,
+        "gateway_skipped": 1
+      },
+      "timestamp": "2026-02-27T17:58:07.110379",
+      "error": null
+    },
+    {
+      "test_name": "Selective Gateway (Cheap Model Skip)",
+      "status": "passed",
+      "duration_ms": 0.6549358367919922,
+      "metrics": {
+        "cheap_model_skipped": true,
+        "expensive_model_optimized": false,
+        "skip_rate": 50.0,
+        "gateway_used": 1,
+        "gateway_skipped": 1
+      },
+      "timestamp": "2026-02-27T17:58:07.110589",
+      "error": null
+    },
+    {
+      "test_name": "Concurrent Requests (100 concurrent)",
+      "status": "passed",
+      "duration_ms": 6.127119064331055,
+      "metrics": {
+        "concurrency": 100,
+        "total_duration_ms": 5.990743637084961,
+        "throughput_rps": 16692.41851394914,
+        "avg_latency_ms": 3.843076229095459,
+        "p50_latency_ms": 3.7626028060913086,
+        "p95_latency_ms": 4.466056823730469
+      },
+      "timestamp": "2026-02-27T17:58:07.110981",
+      "error": null
+    },
+    {
+      "test_name": "Concurrent Requests (100 concurrent)",
+      "status": "passed",
+      "duration_ms": 6.232023239135742,
+      "metrics": {
+        "concurrency": 100,
+        "total_duration_ms": 6.153106689453125,
+        "throughput_rps": 16251.95288282703,
+        "avg_latency_ms": 2.849271297454834,
+        "p50_latency_ms": 2.902388572692871,
+        "p95_latency_ms": 3.297090530395508
+      },
+      "timestamp": "2026-02-27T17:58:07.111324",
+      "error": null
+    },
+    {
+      "test_name": "Latency Benchmark (1000 iterations)",
+      "status": "passed",
+      "duration_ms": 99.65801239013672,
+      "metrics": {
+        "iterations": 1000,
+        "min_ms": 0.0629425048828125,
+        "max_ms": 3.5538673400878906,
+        "mean_ms": 0.09817004203796387,
+        "median_ms": 0.07510185241699219,
+        "p50_ms": 0.07510185241699219,
+        "p75_ms": 0.08797645568847656,
+        "p90_ms": 0.12683868408203125,
+        "p95_ms": 0.13017654418945312,
+        "p99_ms": 0.2732276916503906,
+        "stdev_ms": 0.1673785395195273
+      },
+      "timestamp": "2026-02-27T17:58:07.117335",
+      "error": null
+    },
+    {
+      "test_name": "Latency Benchmark (1000 iterations)",
+      "status": "passed",
+      "duration_ms": 10432.027816772461,
+      "metrics": {
+        "iterations": 1000,
+        "min_ms": 0.06389617919921875,
+        "max_ms": 10332.559823989868,
+        "mean_ms": 10.430511474609375,
+        "median_ms": 0.07510185241699219,
+        "p50_ms": 0.07510185241699219,
+        "p75_ms": 0.09107589721679688,
+        "p90_ms": 0.12683868408203125,
+        "p95_ms": 0.13184547424316406,
+        "p99_ms": 0.2760887145996094,
+        "stdev_ms": 326.74117306337763
+      },
+      "timestamp": "2026-02-27T17:58:07.117660",
+      "error": null
+    }
+  ]
+}

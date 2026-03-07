@@ -9,7 +9,7 @@ from datetime import datetime
 
 sys.path.insert(0, '/Users/kvng/projects/stacksense')
 
-os.environ['OPENAI_API_KEY'] = 'REDACTED_KEY'
+os.environ.setdefault('OPENAI_API_KEY', os.getenv('OPENAI_API_KEY', ''))
 
 from openai import AsyncOpenAI
 from stacksense.database import get_db_manager
