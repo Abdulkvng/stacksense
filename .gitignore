@@ -109,3 +109,13 @@ examples/gateway_*.py
 examples/selective_gateway_example.py
 benchmarks/gateway_performance.py
 tests/test_gateway_live.py
+
+# Internal docs (private)
+OPTIMIZATION_ANALYSIS.md
+OVERHEAD_BREAKDOWN.md
+PERFORMANCE.md
+PRODUCTION_READINESS.md
+QUICK_START.md
+TELEMETRY_GUIDE.md
+TESTING_GUIDE.md
+docs/
