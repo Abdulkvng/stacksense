@@ -7,8 +7,8 @@ name = "stacksense"
 version = "0.1.0"
 description = "AI infrastructure monitoring for tracking usage, cost, and performance across OpenAI, Claude, ElevenLabs, Pinecone, and more. Supports SQLite (default) and PostgreSQL databases."
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
+requires-python = ">=3.9"
+license = "MIT"
 authors = [
     {name = "Abdulrahman Sadiq", email = "abdulkvng@gmail.com"}
 ]
@@ -16,13 +16,12 @@ keywords = ["ai", "monitoring", "openai", "claude", "analytics", "metrics", "llm
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: System :: Monitoring",
 ]
@@ -62,6 +61,9 @@ postgresql = [
 # Note: Both 'postgres' and 'postgresql' install the same PostgreSQL driver
 # Use: pip install stacksense[postgresql] or pip install stacksense[postgres]
 
+[project.scripts]
+stacksense = "stacksense.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/Abdulkvng/stacksense"
 Documentation = "https://stacksense.readthedocs.io"
@@ -78,14 +80,15 @@ include-package-data = true
 stacksense = [
     "dashboard/static/**/*",
     "dashboard/templates/**/*",
+    "py.typed",
 ]
 
 [tool.black]
 line-length = 100
-target-version = ['py38']
+target-version = ['py39']
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 

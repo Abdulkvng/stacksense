@@ -457,7 +457,7 @@ class AgentRun(Base):
             "total_latency": self.total_latency,
             "loop_detected": self.loop_detected,
             "loop_count": self.loop_count,
-            "metadata": self.metadata,
+            "metadata": self.run_metadata,
             "error": self.error,
         }
 

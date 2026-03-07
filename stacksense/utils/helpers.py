@@ -143,13 +143,39 @@ class ClientProxy:
                         "output": response.usage.output_tokens,
                     }
 
+            elif provider == "google":
+                if hasattr(response, "usage_metadata"):
+                    return {
+                        "input": getattr(response.usage_metadata, "prompt_token_count", 0),
+                        "output": getattr(response.usage_metadata, "candidates_token_count", 0),
+                    }
+
+            elif provider == "mistral":
+                if hasattr(response, "usage"):
+                    return {
+                        "input": response.usage.prompt_tokens,
+                        "output": response.usage.completion_tokens,
+                    }
+
+            elif provider == "cohere":
+                if hasattr(response, "meta") and hasattr(response.meta, "tokens"):
+                    return {
+                        "input": getattr(response.meta.tokens, "input_tokens", 0),
+                        "output": getattr(response.meta.tokens, "output_tokens", 0),
+                    }
+
+            elif provider == "deepseek":
+                if hasattr(response, "usage"):
+                    return {
+                        "input": response.usage.prompt_tokens,
+                        "output": response.usage.completion_tokens,
+                    }
+
             elif provider == "elevenlabs":
-                # Character-based usage
                 if hasattr(response, "character_count"):
                     return {"characters": response.character_count}
 
             elif provider == "pinecone":
-                # Query-based usage
                 return {"queries": 1}
 
         except Exception:
@@ -344,10 +370,19 @@ def parse_model_name(model: str) -> Dict[str, str]:
 
     result = {"provider": "unknown", "model_name": model, "version": None}
 
-    if "gpt" in model.lower():
+    model_lower = model.lower()
+    if "gpt" in model_lower or model_lower.startswith("o1") or model_lower.startswith("o3"):
         result["provider"] = "openai"
-    elif "claude" in model.lower():
+    elif "claude" in model_lower:
         result["provider"] = "anthropic"
+    elif "gemini" in model_lower:
+        result["provider"] = "google"
+    elif "mistral" in model_lower or "codestral" in model_lower:
+        result["provider"] = "mistral"
+    elif "command" in model_lower or "embed" in model_lower:
+        result["provider"] = "cohere"
+    elif "deepseek" in model_lower:
+        result["provider"] = "deepseek"
 
     return result
 

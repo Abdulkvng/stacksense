@@ -85,15 +85,23 @@ def create_app(db_manager=None, debug=False):
         user_id = session.get("user_id")
         if not user_id:
             return None
-        return (
-            session_db.query(User)
-            .filter(User.id == user_id, User.is_active.is_(True))
-            .one_or_none()
-        )
+        try:
+            return (
+                session_db.query(User)
+                .filter(User.id == user_id, User.is_active.is_(True))
+                .first()
+            )
+        except Exception as e:
+            logger.error(f"Error fetching current user: {e}")
+            return None
 
     def login_required(view_func):
         @wraps(view_func)
         def wrapped(*args, **kwargs):
+            # Skip authentication in dev mode with auto-login
+            if DEV_MODE and session.get("user_id"):
+                return view_func(*args, **kwargs)
+
             user_id = session.get("user_id")
             if not user_id:
                 if request.path.startswith("/api/"):
@@ -114,13 +122,13 @@ def create_app(db_manager=None, debug=False):
 
     @app.route("/")
     def root():
-        return render_template("landing.html")
+        return render_template("landing_v3.html")
 
     @app.route("/dashboard")
     @login_required
     def dashboard():
-        """Render dashboard shell."""
-        return render_template("index.html")
+        """Render advanced dashboard."""
+        return render_template("dashboard_v2.html")
 
     @app.route("/login")
     def login():
@@ -555,10 +563,10 @@ def create_app(db_manager=None, debug=False):
                 # Token usage stats
                 token_stats = (
                     session_db.query(
-                        func.sum(Event.prompt_tokens).label("total_prompt_tokens"),
-                        func.sum(Event.completion_tokens).label("total_completion_tokens"),
-                        func.avg(Event.prompt_tokens).label("avg_prompt_tokens"),
-                        func.avg(Event.completion_tokens).label("avg_completion_tokens")
+                        func.sum(Event.input_tokens).label("total_prompt_tokens"),
+                        func.sum(Event.output_tokens).label("total_completion_tokens"),
+                        func.avg(Event.input_tokens).label("avg_prompt_tokens"),
+                        func.avg(Event.output_tokens).label("avg_completion_tokens")
                     )
                     .filter(Event.timestamp >= cutoff)
                     .first()

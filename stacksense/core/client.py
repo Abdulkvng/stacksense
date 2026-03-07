@@ -101,16 +101,23 @@ class StackSense:
         """Auto-detect the provider from the client type."""
         client_type = type(client).__module__
 
-        if "openai" in client_type:
-            return "openai"
-        elif "anthropic" in client_type:
-            return "anthropic"
-        elif "elevenlabs" in client_type:
-            return "elevenlabs"
-        elif "pinecone" in client_type:
-            return "pinecone"
-        else:
-            return "unknown"
+        provider_map = {
+            "openai": "openai",
+            "anthropic": "anthropic",
+            "google.generativeai": "google",
+            "google.genai": "google",
+            "mistralai": "mistral",
+            "cohere": "cohere",
+            "deepseek": "deepseek",
+            "elevenlabs": "elevenlabs",
+            "pinecone": "pinecone",
+        }
+
+        for key, provider in provider_map.items():
+            if key in client_type:
+                return provider
+
+        return "unknown"
 
     def _wrap_client(self, client: Any, provider: str) -> Any:
         """Wrap client with monitoring proxy."""

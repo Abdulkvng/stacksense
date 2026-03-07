@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StackSense — AI infrastructure costs, under control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;--off:#fafaf9;--ink:#0d0d0c;--ink-2:#3a3a37;--ink-3:#7a7a74;--ink-4:#b8b8b0;
+  --border:#e8e8e4;--border-d:#d0d0c8;
+  --accent:#2b4fff;--accent-d:#1a35d4;
+  --oss:#0e7a45;--oss-bg:#f0faf4;--oss-b:#c3e8d3;
+  --ent:#2b4fff;--ent-bg:#f0f3ff;--ent-b:#c5ccf8;
+  --serif:'Instrument Serif',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono','Courier New',monospace;
+  --r:4px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--white);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+.logo-mark{display:inline-flex;align-items:center;gap:9px;text-decoration:none}
+.logo-mark svg{width:22px;height:22px;flex-shrink:0}
+.logo-text{font-family:var(--sans);font-size:1.05rem;font-weight:600;letter-spacing:-0.01em;color:var(--ink);line-height:1}
+.logo-text span{color:var(--accent)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;background:rgba(255,255,255,0.93);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px}
+.nav-inner{max-width:1160px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{font-size:0.82rem;font-weight:500;color:var(--ink-3);text-decoration:none;padding:6px 12px;border-radius:var(--r);transition:color .15s,background .15s;letter-spacing:-0.01em}
+.nav-link:hover{color:var(--ink);background:var(--off)}
+.nav-cta{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:600;letter-spacing:-0.01em;text-decoration:none;padding:8px 18px;background:var(--ink);color:var(--white);border-radius:var(--r);transition:background .15s}
+.nav-cta:hover{background:#2a2a26}
+
+.container{max-width:1160px;margin:0 auto;padding:0 40px}
+
+#hero{padding-top:60px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 800px 600px at 70% 50%,rgba(43,79,255,.04) 0%,transparent 70%),radial-gradient(ellipse 400px 400px at 20% 80%,rgba(43,79,255,.025) 0%,transparent 70%)}
+.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 400px;gap:80px;align-items:center;padding:80px 0 100px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:0.75rem;font-weight:500;letter-spacing:.02em;color:var(--ink-3);margin-bottom:28px}
+.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--oss);flex-shrink:0;box-shadow:0 0 0 3px rgba(14,122,69,.15);animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(14,122,69,.15)}50%{box-shadow:0 0 0 6px rgba(14,122,69,.06)}}
+.hero-h1{font-family:var(--serif);font-size:clamp(3rem,5.5vw,5rem);font-weight:400;line-height:1.08;letter-spacing:-0.02em;color:var(--ink);margin-bottom:24px}
+.hero-h1 em{font-style:italic;color:var(--ink-3)}
+.hero-sub{font-size:1.05rem;font-weight:400;color:var(--ink-3);line-height:1.7;max-width:480px;margin-bottom:40px}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);font-size:.875rem;font-weight:600;letter-spacing:-0.01em;text-decoration:none;padding:10px 22px;border-radius:var(--r);border:1px solid transparent;transition:all .15s;cursor:pointer}
+.btn-primary{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn-primary:hover{background:#2a2a26;border-color:#2a2a26}
+.btn-outline{background:transparent;color:var(--ink-2);border-color:var(--border-d)}
+.btn-outline:hover{border-color:var(--ink-3);color:var(--ink)}
+.btn-ent{background:var(--accent);color:var(--white);border-color:var(--accent)}
+.btn-ent:hover{background:var(--accent-d);border-color:var(--accent-d)}
+
+.hero-panel{background:var(--off);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.panel-dots{display:flex;gap:5px}
+.panel-dot{width:10px;height:10px;border-radius:50%}
+.panel-title{font-family:var(--mono);font-size:.7rem;color:var(--ink-4);letter-spacing:.02em;margin-left:4px}
+.panel-row{padding:14px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+.panel-row:last-of-type{border-bottom:none}
+.pr-label{font-size:.73rem;color:var(--ink-3);font-weight:400}
+.pr-val{font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--ink);text-align:right}
+.pr-val.green{color:var(--oss)}.pr-val.blue{color:var(--accent)}.pr-val.dim{color:var(--ink-4)}
+.pr-bar{margin-top:5px;height:3px;border-radius:2px;background:var(--border);overflow:hidden}
+.pr-fill{height:100%;border-radius:2px;animation:grow 1.8s ease-out both}
+@keyframes grow{from{width:0}}
+.panel-code{padding:16px 20px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.72rem;line-height:1.8;color:var(--ink-3);background:#f6f6f4}
+.code-comment{color:var(--ink-4)}.code-fn{color:var(--accent)}.code-str{color:var(--oss)}
+
+.proof-bar{padding:18px 0;border-bottom:1px solid var(--border);background:var(--off)}
+.proof-inner{display:flex;align-items:center;gap:40px;flex-wrap:wrap}
+.proof-item{display:flex;align-items:center;gap:9px;font-size:.8rem;color:var(--ink-3)}
+
+.section{padding:96px 0;border-bottom:1px solid var(--border)}
+.section-label{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);margin-bottom:12px}
+.section-h2{font-family:var(--serif);font-size:clamp(2rem,3.5vw,2.8rem);font-weight:400;line-height:1.15;letter-spacing:-0.02em;color:var(--ink);margin-bottom:16px}
+.section-sub{font-size:1rem;color:var(--ink-3);line-height:1.7;max-width:540px}
+
+.tiers-grid{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tier{padding:40px;display:flex;flex-direction:column}
+.tier-oss{border-right:1px solid var(--border)}
+.tier-pill{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:24px;width:fit-content}
+.pill-oss{background:var(--oss-bg);color:var(--oss);border:1px solid var(--oss-b)}
+.pill-ent{background:var(--ent-bg);color:var(--ent);border:1px solid var(--ent-b)}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.tier-name{font-family:var(--serif);font-size:1.8rem;font-weight:400;line-height:1.15;letter-spacing:-0.02em;margin-bottom:8px}
+.tier-tagline{font-size:.85rem;color:var(--ink-3);margin-bottom:28px;line-height:1.5}
+.tier-divider{height:1px;background:var(--border);margin-bottom:28px}
+.tier-feats{list-style:none;display:flex;flex-direction:column;gap:14px;flex:1}
+.feat{display:flex;align-items:flex-start;gap:11px;font-size:.875rem}
+.feat-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:.6rem}
+.fi-oss{background:var(--oss-bg);color:var(--oss)}.fi-ent{background:var(--ent-bg);color:var(--ent)}
+.feat-title{font-weight:500;color:var(--ink)}
+.feat-desc{color:var(--ink-3);font-size:.82rem;margin-top:1px}
+.tier-footer{margin-top:36px}
+.tier-price{font-family:var(--serif);font-size:2rem;font-weight:400;letter-spacing:-0.02em;margin-bottom:4px}
+.tier-price-note{font-size:.78rem;color:var(--ink-4);margin-bottom:20px}
+.tier-btn{display:block;text-align:center;text-decoration:none;font-size:.85rem;font-weight:600;letter-spacing:-0.01em;padding:11px;border-radius:var(--r);border:1px solid;transition:all .15s}
+.tb-oss{color:var(--oss);border-color:var(--oss-b);background:var(--oss-bg)}
+.tb-oss:hover{background:var(--oss);color:white;border-color:var(--oss)}
+.tb-ent{color:var(--white);border-color:var(--accent);background:var(--accent)}
+.tb-ent:hover{background:var(--accent-d);border-color:var(--accent-d)}
+
+.callout{margin-top:40px;padding:40px 48px;border:1px solid var(--border);border-radius:12px;background:var(--off);display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+.callout-q{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-4);margin-bottom:10px}
+.callout-text{font-family:var(--serif);font-size:1.5rem;font-weight:400;line-height:1.4;letter-spacing:-0.01em;color:var(--ink);max-width:560px}
+.callout-text em{font-style:italic;color:var(--ink-3)}
+.callout-actions{display:flex;flex-direction:column;gap:10px;min-width:190px}
+.callout-actions .btn{justify-content:center}
+
+.int-grid{margin-top:48px;display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.int-cell{padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);transition:background .15s}
+.int-cell:hover{background:var(--off)}
+.int-cell:nth-child(6n){border-right:none}
+.int-cell:nth-last-child(-n+6):not(:nth-child(-n+6)){border-bottom:none}
+.int-emoji{font-size:1.4rem;line-height:1}
+.int-name{font-size:.7rem;font-weight:600;color:var(--ink-2);letter-spacing:-0.01em}
+.int-badge{font-size:.58rem;font-weight:600;padding:2px 7px;border-radius:100px;letter-spacing:.02em}
+.ib-live{background:var(--oss-bg);color:var(--oss)}
+.ib-wip{background:#fff8ed;color:#9a5a00}
+.ib-plan{background:var(--off);color:var(--ink-4);border:1px solid var(--border)}
+
+.ef-grid{margin-top:48px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.ef{background:var(--white);padding:32px 28px;transition:background .15s}
+.ef:hover{background:var(--off)}
+.ef-icon-wrap{width:36px;height:36px;border-radius:8px;background:var(--ent-bg);border:1px solid var(--ent-b);display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:16px}
+.ef-title{font-weight:600;font-size:.9rem;color:var(--ink);margin-bottom:6px}
+.ef-desc{font-size:.8rem;color:var(--ink-3);line-height:1.65}
+.ef-tag{display:inline-block;margin-top:14px;font-size:.65rem;font-weight:600;letter-spacing:.04em;color:var(--ent);background:var(--ent-bg);border:1px solid var(--ent-b);padding:3px 8px;border-radius:4px}
+
+.ctable-wrap{margin-top:48px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{padding:14px 20px;text-align:left;font-size:.75rem;font-weight:600;letter-spacing:.02em;background:var(--off);border-bottom:1px solid var(--border);color:var(--ink-2)}
+thead th:not(:first-child){text-align:center}
+thead th:nth-child(2){color:var(--oss)}
+thead th:nth-child(3){color:var(--accent)}
+tbody td{padding:11px 20px;font-size:.83rem;color:var(--ink-2);border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--off)}
+tbody td:not(:first-child){text-align:center}
+tbody td:first-child{color:var(--ink-3)}
+.ck{color:var(--oss);font-size:1rem}.ck-e{color:var(--accent);font-size:1rem}.nd{color:var(--ink-4)}
+.badge-pill{display:inline-block;font-size:.6rem;font-weight:600;padding:2px 6px;border-radius:100px;background:#fff4e0;color:#9a5a00;margin-left:4px;vertical-align:middle}
+
+.final{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:56px}
+.fc{background:var(--white);padding:52px 48px}
+.fc-ent{background:var(--ink)}
+.fc-pill{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:24px;width:fit-content}
+.fcp-oss{background:var(--oss-bg);color:var(--oss);border:1px solid var(--oss-b)}
+.fcp-ent{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
+.fc-h{font-family:var(--serif);font-size:1.8rem;font-weight:400;letter-spacing:-0.02em;line-height:1.2;margin-bottom:14px}
+.fc-ent .fc-h{color:var(--white)}
+.fc-p{font-size:.9rem;color:var(--ink-3);line-height:1.7;margin-bottom:32px}
+.fc-ent .fc-p{color:rgba(255,255,255,.38)}
+.fc-btns{display:flex;flex-direction:column;gap:8px}
+.fc-btns .btn{justify-content:center}
+.btn-white{background:var(--white);color:var(--ink);border:1px solid transparent}
+.btn-white:hover{background:#f0f0ee}
+.btn-ghost-white{background:transparent;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12)}
+.btn-ghost-white:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
+
+footer{padding:40px 0;border-top:1px solid var(--border)}
+.foot-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.foot-copy{font-size:.78rem;color:var(--ink-4)}
+.foot-links{display:flex;gap:24px}
+.foot-links a{font-size:.78rem;color:var(--ink-4);text-decoration:none;transition:color .15s}
+.foot-links a:hover{color:var(--ink-2)}
+
+.r{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.r.in{opacity:1;transform:none}
+.r2{transition-delay:.08s}.r3{transition-delay:.16s}
+
+@media(max-width:860px){
+  nav{padding:0 20px}.nav-links{display:none}.container{padding:0 20px}
+  .hero-inner{grid-template-columns:1fr;gap:48px;padding:56px 0 72px}.hero-panel{display:none}
+  .tiers-grid{grid-template-columns:1fr}.tier-oss{border-right:none;border-bottom:1px solid var(--border)}
+  .int-grid{grid-template-columns:repeat(3,1fr)}.ef-grid{grid-template-columns:repeat(2,1fr)}
+  .callout{grid-template-columns:1fr;gap:24px;padding:28px 24px}
+  .final{grid-template-columns:1fr}.fc{padding:36px 28px}.section{padding:64px 0}
+  .proof-inner{gap:20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo-mark">
+      <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5.5" y="5.5" width="11" height="11" rx="1.5" transform="rotate(45 11 11)" fill="#2b4fff" opacity="0.15"/>
+        <rect x="7.5" y="7.5" width="7" height="7" rx="1" transform="rotate(45 11 11)" fill="#2b4fff"/>
+      </svg>
+      <span class="logo-text">Stack<span>Sense</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#tiers" class="nav-link">Product</a>
+      <a href="#integrations" class="nav-link">Integrations</a>
+      <a href="#enterprise" class="nav-link">Enterprise</a>
+      <a href="#compare" class="nav-link">Compare</a>
+      <a href="https://github.com/Abdulkvng/stacksense" class="nav-link">GitHub</a>
+    </div>
+    <a href="/dashboard" class="nav-cta">
+      Open Dashboard
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot"></span>
+          Open source · Self-hosted · v0.1.0
+        </div>
+        <h1 class="hero-h1">
+          AI infrastructure costs,<br><em>under control.</em>
+        </h1>
+        <p class="hero-sub">
+          Full observability for every AI API call — track cost, latency, and token usage across all your providers in real-time. Instrument with one line of code, gain instant visibility into your AI infrastructure, and scale to enterprise-grade routing, budget enforcement, and governance when you need it. Free, open source, and fully self-hosted.
+        </p>
+        <div class="hero-actions">
+          <a href="https://github.com/Abdulkvng/stacksense" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            Get Started Free
+          </a>
+          <a href="#tiers" class="btn btn-outline">See how it works</a>
+          <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise" class="btn btn-ent">Enterprise Demo</a>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="panel-header">
+          <div class="panel-dots">
+            <div class="panel-dot" style="background:#ff5f57"></div>
+            <div class="panel-dot" style="background:#febc2e"></div>
+            <div class="panel-dot" style="background:#28c840"></div>
+          </div>
+          <span class="panel-title">stacksense · live</span>
+        </div>
+        <div class="panel-row">
+          <div>
+            <div class="pr-label">Today's AI spend</div>
+            <div class="pr-bar" style="width:100%;margin-top:6px"><div class="pr-fill" style="width:64%;background:var(--accent)"></div></div>
+          </div>
+          <div class="pr-val blue">$3.84</div>
+        </div>
+        <div class="panel-row"><div class="pr-label">Total tokens today</div><div class="pr-val">1.24M</div></div>
+        <div class="panel-row"><div class="pr-label">Avg latency (p95)</div><div class="pr-val green">312ms</div></div>
+        <div class="panel-row"><div class="pr-label">Providers active</div><div class="pr-val">4</div></div>
+        <div class="panel-row"><div class="pr-label">Cost this month</div><div class="pr-val">$47.20</div></div>
+        <div class="panel-row"><div class="pr-label">Budget remaining</div><div class="pr-val green">82%</div></div>
+        <div class="panel-code">
+          <div class="code-comment"># one line to start</div>
+          <div><span class="code-fn">client</span> = ss.<span class="code-fn">monitor</span>(client)</div>
+          <div class="code-comment"># that's it.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="proof-bar">
+  <div class="container">
+    <div class="proof-inner">
+      <div class="proof-item">🟢 Open source · Fully licensed · No vendor lock-in</div>
+      <div class="proof-item">⚡ &lt;50ms instrumentation overhead · Zero performance impact</div>
+      <div class="proof-item">🔌 5+ providers supported · OpenAI, Anthropic, ElevenLabs, Pinecone</div>
+      <div class="proof-item">🐋 Docker Compose included · Deploy in minutes</div>
+      <div class="proof-item">🔐 Self-hosted, your data · Full control</div>
+      <div class="proof-item">📊 Real-time metrics · Live dashboard updates</div>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="tiers">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Two-tier architecture</div>
+      <h2 class="section-h2">Visibility first. <em style="font-style:italic;color:var(--ink-3)">Optimization when you need it.</em></h2>
+      <p class="section-sub">Start with complete observability for free. Add enterprise-grade routing, budget enforcement, and governance as you scale.</p>
+    </div>
+    <div class="tiers-grid r r2">
+      <div class="tier tier-oss">
+        <div class="tier-pill pill-oss"><span class="pill-dot"></span>Open Source</div>
+        <div class="tier-name">Visibility Layer</div>
+        <div class="tier-tagline">Complete observability, free and self-hosted. The foundation every AI team needs.</div>
+        <div class="tier-divider"></div>
+        <ul class="tier-feats">
+          <li class="feat"><div class="feat-icon fi-oss">✓</div><div><div class="feat-title">Unified dashboard</div><div class="feat-desc">Real-time cost, latency, and token metrics across all providers. Drill down by model, timeframe, or environment with interactive charts and tables.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-oss">✓</div><div><div class="feat-title">Zero-code instrumentation</div><div class="feat-desc">Wrap any client in one line, no SDK changes required. Automatic capture of all metrics including errors, retries, and streaming responses.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-oss">✓</div><div><div class="feat-title">Multi-provider support</div><div class="feat-desc">OpenAI (GPT-4, GPT-3.5), Anthropic (Claude), ElevenLabs (voice), Pinecone (vectors). Unified interface across all providers with automatic cost calculation.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-oss">✓</div><div><div class="feat-title">SQLite + PostgreSQL</div><div class="feat-desc">Local dev with SQLite for zero-config testing. Production-ready PostgreSQL support with automatic schema migrations and connection pooling.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-oss">✓</div><div><div class="feat-title">Google OAuth + key vault</div><div class="feat-desc">Encrypted API key storage with AES-256. Per-user accounts with Google OAuth, role-based access control, and audit logging. Fully self-hosted.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-oss">✓</div><div><div class="feat-title">Docker + Kubernetes</div><div class="feat-desc">Production Docker Compose setup included. Kubernetes Helm charts in beta with horizontal scaling, health checks, and Prometheus metrics export.</div></div></li>
+        </ul>
+        <div class="tier-footer">
+          <div class="tier-price">Free</div>
+          <div class="tier-price-note">Open source · forever · no limits</div>
+          <a href="https://github.com/Abdulkvng/stacksense" class="tier-btn tb-oss">Get Started on GitHub →</a>
+        </div>
+      </div>
+      <div class="tier">
+        <div class="tier-pill pill-ent"><span class="pill-dot"></span>Enterprise</div>
+        <div class="tier-name">Optimization Engine</div>
+        <div class="tier-tagline">Active cost control — route, enforce, govern. The CFO layer for your AI infrastructure.</div>
+        <div class="tier-divider"></div>
+        <ul class="tier-feats">
+          <li class="feat"><div class="feat-icon fi-ent">✓</div><div><div class="feat-title">Dynamic model routing</div><div class="feat-desc">Automatically route requests to the most cost-effective model based on prompt complexity, required quality tier, and latency SLAs. Save 40-60% on AI costs without sacrificing performance.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-ent">✓</div><div><div class="feat-title">Budget circuit breakers</div><div class="feat-desc">Set per-team, per-feature, or global spending limits. Auto-downgrade to cheaper models or rate-limit when budgets are hit. Zero service disruption, full spend control.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-ent">✓</div><div><div class="feat-title">Token waste detection</div><div class="feat-desc">ML-powered prompt scoring identifies inefficient patterns, redundant context, and bloated system prompts. Get specific recommendations to reduce token usage by 20-50%.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-ent">✓</div><div><div class="feat-title">Cross-vendor arbitrage</div><div class="feat-desc">Real-time price monitoring across OpenAI, Anthropic, and others. Automatically shift traffic to maximize quality-per-dollar. Handle provider outages with instant failover.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-ent">✓</div><div><div class="feat-title">Governance + audit logs</div><div class="feat-desc">Tamper-evident blockchain-style audit trail. Model allowlists, PII detection with automatic redaction, data residency enforcement. Full SOC 2 compliance support.</div></div></li>
+          <li class="feat"><div class="feat-icon fi-ent">✓</div><div><div class="feat-title">Agent tracking</div><div class="feat-desc">Track multi-step agentic workflows end-to-end. Total cost per run, infinite loop detection, per-task token budgets. Full step-by-step audit trail with tool usage breakdown.</div></div></li>
+        </ul>
+        <div class="tier-footer">
+          <div class="tier-price">Custom</div>
+          <div class="tier-price-note">Talk to us · enterprise pricing</div>
+          <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise Demo" class="tier-btn tb-ent">Request Enterprise Demo →</a>
+        </div>
+      </div>
+    </div>
+    <div class="callout r r3">
+      <div>
+        <div class="callout-q">The philosophy</div>
+        <p class="callout-text">Start with visibility — <em>free, forever.</em> Add optimization when your AI spend is worth controlling. Two tiers, one clean upgrade path.</p>
+      </div>
+      <div class="callout-actions">
+        <a href="https://github.com/Abdulkvng/stacksense" class="btn btn-primary">Start for free</a>
+        <a href="#compare" class="btn btn-outline">Full comparison</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="capabilities" style="background:linear-gradient(180deg,var(--white) 0%,var(--off) 100%)">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Core capabilities</div>
+      <h2 class="section-h2">Everything you need <em style="font-style:italic;color:var(--ink-3)">out of the box.</em></h2>
+      <p class="section-sub">StackSense gives you complete control over your AI infrastructure from day one. No partial solutions, no "coming soon" for critical features.</p>
+    </div>
+    <div class="ef-grid r r2" style="grid-template-columns:repeat(2,1fr);margin-top:40px">
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">📊</div><div class="ef-title">Real-Time Cost Tracking</div><div class="ef-desc">Automatic cost calculation per model and provider. Live updates every second with sub-cent precision. Historical trends, cost breakdowns by feature, and instant alerts when spending patterns change.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">⚡</div><div class="ef-title">Latency & Performance Monitoring</div><div class="ef-desc">Track p50, p95, p99 latencies across all requests. Automatic slow query detection, streaming vs batch performance analysis, and provider comparison dashboards to identify the fastest endpoints.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">🔢</div><div class="ef-title">Token Usage Analytics</div><div class="ef-desc">Granular input/output token breakdown. Track token efficiency over time, identify expensive patterns, and get automatic recommendations for prompt optimization and context reduction.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">🔍</div><div class="ef-title">Error & Retry Analysis</div><div class="ef-desc">Comprehensive error tracking with automatic categorization. Monitor rate limits, failed requests, and timeout patterns. Intelligent retry analysis helps identify wasteful retry loops costing you money.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">📈</div><div class="ef-title">Multi-Timeframe Views</div><div class="ef-desc">1H, 24H, 7D, and 30D views with intelligent data aggregation. Compare across periods, spot trends early, and understand seasonal usage patterns. Custom date ranges for detailed analysis.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">🌍</div><div class="ef-title">Multi-Environment Support</div><div class="ef-desc">Separate tracking for development, staging, and production. Environment-specific budgets, isolated metrics, and the ability to test cost impact before deploying to production.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">🔐</div><div class="ef-title">Encrypted Key Management</div><div class="ef-desc">AES-256 encrypted storage for all API keys. Per-user key vaults with role-based access control. Automatic key rotation reminders and audit logs of who accessed what, when.</div></div>
+      <div class="ef"><div class="ef-icon-wrap" style="background:var(--oss-bg);border-color:var(--oss-b)">📡</div><div class="ef-title">Live Monitoring Dashboard</div><div class="ef-desc">WebSocket-powered real-time updates with zero polling overhead. Live alerts for budget thresholds, error spikes, and latency degradation. System health checks with Prometheus metrics export.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="integrations">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Built-in support</div>
+      <h2 class="section-h2">Plug into <em style="font-style:italic;color:var(--ink-3)">your entire stack.</em></h2>
+    </div>
+    <div class="int-grid r r2">
+      <div class="int-cell"><div class="int-emoji">🤖</div><div class="int-name">OpenAI</div><div class="int-badge ib-live">Live</div></div>
+      <div class="int-cell"><div class="int-emoji">🧠</div><div class="int-name">Anthropic</div><div class="int-badge ib-live">Live</div></div>
+      <div class="int-cell"><div class="int-emoji">🔊</div><div class="int-name">ElevenLabs</div><div class="int-badge ib-live">Live</div></div>
+      <div class="int-cell"><div class="int-emoji">🌲</div><div class="int-name">Pinecone</div><div class="int-badge ib-live">Live</div></div>
+      <div class="int-cell"><div class="int-emoji">☁️</div><div class="int-name">AWS Bedrock</div><div class="int-badge ib-wip">Building</div></div>
+      <div class="int-cell"><div class="int-emoji">🧬</div><div class="int-name">Google AI</div><div class="int-badge ib-wip">Building</div></div>
+      <div class="int-cell"><div class="int-emoji">☸️</div><div class="int-name">Kubernetes</div><div class="int-badge ib-wip">Beta</div></div>
+      <div class="int-cell"><div class="int-emoji">📊</div><div class="int-name">Grafana</div><div class="int-badge ib-plan">Planned</div></div>
+      <div class="int-cell"><div class="int-emoji">📈</div><div class="int-name">Datadog</div><div class="int-badge ib-plan">Planned</div></div>
+      <div class="int-cell"><div class="int-emoji">🐋</div><div class="int-name">Docker</div><div class="int-badge ib-live">Live</div></div>
+      <div class="int-cell"><div class="int-emoji">🗄️</div><div class="int-name">PostgreSQL</div><div class="int-badge ib-live">Live</div></div>
+      <div class="int-cell"><div class="int-emoji">🪶</div><div class="int-name">SQLite</div><div class="int-badge ib-live">Live</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="quickstart">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Quick start</div>
+      <h2 class="section-h2">From zero to <em style="font-style:italic;color:var(--ink-3)">full visibility in 2 minutes.</em></h2>
+      <p class="section-sub">Three simple steps to instrument your entire AI stack. No configuration files, no complex setup, just wrap and go.</p>
+    </div>
+    <div style="margin-top:48px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px" class="r r2">
+      <div>
+        <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:24px 20px;margin-bottom:16px">
+          <div style="font-family:var(--mono);font-size:.7rem;color:var(--ink-4);margin-bottom:12px">STEP 1 · INSTALL</div>
+          <pre style="font-family:var(--mono);font-size:.8rem;line-height:1.8;color:var(--ink);background:#f6f6f4;padding:14px;border-radius:6px;margin:0;overflow-x:auto"><span style="color:var(--ink-4)"># Install StackSense</span>
+pip install stacksense
+
+<span style="color:var(--ink-4)"># Or with Docker</span>
+docker compose up -d</pre>
+        </div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.6">PyPI package or Docker Compose. Zero dependencies, works with Python 3.8+.</div>
+      </div>
+      <div>
+        <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:24px 20px;margin-bottom:16px">
+          <div style="font-family:var(--mono);font-size:.7rem;color:var(--ink-4);margin-bottom:12px">STEP 2 · WRAP CLIENT</div>
+          <pre style="font-family:var(--mono);font-size:.8rem;line-height:1.8;color:var(--ink);background:#f6f6f4;padding:14px;border-radius:6px;margin:0;overflow-x:auto"><span style="color:var(--ink-4)"># Wrap any AI client</span>
+<span style="color:var(--accent)">import</span> stacksense <span style="color:var(--accent)">as</span> ss
+
+client = OpenAI()
+client = <span style="color:var(--accent)">ss.monitor</span>(client)
+
+<span style="color:var(--ink-4)"># That's it!</span></pre>
+        </div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.6">One line wraps your client. All methods automatically tracked with zero code changes.</div>
+      </div>
+      <div>
+        <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:24px 20px;margin-bottom:16px">
+          <div style="font-family:var(--mono);font-size:.7rem;color:var(--ink-4);margin-bottom:12px">STEP 3 · OPEN DASHBOARD</div>
+          <pre style="font-family:var(--mono);font-size:.8rem;line-height:1.8;color:var(--ink);background:#f6f6f4;padding:14px;border-radius:6px;margin:0;overflow-x:auto"><span style="color:var(--ink-4)"># Start dashboard</span>
+python -m stacksense.dashboard
+
+<span style="color:var(--ink-4)"># Open browser</span>
+<span style="color:var(--oss)">http://localhost:5000</span>
+
+<span style="color:var(--ink-4)"># See all metrics live!</span></pre>
+        </div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.6">Dashboard auto-starts on port 5000. Real-time metrics, zero configuration required.</div>
+      </div>
+    </div>
+    <div style="margin-top:44px;padding:32px 36px;border:1px solid var(--border);border-radius:12px;background:var(--off)" class="r r3">
+      <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-4);margin-bottom:14px">Full example</div>
+      <pre style="font-family:var(--mono);font-size:.85rem;line-height:1.9;color:var(--ink);background:#f6f6f4;padding:20px 24px;border-radius:8px;margin:0;overflow-x:auto"><span style="color:var(--accent)">from</span> openai <span style="color:var(--accent)">import</span> OpenAI
+<span style="color:var(--accent)">import</span> stacksense <span style="color:var(--accent)">as</span> ss
+
+<span style="color:var(--ink-4)"># Initialize and wrap your client</span>
+client = ss.<span style="color:var(--accent)">monitor</span>(OpenAI())
+
+<span style="color:var(--ink-4)"># Use normally - every call is automatically tracked</span>
+response = client.chat.completions.<span style="color:var(--accent)">create</span>(
+    model=<span style="color:var(--oss)">"gpt-4"</span>,
+    messages=[{<span style="color:var(--oss)">"role"</span>: <span style="color:var(--oss)">"user"</span>, <span style="color:var(--oss)">"content"</span>: <span style="color:var(--oss)">"Hello!"</span>}]
+)
+
+<span style="color:var(--ink-4)"># ✅ Cost, latency, tokens → tracked automatically</span>
+<span style="color:var(--ink-4)"># ✅ Visible in dashboard at http://localhost:5000</span>
+<span style="color:var(--ink-4)"># ✅ No configuration needed</span></pre>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--white);padding:72px 0">
+  <div class="container">
+    <div class="r" style="text-align:center;max-width:680px;margin:0 auto 48px">
+      <div class="section-label">Use cases</div>
+      <h2 class="section-h2" style="margin-bottom:18px">Built for teams <em style="font-style:italic;color:var(--ink-3)">shipping AI products.</em></h2>
+      <p class="section-sub" style="max-width:100%">From indie hackers to enterprise engineering teams, StackSense helps you understand and control AI costs from day one.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px" class="r r2">
+      <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:28px 24px">
+        <div style="font-size:2rem;margin-bottom:14px">🚀</div>
+        <div style="font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)">Startups & Indie Hackers</div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.65">Track every dollar spent on AI from day one. Know exactly which features cost what. Catch runaway costs before they hit your runway. Free tier means zero overhead.</div>
+      </div>
+      <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:28px 24px">
+        <div style="font-size:2rem;margin-bottom:14px">🏢</div>
+        <div style="font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)">Enterprise Teams</div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.65">Multi-team visibility with per-project budgets. Compliance-ready audit trails. Dynamic routing saves 40-60% on AI spend. SOC 2 ready governance engine included.</div>
+      </div>
+      <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:28px 24px">
+        <div style="font-size:2rem;margin-bottom:14px">🤖</div>
+        <div style="font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)">AI Agent Developers</div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.65">Track entire agentic workflows end-to-end. Catch infinite loops before they drain your budget. Per-task token limits. Full audit trail of every tool call and decision.</div>
+      </div>
+      <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:28px 24px">
+        <div style="font-size:2rem;margin-bottom:14px">📊</div>
+        <div style="font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)">Data Science Teams</div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.65">Compare model performance vs cost in real-time. A/B test prompts with instant ROI analysis. Track embeddings, vector searches, and inference costs in one place.</div>
+      </div>
+      <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:28px 24px">
+        <div style="font-size:2rem;margin-bottom:14px">💼</div>
+        <div style="font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)">FinOps & Platform Teams</div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.65">Centralized AI cost management across all teams. Chargeback by department. Budget forecasting with trend analysis. Prometheus metrics for existing monitoring stack.</div>
+      </div>
+      <div style="background:var(--off);border:1px solid var(--border);border-radius:12px;padding:28px 24px">
+        <div style="font-size:2rem;margin-bottom:14px">🎓</div>
+        <div style="font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)">Researchers & Academics</div>
+        <div style="font-size:.82rem;color:var(--ink-3);line-height:1.65">Track research experiment costs. Compare LLM providers for your specific workload. Self-hosted means your data stays private. Open source means full control and customization.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="enterprise" style="background:var(--off)">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Enterprise tier</div>
+      <h2 class="section-h2">From observability <em style="font-style:italic;color:var(--ink-3)">to active control.</em></h2>
+      <p class="section-sub">Six capabilities that transform StackSense from a dashboard into the economic layer of your AI infrastructure.</p>
+    </div>
+    <div class="ef-grid r r2">
+      <div class="ef"><div class="ef-icon-wrap">⚡</div><div class="ef-title">Dynamic Model Routing</div><div class="ef-desc">Route each prompt to the right model based on task complexity, cost thresholds, and latency requirements. Automatic fallback when quality permits.</div><span class="ef-tag">Routing</span></div>
+      <div class="ef"><div class="ef-icon-wrap">🔬</div><div class="ef-title">Token Waste Detection</div><div class="ef-desc">Score prompts for efficiency. Detect redundant context, bloated system prompts, and high retry rates. Get specific recommendations to cut spend.</div><span class="ef-tag">Cost Intelligence</span></div>
+      <div class="ef"><div class="ef-icon-wrap">🛑</div><div class="ef-title">Budget Circuit Breakers</div><div class="ef-desc">Per-team, per-feature, or global limits. When hit, StackSense auto-downgrades model tiers or rate-limits requests with no service disruption.</div><span class="ef-tag">Budget Enforcement</span></div>
+      <div class="ef"><div class="ef-icon-wrap">⚖️</div><div class="ef-title">Cross-Vendor Arbitrage</div><div class="ef-desc">Monitor real-time pricing and latency across providers. Shift traffic automatically to maximize value without degrading user experience.</div><span class="ef-tag">Multi-Provider</span></div>
+      <div class="ef"><div class="ef-icon-wrap">📋</div><div class="ef-title">Governance &amp; Audit</div><div class="ef-desc">Tamper-evident logs of every AI call. Model allowlists, PII detection, data residency enforcement, compliance reporting for SOC 2.</div><span class="ef-tag">Governance</span></div>
+      <div class="ef"><div class="ef-icon-wrap">🤖</div><div class="ef-title">Agent Tracking</div><div class="ef-desc">Track agentic workflows end-to-end. Total cost per run, loop detection, task-level token budgets, full step-by-step audit trail.</div><span class="ef-tag">Agent Intelligence</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="compare">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Full feature comparison</div>
+      <h2 class="section-h2">OSS vs Enterprise</h2>
+    </div>
+    <div class="ctable-wrap r r2">
+      <table>
+        <thead><tr><th>Feature</th><th>🟢 Open Source</th><th>🔵 Enterprise</th></tr></thead>
+        <tbody>
+          <tr><td>Cost &amp; token tracking</td><td><span class="ck">✓</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Latency &amp; error monitoring</td><td><span class="ck">✓</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Multi-provider dashboard</td><td><span class="ck">✓</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>SQLite + PostgreSQL</td><td><span class="ck">✓</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Docker / self-hosted</td><td><span class="ck">✓</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Kubernetes integration</td><td><span class="ck">✓ <span class="badge-pill">Beta</span></span></td><td><span class="ck-e">✓ Full</span></td></tr>
+          <tr><td>Google OAuth + accounts</td><td><span class="ck">✓</span></td><td><span class="ck-e">✓ + SSO/SAML</span></td></tr>
+          <tr><td>Dynamic model routing</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Budget circuit breakers</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Token waste detection</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Cross-vendor arbitrage</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>SLA-aware routing</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Agent workflow tracking</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Enterprise policy engine</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Audit logs &amp; governance</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>AI unit economics</td><td><span class="nd">—</span></td><td><span class="ck-e">✓</span></td></tr>
+          <tr><td>Support</td><td>Community</td><td><span class="ck-e">Enterprise SLA</span></td></tr>
+          <tr><td>License</td><td><span class="ck">Open Source</span></td><td>Proprietary</td></tr>
+          <tr><td>Price</td><td><span class="ck">Free</span></td><td>Custom</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="border-bottom:none">
+  <div class="container">
+    <div class="r">
+      <div class="section-label">Get started</div>
+      <h2 class="section-h2">Choose your path.</h2>
+    </div>
+    <div class="final r r2">
+      <div class="fc fc-oss">
+        <div class="fc-pill fcp-oss"><span class="pill-dot"></span>Open Source</div>
+        <div class="fc-h">Start monitoring in 5 minutes.</div>
+        <p class="fc-p"><code style="font-family:var(--mono);font-size:.85em;background:var(--off);padding:2px 6px;border-radius:3px;border:1px solid var(--border)">pip install stacksense</code> — wrap your clients, see your costs. No signup, no credit card, no limits. Fully open source and self-hosted.</p>
+        <div class="fc-btns">
+          <a href="https://github.com/Abdulkvng/stacksense" class="btn btn-primary">Get on GitHub</a>
+          <a href="/dashboard" class="btn btn-outline">View Live Dashboard →</a>
+        </div>
+      </div>
+      <div class="fc fc-ent">
+        <div class="fc-pill fcp-ent"><span style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);display:inline-block"></span> Enterprise</div>
+        <div class="fc-h">Ready to optimize at scale?</div>
+        <p class="fc-p">Talk to us about dynamic routing, budget enforcement, and governance. We'll show you exactly how much you're leaving on the table.</p>
+        <div class="fc-btns">
+          <a href="mailto:abdulkvng@gmail.com?subject=StackSense Enterprise Demo" class="btn btn-white">Book an Enterprise Demo</a>
+          <a href="#compare" class="btn btn-ghost-white">Compare all features →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-inner">
+      <a href="#" class="logo-mark" style="opacity:.65">
+        <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5.5" y="5.5" width="11" height="11" rx="1.5" transform="rotate(45 11 11)" fill="#2b4fff" opacity="0.15"/>
+          <rect x="7.5" y="7.5" width="7" height="7" rx="1" transform="rotate(45 11 11)" fill="#2b4fff"/>
+        </svg>
+        <span class="logo-text" style="font-size:.9rem">Stack<span>Sense</span></span>
+      </a>
+      <div class="foot-copy">Open Source · v0.1.0 · Built by Abdulrahman Sadiq</div>
+      <div class="foot-links">
+        <a href="https://github.com/Abdulkvng/stacksense">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="mailto:abdulkvng@gmail.com">Contact</a>
+        <a href="https://github.com/Abdulkvng/stacksense/issues">Issues</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(
+  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in') }),
+  {threshold:0.07}
+);
+document.querySelectorAll('.r').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

@@ -228,7 +228,7 @@ class StackSenseDashboard {
 
     async loadData() {
         this.setMetricsLoading(true);
-        try:
+        try {
             await Promise.all([
                 this.loadMetrics(),
                 this.loadCostBreakdown(),

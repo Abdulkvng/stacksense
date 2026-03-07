@@ -16,18 +16,50 @@ class MetricsTracker:
     Tracks metrics for AI API calls including tokens, cost, latency, and errors.
     """
 
-    # Pricing per 1M tokens (as of 2024)
+    # Pricing per 1M tokens (updated 2025)
     PRICING = {
         "openai": {
-            "gpt-4": {"input": 30.0, "output": 60.0},
+            "gpt-4o": {"input": 2.50, "output": 10.0},
+            "gpt-4o-mini": {"input": 0.15, "output": 0.60},
             "gpt-4-turbo": {"input": 10.0, "output": 30.0},
+            "gpt-4": {"input": 30.0, "output": 60.0},
             "gpt-3.5-turbo": {"input": 0.5, "output": 1.5},
+            "o1": {"input": 15.0, "output": 60.0},
+            "o1-mini": {"input": 3.0, "output": 12.0},
+            "o1-pro": {"input": 150.0, "output": 600.0},
+            "o3": {"input": 10.0, "output": 40.0},
+            "o3-mini": {"input": 1.10, "output": 4.40},
             "text-embedding-3-small": {"input": 0.02, "output": 0.0},
+            "text-embedding-3-large": {"input": 0.13, "output": 0.0},
         },
         "anthropic": {
+            "claude-opus-4": {"input": 15.0, "output": 75.0},
+            "claude-sonnet-4": {"input": 3.0, "output": 15.0},
             "claude-3-5-sonnet": {"input": 3.0, "output": 15.0},
+            "claude-3-5-haiku": {"input": 0.80, "output": 4.0},
             "claude-3-opus": {"input": 15.0, "output": 75.0},
             "claude-3-haiku": {"input": 0.25, "output": 1.25},
+        },
+        "google": {
+            "gemini-2.0-flash": {"input": 0.10, "output": 0.40},
+            "gemini-2.0-flash-lite": {"input": 0.075, "output": 0.30},
+            "gemini-1.5-pro": {"input": 1.25, "output": 5.0},
+            "gemini-1.5-flash": {"input": 0.075, "output": 0.30},
+        },
+        "mistral": {
+            "mistral-large": {"input": 2.0, "output": 6.0},
+            "mistral-small": {"input": 0.20, "output": 0.60},
+            "mistral-nemo": {"input": 0.15, "output": 0.15},
+            "codestral": {"input": 0.30, "output": 0.90},
+        },
+        "cohere": {
+            "command-r-plus": {"input": 2.50, "output": 10.0},
+            "command-r": {"input": 0.15, "output": 0.60},
+            "embed-v4": {"input": 0.10, "output": 0.0},
+        },
+        "deepseek": {
+            "deepseek-chat": {"input": 0.14, "output": 0.28},
+            "deepseek-reasoner": {"input": 0.55, "output": 2.19},
         },
         "elevenlabs": {
             "default": {"characters": 0.30},  # per 1000 characters

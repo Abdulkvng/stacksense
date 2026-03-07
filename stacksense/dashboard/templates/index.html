@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StackSense Dashboard</title>
-    <meta name="theme-color" content="#050a08">
+    <meta name="theme-color" content="#ffffff">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="app-page">
-    <div class="noise-layer" aria-hidden="true"></div>
-    <div class="bg-orb orb-a" aria-hidden="true"></div>
-    <div class="bg-orb orb-b" aria-hidden="true"></div>
-
     <div class="layout">
         <header class="topbar">
             <a href="/dashboard" class="brand" aria-label="StackSense Dashboard">
@@ -23,12 +19,6 @@
             </a>
 
             <div class="top-actions">
-                <div class="timeframe-selector" role="group" aria-label="Select timeframe">
-                    <button class="timeframe-btn" data-timeframe="1h">1H</button>
-                    <button class="timeframe-btn active" data-timeframe="24h">24H</button>
-                    <button class="timeframe-btn" data-timeframe="7d">7D</button>
-                    <button class="timeframe-btn" data-timeframe="30d">30D</button>
-                </div>
                 <button class="icon-btn" id="refreshBtn" aria-label="Refresh dashboard">Refresh</button>
             </div>
 
@@ -54,6 +44,12 @@
 
         <main>
             <section class="section-pane active" data-pane="overview">
+                <div class="timeframe-selector" role="group" aria-label="Select timeframe" style="margin-bottom: 24px;">
+                    <button class="timeframe-btn" data-timeframe="1h">1H</button>
+                    <button class="timeframe-btn active" data-timeframe="24h">24H</button>
+                    <button class="timeframe-btn" data-timeframe="7d">7D</button>
+                    <button class="timeframe-btn" data-timeframe="30d">30D</button>
+                </div>
                 <div class="metrics-grid" aria-label="Key metrics">
                     <article class="metric-card">
                         <p>Total Calls</p>
@@ -225,99 +221,100 @@
             </section>
 
             <section class="section-pane" data-pane="enterprise">
+                <h2 style="margin-bottom: 24px; font-size: 24px; font-weight: 700;">Enterprise Features</h2>
                 <div class="enterprise-grid">
                     <article class="card">
                         <div class="card-header">
-                            <h3>⚡ Dynamic Model Routing</h3>
+                            <h3 style="font-size: 16px;">⚡ Dynamic Model Routing</h3>
                         </div>
-                        <p class="body-muted">Route prompts to cost-effective models based on task complexity</p>
-                        <div class="feature-status">
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Route prompts to cost-effective models based on task complexity</p>
+                        <div class="feature-status" style="margin-top: 16px;">
                             <span class="status-badge active">Active</span>
-                            <span class="metric-value">0 Rules Configured</span>
+                            <span class="metric-value" style="font-size: 14px;">0 Rules Configured</span>
                         </div>
                     </article>
 
                     <article class="card">
                         <div class="card-header">
-                            <h3>🛑 Budget Enforcement</h3>
+                            <h3 style="font-size: 16px;">🛑 Budget Enforcement</h3>
                         </div>
-                        <p class="body-muted">Set spend limits with automatic circuit breakers</p>
-                        <div class="feature-status">
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Set spend limits with automatic circuit breakers</p>
+                        <div class="feature-status" style="margin-top: 16px;">
                             <span class="status-badge active">Active</span>
-                            <span class="metric-value">0 Budgets Set</span>
+                            <span class="metric-value" style="font-size: 14px;">0 Budgets Set</span>
                         </div>
                     </article>
 
                     <article class="card">
                         <div class="card-header">
-                            <h3>💰 Cost Optimization</h3>
+                            <h3 style="font-size: 16px;">💰 Cost Optimization</h3>
                         </div>
-                        <p class="body-muted">Identify token waste and inefficient prompts</p>
-                        <div class="optimization-stats">
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Identify token waste and inefficient prompts</p>
+                        <div class="optimization-stats" style="margin-top: 16px;">
                             <div class="stat-item">
-                                <span class="stat-label">Estimated Waste</span>
-                                <span class="stat-value" id="estimatedWaste">$0.00</span>
+                                <span class="stat-label" style="font-size: 12px; color: #94a3b8;">Estimated Waste</span>
+                                <span class="stat-value" id="estimatedWaste" style="font-size: 20px; font-weight: 700;">$0.00</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Waste %</span>
-                                <span class="stat-value" id="wastePercentage">0%</span>
+                                <span class="stat-label" style="font-size: 12px; color: #94a3b8;">Waste %</span>
+                                <span class="stat-value" id="wastePercentage" style="font-size: 20px; font-weight: 700;">0%</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="card">
                         <div class="card-header">
-                            <h3>⏱️ SLA-Aware Routing</h3>
+                            <h3 style="font-size: 16px;">⏱️ SLA-Aware Routing</h3>
                         </div>
-                        <p class="body-muted">Route based on latency requirements and SLA guarantees</p>
-                        <div class="feature-status">
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Route based on latency requirements</p>
+                        <div class="feature-status" style="margin-top: 16px;">
                             <span class="status-badge active">Active</span>
-                            <span class="metric-value">0 SLA Configs</span>
+                            <span class="metric-value" style="font-size: 14px;">0 SLA Configs</span>
                         </div>
                     </article>
 
                     <article class="card">
                         <div class="card-header">
-                            <h3>📋 Governance & Audit Logs</h3>
+                            <h3 style="font-size: 16px;">📋 Governance & Audit</h3>
                         </div>
-                        <p class="body-muted">Tamper-proof audit trail for compliance</p>
-                        <div class="audit-summary">
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Audit trail for compliance</p>
+                        <div class="audit-summary" style="margin-top: 16px;">
                             <div class="stat-item">
-                                <span class="stat-label">Total Events</span>
-                                <span class="stat-value" id="auditEventCount">0</span>
+                                <span class="stat-label" style="font-size: 12px; color: #94a3b8;">Total Events</span>
+                                <span class="stat-value" id="auditEventCount" style="font-size: 20px; font-weight: 700;">0</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Violations</span>
-                                <span class="stat-value critical" id="violationCount">0</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="card">
-                        <div class="card-header">
-                            <h3>🤖 Agent Tracking</h3>
-                        </div>
-                        <p class="body-muted">Track multi-step workflows and detect infinite loops</p>
-                        <div class="agent-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Active Runs</span>
-                                <span class="stat-value" id="activeAgentRuns">0</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Loop Detections</span>
-                                <span class="stat-value warning" id="loopDetections">0</span>
+                                <span class="stat-label" style="font-size: 12px; color: #94a3b8;">Violations</span>
+                                <span class="stat-value critical" id="violationCount" style="font-size: 20px; font-weight: 700;">0</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="card">
                         <div class="card-header">
-                            <h3>🔒 Enterprise Policy Engine</h3>
+                            <h3 style="font-size: 16px;">🤖 Agent Tracking</h3>
                         </div>
-                        <p class="body-muted">Model allowlists, PII detection, data residency</p>
-                        <div class="feature-status">
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Track workflows & detect loops</p>
+                        <div class="agent-stats" style="margin-top: 16px;">
+                            <div class="stat-item">
+                                <span class="stat-label" style="font-size: 12px; color: #94a3b8;">Active Runs</span>
+                                <span class="stat-value" id="activeAgentRuns" style="font-size: 20px; font-weight: 700;">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label" style="font-size: 12px; color: #94a3b8;">Loop Detections</span>
+                                <span class="stat-value warning" id="loopDetections" style="font-size: 20px; font-weight: 700;">0</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <h3 style="font-size: 16px;">🔒 Policy Engine</h3>
+                        </div>
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Allowlists, PII detection</p>
+                        <div class="feature-status" style="margin-top: 16px;">
                             <span class="status-badge active">Active</span>
-                            <span class="metric-value">0 Policies Set</span>
+                            <span class="metric-value" style="font-size: 14px;">0 Policies Set</span>
                         </div>
                     </article>
 
@@ -340,14 +337,14 @@
             </section>
 
             <section class="section-pane" data-pane="monitoring">
-                <div class="monitoring-header">
+                <div class="monitoring-header" style="margin-bottom: 24px;">
                     <div class="card">
-                        <div class="card-header">
-                            <h3>📡 Live Monitoring</h3>
-                            <span id="liveStreamStatus" class="stream-status status-disconnected">Disconnected</span>
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 20px;">📡 Live Monitoring</h3>
+                            <span id="liveStreamStatus" class="stream-status status-disconnected" style="font-size: 12px; padding: 6px 12px;">Disconnected</span>
                         </div>
-                        <p class="body-muted">
-                            Real-time metrics, alerts, and system health monitoring powered by Prometheus.
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">
+                            Real-time metrics, alerts, and system health monitoring.
                         </p>
                     </div>
                 </div>
@@ -355,19 +352,19 @@
                 <div class="monitoring-grid">
                     <article class="card">
                         <div class="card-header">
-                            <h3>🏥 System Health</h3>
+                            <h3 style="font-size: 16px;">🏥 System Health</h3>
                         </div>
-                        <div id="liveHealthStatus" class="health-status">
+                        <div id="liveHealthStatus" class="health-status" style="margin-top: 16px; min-height: 100px;">
                             <p class="no-data">Loading health status...</p>
                         </div>
                     </article>
 
                     <article class="card full-width">
-                        <div class="card-header">
-                            <h3>🚨 Live Alerts</h3>
-                            <button id="clearAlertsBtn" class="ghost-btn">Clear All</button>
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="font-size: 16px;">🚨 Live Alerts</h3>
+                            <button id="clearAlertsBtn" class="ghost-btn" style="font-size: 13px;">Clear All</button>
                         </div>
-                        <div class="alerts-container">
+                        <div class="alerts-container" style="margin-top: 16px;">
                             <ul id="liveAlertsList" class="alerts-list"></ul>
                             <p id="liveAlertsEmpty" class="no-data" hidden>No active alerts</p>
                         </div>
@@ -375,29 +372,29 @@
 
                     <article class="card full-width">
                         <div class="card-header">
-                            <h3>📊 Prometheus Metrics</h3>
+                            <h3 style="font-size: 16px;">📊 Prometheus Metrics</h3>
                         </div>
-                        <p class="body-muted">
-                            Access raw Prometheus metrics at <code><a href="/metrics" target="_blank">/metrics</a></code>
+                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5; word-wrap: break-word;">
+                            Access raw Prometheus metrics at <code style="font-size: 12px;"><a href="/metrics" target="_blank">/metrics</a></code>
                         </p>
-                        <div class="metrics-info">
-                            <div class="info-item">
-                                <span class="info-label">Endpoint:</span>
-                                <code class="info-value">/metrics</code>
+                        <div class="metrics-info" style="margin-top: 16px;">
+                            <div class="info-item" style="margin-bottom: 12px;">
+                                <span class="info-label" style="font-size: 12px; color: #94a3b8;">Endpoint:</span>
+                                <code class="info-value" style="font-size: 12px;">/metrics</code>
+                            </div>
+                            <div class="info-item" style="margin-bottom: 12px;">
+                                <span class="info-label" style="font-size: 12px; color: #94a3b8;">Format:</span>
+                                <code class="info-value" style="font-size: 12px; word-wrap: break-word;">Prometheus Exposition Format</code>
                             </div>
                             <div class="info-item">
-                                <span class="info-label">Format:</span>
-                                <code class="info-value">Prometheus Exposition Format</code>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Available Metrics:</span>
-                                <ul class="metrics-list">
-                                    <li>stacksense_requests_total - Total requests by feature</li>
-                                    <li>stacksense_request_duration_seconds - Request latency</li>
-                                    <li>stacksense_budget_utilization_ratio - Budget utilization</li>
-                                    <li>stacksense_routing_decisions_total - Routing decisions</li>
-                                    <li>stacksense_agent_cost_dollars - Agent costs</li>
-                                    <li>stacksense_policy_violations_total - Policy violations</li>
+                                <span class="info-label" style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 8px;">Available Metrics:</span>
+                                <ul class="metrics-list" style="max-height: 200px; overflow-y: auto; font-size: 13px; line-height: 1.6; padding-left: 20px;">
+                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_requests_total - Total requests by feature</li>
+                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_request_duration_seconds - Request latency</li>
+                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_budget_utilization_ratio - Budget utilization</li>
+                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_routing_decisions_total - Routing decisions</li>
+                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_agent_cost_dollars - Agent costs</li>
+                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_policy_violations_total - Policy violations</li>
                                 </ul>
                             </div>
                         </div>
