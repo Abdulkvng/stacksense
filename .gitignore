@@ -91,3 +91,21 @@ dmypy.json
 
 # Internal Documentation
 INTERNAL_README.md
+
+# Enterprise & Gateway (private - not on GitHub)
+stacksense/enterprise/
+stacksense/gateway/
+AI_GATEWAY_GUIDE.md
+GATEWAY_TESTING_GUIDE.md
+QUICKSTART_GATEWAY.md
+Dockerfile.gateway
+docker-compose.gateway.yml
+docker/Dockerfile.gateway
+docker/docker-compose.gateway.yml
+docs/AI_GATEWAY_GUIDE.md
+docs/GATEWAY_TESTING_GUIDE.md
+docs/QUICKSTART_GATEWAY.md
+examples/gateway_*.py
+examples/selective_gateway_example.py
+benchmarks/gateway_performance.py
+tests/test_gateway_live.py
