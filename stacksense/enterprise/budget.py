@@ -37,10 +37,7 @@ class BudgetEnforcer:
         self.user_id = user_id
 
     def check_budget(
-        self,
-        cost: float,
-        scope: str = "global",
-        scope_value: Optional[str] = None
+        self, cost: float, scope: str = "global", scope_value: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Check if a cost would exceed budget limits.
@@ -65,23 +62,20 @@ class BudgetEnforcer:
                 "allowed": True,
                 "action": "allow",
                 "downgrade_model": None,
-                "budget_remaining": float('inf'),
+                "budget_remaining": float("inf"),
                 "budget_utilization": 0.0,
-                "message": "No budget enforcement configured"
+                "message": "No budget enforcement configured",
             }
 
         try:
             # Find applicable budgets
             now = datetime.utcnow()
-            budgets = (
-                self.db_session.query(Budget)
-                .filter(
-                    Budget.user_id == self.user_id,
-                    Budget.is_active == True,
-                    Budget.scope == scope,
-                    Budget.period_start <= now,
-                    Budget.period_end >= now
-                )
+            budgets = self.db_session.query(Budget).filter(
+                Budget.user_id == self.user_id,
+                Budget.is_active == True,
+                Budget.scope == scope,
+                Budget.period_start <= now,
+                Budget.period_end >= now,
             )
 
             if scope_value:
@@ -94,15 +88,17 @@ class BudgetEnforcer:
                     "allowed": True,
                     "action": "allow",
                     "downgrade_model": None,
-                    "budget_remaining": float('inf'),
+                    "budget_remaining": float("inf"),
                     "budget_utilization": 0.0,
-                    "message": f"No active budget found for {scope}/{scope_value}"
+                    "message": f"No active budget found for {scope}/{scope_value}",
                 }
 
             # Calculate budget status
             projected_spend = budget.current_spend + cost
             budget_remaining = budget.limit_amount - budget.current_spend
-            budget_utilization = projected_spend / budget.limit_amount if budget.limit_amount > 0 else 0.0
+            budget_utilization = (
+                projected_spend / budget.limit_amount if budget.limit_amount > 0 else 0.0
+            )
 
             # Determine action based on utilization
             if projected_spend > budget.limit_amount:
@@ -114,7 +110,7 @@ class BudgetEnforcer:
                         "downgrade_model": None,
                         "budget_remaining": budget_remaining,
                         "budget_utilization": budget_utilization,
-                        "message": f"Budget limit exceeded for {scope}/{scope_value}"
+                        "message": f"Budget limit exceeded for {scope}/{scope_value}",
                     }
                 elif budget.action == "downgrade":
                     return {
@@ -123,7 +119,7 @@ class BudgetEnforcer:
                         "downgrade_model": budget.downgrade_model,
                         "budget_remaining": budget_remaining,
                         "budget_utilization": budget_utilization,
-                        "message": f"Downgrading model due to budget limit"
+                        "message": f"Downgrading model due to budget limit",
                     }
                 else:  # alert
                     return {
@@ -132,7 +128,7 @@ class BudgetEnforcer:
                         "downgrade_model": None,
                         "budget_remaining": budget_remaining,
                         "budget_utilization": budget_utilization,
-                        "message": f"Budget limit exceeded - alerting only"
+                        "message": f"Budget limit exceeded - alerting only",
                     }
 
             elif budget_utilization >= 0.9:
@@ -143,7 +139,7 @@ class BudgetEnforcer:
                     "downgrade_model": None,
                     "budget_remaining": budget_remaining,
                     "budget_utilization": budget_utilization,
-                    "message": f"Budget at {budget_utilization*100:.1f}% utilization"
+                    "message": f"Budget at {budget_utilization*100:.1f}% utilization",
                 }
 
             else:
@@ -153,7 +149,7 @@ class BudgetEnforcer:
                     "downgrade_model": None,
                     "budget_remaining": budget_remaining,
                     "budget_utilization": budget_utilization,
-                    "message": "Within budget limits"
+                    "message": "Within budget limits",
                 }
 
         except Exception as e:
@@ -165,14 +161,11 @@ class BudgetEnforcer:
                 "downgrade_model": None,
                 "budget_remaining": 0.0,
                 "budget_utilization": 0.0,
-                "message": f"Budget check failed: {str(e)}"
+                "message": f"Budget check failed: {str(e)}",
             }
 
     def record_spend(
-        self,
-        cost: float,
-        scope: str = "global",
-        scope_value: Optional[str] = None
+        self, cost: float, scope: str = "global", scope_value: Optional[str] = None
     ) -> bool:
         """
         Record actual spend against the budget using atomic update.
@@ -197,12 +190,9 @@ class BudgetEnforcer:
                     Budget.is_active == True,
                     Budget.scope == scope,
                     Budget.period_start <= now,
-                    Budget.period_end >= now
+                    Budget.period_end >= now,
                 )
-                .values(
-                    current_spend=Budget.current_spend + cost,
-                    updated_at=datetime.utcnow()
-                )
+                .values(current_spend=Budget.current_spend + cost, updated_at=datetime.utcnow())
                 .returning(Budget)
             )
 
@@ -262,7 +252,7 @@ class BudgetEnforcer:
                 period_end=period_end,
                 action=data.action,
                 downgrade_model=data.downgrade_model,
-                is_active=True
+                is_active=True,
             )
 
             self.db_session.add(budget)
@@ -297,10 +287,7 @@ class BudgetEnforcer:
         try:
             budget = (
                 self.db_session.query(Budget)
-                .filter(
-                    Budget.id == budget_id,
-                    Budget.user_id == self.user_id
-                )
+                .filter(Budget.id == budget_id, Budget.user_id == self.user_id)
                 .first()
             )
 
@@ -373,10 +360,7 @@ class BudgetEnforcer:
         try:
             budget = (
                 self.db_session.query(Budget)
-                .filter(
-                    Budget.id == budget_id,
-                    Budget.user_id == self.user_id
-                )
+                .filter(Budget.id == budget_id, Budget.user_id == self.user_id)
                 .first()
             )
 
@@ -410,10 +394,7 @@ class BudgetEnforcer:
         try:
             budget = (
                 self.db_session.query(Budget)
-                .filter(
-                    Budget.id == budget_id,
-                    Budget.user_id == self.user_id
-                )
+                .filter(Budget.id == budget_id, Budget.user_id == self.user_id)
                 .first()
             )
 

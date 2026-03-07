@@ -46,16 +46,9 @@ class SemanticCache:
         self.cache = OrderedDict()
 
         # Cache statistics
-        self.stats = {
-            "hits": 0,
-            "misses": 0,
-            "evictions": 0,
-            "total_requests": 0
-        }
+        self.stats = {"hits": 0, "misses": 0, "evictions": 0, "total_requests": 0}
 
-        logger.info(
-            f"Semantic Cache initialized (max_size={max_size}, ttl={default_ttl}s)"
-        )
+        logger.info(f"Semantic Cache initialized (max_size={max_size}, ttl={default_ttl}s)")
 
     def get(self, cache_key: str) -> Optional[Any]:
         """
@@ -90,12 +83,7 @@ class SemanticCache:
         logger.debug(f"Cache hit: {cache_key[:16]}...")
         return entry["response"]
 
-    def set(
-        self,
-        cache_key: str,
-        response: Any,
-        ttl: Optional[int] = None
-    ):
+    def set(self, cache_key: str, response: Any, ttl: Optional[int] = None):
         """
         Store response in cache.
 
@@ -119,7 +107,7 @@ class SemanticCache:
         self.cache[cache_key] = {
             "response": response,
             "expires_at": expires_at,
-            "created_at": time.time()
+            "created_at": time.time(),
         }
 
         # Move to end (most recently used)
@@ -127,12 +115,7 @@ class SemanticCache:
 
         logger.debug(f"Cache set: {cache_key[:16]}... (ttl={ttl}s)")
 
-    def generate_key(
-        self,
-        messages: List[Dict[str, str]],
-        model: str,
-        **kwargs
-    ) -> str:
+    def generate_key(self, messages: List[Dict[str, str]], model: str, **kwargs) -> str:
         """
         Generate cache key from request parameters.
 
@@ -151,15 +134,13 @@ class SemanticCache:
         """
         # Create deterministic representation
         cache_input = {
-            "messages": [
-                {"role": m.get("role"), "content": m.get("content")}
-                for m in messages
-            ],
+            "messages": [{"role": m.get("role"), "content": m.get("content")} for m in messages],
             "model": model,
             "params": {
-                k: v for k, v in kwargs.items()
+                k: v
+                for k, v in kwargs.items()
                 if k in ["temperature", "max_tokens", "top_p", "frequency_penalty"]
-            }
+            },
         }
 
         # Generate hash
@@ -218,7 +199,7 @@ class SemanticCache:
             "misses": self.stats["misses"],
             "hit_rate": hit_rate,
             "evictions": self.stats["evictions"],
-            "total_requests": self.stats["total_requests"]
+            "total_requests": self.stats["total_requests"],
         }
 
     def cleanup_expired(self) -> int:
@@ -230,8 +211,7 @@ class SemanticCache:
         """
         current_time = time.time()
         expired_keys = [
-            key for key, entry in self.cache.items()
-            if current_time > entry["expires_at"]
+            key for key, entry in self.cache.items() if current_time > entry["expires_at"]
         ]
 
         for key in expired_keys:
@@ -243,10 +223,7 @@ class SemanticCache:
         return len(expired_keys)
 
     def find_similar(
-        self,
-        messages: List[Dict[str, str]],
-        model: str,
-        similarity_threshold: float = 0.95
+        self, messages: List[Dict[str, str]], model: str, similarity_threshold: float = 0.95
     ) -> Optional[Any]:
         """
         Find cached response with similar prompt.
@@ -286,11 +263,13 @@ class SemanticCache:
             age = time.time() - entry["created_at"]
             ttl_remaining = max(0, entry["expires_at"] - time.time())
 
-            entries.append({
-                "key": key[:16] + "...",
-                "age_seconds": int(age),
-                "ttl_remaining": int(ttl_remaining),
-                "created_at": entry["created_at"]
-            })
+            entries.append(
+                {
+                    "key": key[:16] + "...",
+                    "age_seconds": int(age),
+                    "ttl_remaining": int(ttl_remaining),
+                    "created_at": entry["created_at"],
+                }
+            )
 
         return entries

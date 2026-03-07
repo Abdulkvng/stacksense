@@ -37,7 +37,7 @@ class GovernanceEngine:
         resource_id: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
         ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None
+        user_agent: Optional[str] = None,
     ) -> AuditLog:
         """
         Create a tamper-proof audit log entry.
@@ -68,7 +68,7 @@ class GovernanceEngine:
             details=details or {},
             ip_address=ip_address,
             user_agent=user_agent,
-            is_tamper_proof=True
+            is_tamper_proof=True,
         )
 
         # Generate tamper-proof hash
@@ -88,9 +88,9 @@ class GovernanceEngine:
             "user_id": audit_log.user_id,
             "event_type": audit_log.event_type,
             "action": audit_log.action,
-            "details": audit_log.details
+            "details": audit_log.details,
         }
-        hash_input = json.dumps(data, sort_keys=True).encode('utf-8')
+        hash_input = json.dumps(data, sort_keys=True).encode("utf-8")
         return hashlib.sha256(hash_input).hexdigest()
 
     def verify_integrity(self, log_id: int) -> bool:
@@ -111,7 +111,7 @@ class GovernanceEngine:
         event_type: Optional[str] = None,
         severity: Optional[str] = None,
         days: int = 30,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[AuditLog]:
         """Get audit logs with optional filtering."""
         if not self.db_session:
@@ -141,10 +141,7 @@ class GovernanceEngine:
         # Get critical/warning events
         violations = (
             self.db_session.query(AuditLog)
-            .filter(
-                AuditLog.timestamp >= since,
-                AuditLog.severity.in_(["warning", "critical"])
-            )
+            .filter(AuditLog.timestamp >= since, AuditLog.severity.in_(["warning", "critical"]))
             .order_by(AuditLog.timestamp.desc())
             .limit(50)
             .all()
@@ -157,7 +154,7 @@ class GovernanceEngine:
                 "event_type": v.event_type,
                 "severity": v.severity,
                 "action": v.action,
-                "details": v.details
+                "details": v.details,
             }
             for v in violations
         ]

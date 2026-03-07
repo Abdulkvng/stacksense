@@ -9,7 +9,6 @@ from typing import Any, Callable, Optional
 from stacksense.monitoring.tracker import MetricsTracker
 from stacksense.config.settings import Settings
 
-
 # Module-level default tracker (lazily initialized)
 _default_tracker: Optional[MetricsTracker] = None
 

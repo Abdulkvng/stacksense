@@ -38,12 +38,14 @@ class RequestThrottler:
         self.cost_windows = defaultdict(deque)  # scope -> (timestamp, cost)
 
         # Circuit breaker state
-        self.circuit_breakers = defaultdict(lambda: {
-            "state": "closed",  # closed, open, half_open
-            "failures": 0,
-            "last_failure_time": None,
-            "opened_at": None
-        })
+        self.circuit_breakers = defaultdict(
+            lambda: {
+                "state": "closed",  # closed, open, half_open
+                "failures": 0,
+                "last_failure_time": None,
+                "opened_at": None,
+            }
+        )
 
         # Agent loop detection
         self.agent_requests = defaultdict(deque)  # agent_id -> request_hashes
@@ -63,7 +65,7 @@ class RequestThrottler:
         scope: str = "global",
         estimated_cost: float = 0.0,
         agent_id: Optional[str] = None,
-        request_hash: Optional[str] = None
+        request_hash: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Check if request should be allowed or throttled.
@@ -118,7 +120,7 @@ class RequestThrottler:
             "reason": "ok",
             "retry_after": 0,
             "current_rate": len(self.request_windows[scope]),
-            "limit": self.default_limits["requests_per_minute"]
+            "limit": self.default_limits["requests_per_minute"],
         }
 
     def _check_rate_limit(self, scope: str, current_time: float) -> Dict[str, Any]:
@@ -135,24 +137,19 @@ class RequestThrottler:
         limit = self.default_limits["requests_per_minute"]
 
         if current_rate >= limit:
-            logger.warning(
-                f"Rate limit exceeded: {scope} - {current_rate}/{limit} req/min"
-            )
+            logger.warning(f"Rate limit exceeded: {scope} - {current_rate}/{limit} req/min")
             return {
                 "allowed": False,
                 "reason": "rate_limit_exceeded",
                 "retry_after": 60,
                 "current_rate": current_rate,
-                "limit": limit
+                "limit": limit,
             }
 
         return {"allowed": True}
 
     def _check_cost_limit(
-        self,
-        scope: str,
-        estimated_cost: float,
-        current_time: float
+        self, scope: str, estimated_cost: float, current_time: float
     ) -> Dict[str, Any]:
         """Check cost per minute limit."""
         window = self.cost_windows[scope]
@@ -178,7 +175,7 @@ class RequestThrottler:
                 "reason": "cost_limit_exceeded",
                 "retry_after": 60,
                 "current_rate": current_spend,
-                "limit": limit
+                "limit": limit,
             }
 
         return {"allowed": True}
@@ -205,7 +202,7 @@ class RequestThrottler:
         if len(occurrences) >= 3:
             # Check if they're rapid (within 10s intervals)
             timestamps = [r[0] for r in occurrences[-3:]]
-            intervals = [timestamps[i+1] - timestamps[i] for i in range(len(timestamps)-1)]
+            intervals = [timestamps[i + 1] - timestamps[i] for i in range(len(timestamps) - 1)]
 
             if all(interval < 10 for interval in intervals):
                 logger.error(
@@ -217,7 +214,7 @@ class RequestThrottler:
                     "reason": "agent_loop_detected",
                     "retry_after": 300,  # 5 minutes
                     "current_rate": len(occurrences),
-                    "limit": 3
+                    "limit": 3,
                 }
 
         return {"allowed": True}
@@ -249,7 +246,7 @@ class RequestThrottler:
                 "reason": "circuit_breaker_open",
                 "retry_after": 60,
                 "current_rate": breaker["failures"],
-                "limit": 5
+                "limit": 5,
             }
 
         return {"allowed": True}
@@ -271,8 +268,7 @@ class RequestThrottler:
             breaker["state"] = "open"
             breaker["opened_at"] = current_time
             logger.error(
-                f"Circuit breaker {provider}: CLOSED → OPEN "
-                f"({breaker['failures']} failures)"
+                f"Circuit breaker {provider}: CLOSED → OPEN " f"({breaker['failures']} failures)"
             )
 
     def record_success(self, provider: str):
@@ -327,25 +323,20 @@ class RequestThrottler:
         return {
             "requests_per_minute": {
                 "current": len(recent_requests),
-                "limit": self.default_limits["requests_per_minute"]
+                "limit": self.default_limits["requests_per_minute"],
             },
             "cost_per_minute": {
                 "current": total_cost,
-                "limit": self.default_limits["cost_per_minute"]
+                "limit": self.default_limits["cost_per_minute"],
             },
             "circuit_breakers": {
-                provider: {
-                    "state": breaker["state"],
-                    "failures": breaker["failures"]
-                }
+                provider: {"state": breaker["state"], "failures": breaker["failures"]}
                 for provider, breaker in self.circuit_breakers.items()
-            }
+            },
         }
 
     def set_limits(
-        self,
-        requests_per_minute: Optional[int] = None,
-        cost_per_minute: Optional[float] = None
+        self, requests_per_minute: Optional[int] = None, cost_per_minute: Optional[float] = None
     ):
         """Update throttling limits."""
         if requests_per_minute is not None:

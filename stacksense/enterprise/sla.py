@@ -25,9 +25,7 @@ class SLARouter:
         self.user_id = user_id
 
     def route_by_sla(
-        self,
-        priority_level: str = "medium",
-        max_latency_ms: Optional[int] = None
+        self, priority_level: str = "medium", max_latency_ms: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Route based on SLA requirements.
@@ -47,7 +45,7 @@ class SLARouter:
                 "model": None,
                 "estimated_latency": 0.0,
                 "success_rate": 0.0,
-                "reason": "No SLA configuration found"
+                "reason": "No SLA configuration found",
             }
 
         # Get SLA config
@@ -56,7 +54,7 @@ class SLARouter:
             .filter(
                 SLAConfig.user_id == self.user_id,
                 SLAConfig.is_active == True,
-                SLAConfig.priority_level == priority_level
+                SLAConfig.priority_level == priority_level,
             )
             .first()
         )
@@ -67,7 +65,7 @@ class SLARouter:
                 "model": None,
                 "estimated_latency": 0.0,
                 "success_rate": 0.0,
-                "reason": f"No SLA config for priority {priority_level}"
+                "reason": f"No SLA config for priority {priority_level}",
             }
 
         # Get provider performance stats
@@ -78,7 +76,8 @@ class SLARouter:
         min_success = sla_config.min_success_rate
 
         viable_providers = [
-            p for p in provider_stats
+            p
+            for p in provider_stats
             if p["p95_latency"] <= max_latency and p["success_rate"] >= min_success
         ]
 
@@ -89,7 +88,7 @@ class SLARouter:
                 "model": None,
                 "estimated_latency": 0.0,
                 "success_rate": 0.0,
-                "reason": "No providers meet SLA requirements"
+                "reason": "No providers meet SLA requirements",
             }
 
         # Select based on fallback strategy
@@ -106,7 +105,7 @@ class SLARouter:
             "model": selected["model"],
             "estimated_latency": selected["p95_latency"],
             "success_rate": selected["success_rate"],
-            "reason": f"Selected by {strategy} strategy"
+            "reason": f"Selected by {strategy} strategy",
         }
 
     def _get_provider_performance(self, days: int = 7) -> List[Dict[str, Any]]:
@@ -124,7 +123,7 @@ class SLARouter:
                 func.avg(Event.latency).label("avg_latency"),
                 func.avg(Event.cost).label("avg_cost"),
                 func.count(Event.id).label("total_calls"),
-                func.sum(func.cast(Event.success, func.Integer())).label("success_count")
+                func.sum(func.cast(Event.success, func.Integer())).label("success_count"),
             )
             .filter(Event.timestamp >= since)
             .group_by(Event.provider, Event.model)
@@ -137,15 +136,17 @@ class SLARouter:
             # Estimate P95 as avg * 1.5 (simplified)
             p95_latency = stat.avg_latency * 1.5 if stat.avg_latency else 0.0
 
-            results.append({
-                "provider": stat.provider,
-                "model": stat.model,
-                "avg_latency": stat.avg_latency or 0.0,
-                "p95_latency": p95_latency,
-                "avg_cost": stat.avg_cost or 0.0,
-                "success_rate": success_rate,
-                "total_calls": stat.total_calls
-            })
+            results.append(
+                {
+                    "provider": stat.provider,
+                    "model": stat.model,
+                    "avg_latency": stat.avg_latency or 0.0,
+                    "p95_latency": p95_latency,
+                    "avg_cost": stat.avg_cost or 0.0,
+                    "success_rate": success_rate,
+                    "total_calls": stat.total_calls,
+                }
+            )
 
         return results
 
@@ -156,7 +157,7 @@ class SLARouter:
         min_success_rate: float,
         priority_level: str = "medium",
         fallback_strategy: str = "most_reliable",
-        preferred_providers: Optional[List[str]] = None
+        preferred_providers: Optional[List[str]] = None,
     ) -> SLAConfig:
         """Create a new SLA configuration."""
         if not self.db_session or not self.user_id:
@@ -170,7 +171,7 @@ class SLARouter:
             priority_level=priority_level,
             preferred_providers=preferred_providers,
             fallback_strategy=fallback_strategy,
-            is_active=True
+            is_active=True,
         )
 
         self.db_session.add(config)

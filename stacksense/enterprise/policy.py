@@ -23,11 +23,7 @@ class PolicyEngine:
         self.db_session = db_session
         self.user_id = user_id
 
-    def check_policy(
-        self,
-        policy_type: str,
-        data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def check_policy(self, policy_type: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Check if data complies with policies.
 
@@ -48,7 +44,7 @@ class PolicyEngine:
                 "compliant": True,
                 "violations": [],
                 "enforcement_level": "advisory",
-                "policy_name": None
+                "policy_name": None,
             }
 
         # Get active policies of this type
@@ -57,7 +53,7 @@ class PolicyEngine:
             .filter(
                 Policy.user_id == self.user_id,
                 Policy.policy_type == policy_type,
-                Policy.is_active == True
+                Policy.is_active == True,
             )
             .all()
         )
@@ -67,7 +63,7 @@ class PolicyEngine:
                 "compliant": True,
                 "violations": [],
                 "enforcement_level": "advisory",
-                "policy_name": None
+                "policy_name": None,
             }
 
         all_violations = []
@@ -84,7 +80,7 @@ class PolicyEngine:
             "compliant": len(all_violations) == 0,
             "violations": all_violations,
             "enforcement_level": enforcement_level,
-            "policy_name": policies[0].name if policies else None
+            "policy_name": policies[0].name if policies else None,
         }
 
     def _evaluate_policy(self, policy: Policy, data: Dict[str, Any]) -> List[str]:
@@ -118,10 +114,10 @@ class PolicyEngine:
 
         # Basic regex patterns for PII
         patterns = {
-            "email": r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-            "ssn": r'\b\d{3}-\d{2}-\d{4}\b',
-            "phone": r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
-            "credit_card": r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'
+            "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+            "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
+            "phone": r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b",
+            "credit_card": r"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b",
         }
 
         for pii_type, pattern in patterns.items():
@@ -137,11 +133,7 @@ class PolicyEngine:
         provider = data.get("provider", "")
 
         # Map providers to regions (simplified)
-        provider_regions = {
-            "openai": "us",
-            "anthropic": "us",
-            "google": "us-eu"
-        }
+        provider_regions = {"openai": "us", "anthropic": "us", "google": "us-eu"}
 
         provider_region = provider_regions.get(provider, "unknown")
 
@@ -157,7 +149,7 @@ class PolicyEngine:
         name: str,
         policy_type: str,
         rules: Dict[str, Any],
-        enforcement_level: str = "advisory"
+        enforcement_level: str = "advisory",
     ) -> Policy:
         """Create a new policy."""
         if not self.db_session or not self.user_id:
@@ -169,7 +161,7 @@ class PolicyEngine:
             policy_type=policy_type,
             rules=rules,
             enforcement_level=enforcement_level,
-            is_active=True
+            is_active=True,
         )
 
         self.db_session.add(policy)
@@ -198,10 +190,7 @@ class PolicyEngine:
 
         policy = (
             self.db_session.query(Policy)
-            .filter(
-                Policy.id == policy_id,
-                Policy.user_id == self.user_id
-            )
+            .filter(Policy.id == policy_id, Policy.user_id == self.user_id)
             .first()
         )
 

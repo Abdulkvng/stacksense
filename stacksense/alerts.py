@@ -72,9 +72,7 @@ class AlertRule:
             "operator": self.operator,
             "window": self.window,
             "cooldown": self.cooldown,
-            "last_triggered": (
-                self.last_triggered.isoformat() if self.last_triggered else None
-            ),
+            "last_triggered": (self.last_triggered.isoformat() if self.last_triggered else None),
         }
 
 

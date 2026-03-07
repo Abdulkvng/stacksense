@@ -230,7 +230,9 @@ class RoutingRule(Base):
     __tablename__ = "routing_rules"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     name = Column(String(255), nullable=False)
     priority = Column(Integer, default=0, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
@@ -246,8 +248,8 @@ class RoutingRule(Base):
 
     # Performance indexes
     __table_args__ = (
-        Index('idx_routing_user_active_priority', 'user_id', 'is_active', 'priority'),
-        Index('idx_routing_created', 'created_at'),
+        Index("idx_routing_user_active_priority", "user_id", "is_active", "priority"),
+        Index("idx_routing_created", "created_at"),
     )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -270,7 +272,9 @@ class Budget(Base):
     __tablename__ = "budgets"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     name = Column(String(255), nullable=False)
     scope = Column(String(50), nullable=False)  # 'global', 'team', 'feature', 'provider'
     scope_value = Column(String(255), nullable=True)  # team name, feature name, etc.
@@ -293,10 +297,17 @@ class Budget(Base):
 
     # Performance indexes - CRITICAL for budget checking at scale
     __table_args__ = (
-        Index('idx_budget_user_active', 'user_id', 'is_active'),
-        Index('idx_budget_scope_active', 'scope', 'is_active'),
-        Index('idx_budget_period', 'period_start', 'period_end'),
-        Index('idx_budget_user_scope_period', 'user_id', 'scope', 'scope_value', 'period_start', 'period_end'),
+        Index("idx_budget_user_active", "user_id", "is_active"),
+        Index("idx_budget_scope_active", "scope", "is_active"),
+        Index("idx_budget_period", "period_start", "period_end"),
+        Index(
+            "idx_budget_user_scope_period",
+            "user_id",
+            "scope",
+            "scope_value",
+            "period_start",
+            "period_end",
+        ),
     )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -324,7 +335,9 @@ class SLAConfig(Base):
     __tablename__ = "sla_configs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     name = Column(String(255), nullable=False)
 
     # SLA requirements
@@ -343,8 +356,8 @@ class SLAConfig(Base):
 
     # Performance indexes
     __table_args__ = (
-        Index('idx_sla_user_active', 'user_id', 'is_active'),
-        Index('idx_sla_priority', 'priority_level', 'is_active'),
+        Index("idx_sla_user_active", "user_id", "is_active"),
+        Index("idx_sla_priority", "priority_level", "is_active"),
     )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -372,8 +385,12 @@ class AuditLog(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
 
     # Audit event details
-    event_type = Column(String(100), nullable=False, index=True)  # 'model_call', 'policy_violation', 'config_change'
-    event_category = Column(String(50), nullable=False)  # 'access', 'config', 'compliance', 'security'
+    event_type = Column(
+        String(100), nullable=False, index=True
+    )  # 'model_call', 'policy_violation', 'config_change'
+    event_category = Column(
+        String(50), nullable=False
+    )  # 'access', 'config', 'compliance', 'security'
     severity = Column(String(20), nullable=False)  # 'info', 'warning', 'critical'
 
     # Event data
@@ -414,7 +431,9 @@ class AgentRun(Base):
     __tablename__ = "agent_runs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     agent_name = Column(String(255), nullable=False, index=True)
     run_id = Column(String(255), nullable=False, unique=True, index=True)
 
@@ -438,9 +457,7 @@ class AgentRun(Base):
     run_metadata = Column(JSON, nullable=True)
     error = Column(Text, nullable=True)
 
-    __table_args__ = (
-        Index("idx_agent_status", "agent_name", "status", "start_time"),
-    )
+    __table_args__ = (Index("idx_agent_status", "agent_name", "status", "start_time"),)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -468,9 +485,13 @@ class Policy(Base):
     __tablename__ = "policies"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     name = Column(String(255), nullable=False)
-    policy_type = Column(String(50), nullable=False)  # 'model_allowlist', 'pii_detection', 'data_residency'
+    policy_type = Column(
+        String(50), nullable=False
+    )  # 'model_allowlist', 'pii_detection', 'data_residency'
 
     # Policy rules
     rules = Column(JSON, nullable=False)
@@ -483,8 +504,8 @@ class Policy(Base):
 
     # Performance indexes
     __table_args__ = (
-        Index('idx_policy_user_type_active', 'user_id', 'policy_type', 'is_active'),
-        Index('idx_policy_enforcement', 'enforcement_level', 'is_active'),
+        Index("idx_policy_user_type_active", "user_id", "policy_type", "is_active"),
+        Index("idx_policy_enforcement", "enforcement_level", "is_active"),
     )
 
     def to_dict(self) -> Dict[str, Any]:

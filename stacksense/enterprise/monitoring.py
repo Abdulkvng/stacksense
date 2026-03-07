@@ -19,35 +19,65 @@ from collections import defaultdict
 
 try:
     from prometheus_client import (
-        Counter, Histogram, Gauge, Summary,
-        CollectorRegistry, generate_latest,
-        CONTENT_TYPE_LATEST
+        Counter,
+        Histogram,
+        Gauge,
+        Summary,
+        CollectorRegistry,
+        generate_latest,
+        CONTENT_TYPE_LATEST,
     )
+
     PROMETHEUS_AVAILABLE = True
 except ImportError:
     PROMETHEUS_AVAILABLE = False
+
     # Fallback to no-op metrics
     class Counter:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, *args, **kwargs): return self
-        def inc(self, *args, **kwargs): pass
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, *args, **kwargs):
+            return self
+
+        def inc(self, *args, **kwargs):
+            pass
 
     class Histogram:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, *args, **kwargs): return self
-        def observe(self, *args, **kwargs): pass
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, *args, **kwargs):
+            return self
+
+        def observe(self, *args, **kwargs):
+            pass
 
     class Gauge:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, *args, **kwargs): return self
-        def set(self, *args, **kwargs): pass
-        def inc(self, *args, **kwargs): pass
-        def dec(self, *args, **kwargs): pass
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, *args, **kwargs):
+            return self
+
+        def set(self, *args, **kwargs):
+            pass
+
+        def inc(self, *args, **kwargs):
+            pass
+
+        def dec(self, *args, **kwargs):
+            pass
 
     class Summary:
-        def __init__(self, *args, **kwargs): pass
-        def labels(self, *args, **kwargs): return self
-        def observe(self, *args, **kwargs): pass
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def labels(self, *args, **kwargs):
+            return self
+
+        def observe(self, *args, **kwargs):
+            pass
 
 
 from stacksense.logger.logger import get_logger
@@ -63,27 +93,27 @@ registry = CollectorRegistry() if PROMETHEUS_AVAILABLE else None
 
 # Total requests by feature
 requests_total = Counter(
-    'stacksense_requests_total',
-    'Total requests by feature',
-    ['feature', 'user_id', 'status'],
-    registry=registry
+    "stacksense_requests_total",
+    "Total requests by feature",
+    ["feature", "user_id", "status"],
+    registry=registry,
 )
 
 # Request latency
 request_latency = Histogram(
-    'stacksense_request_duration_seconds',
-    'Request latency in seconds',
-    ['feature', 'user_id'],
-    buckets=[.005, .01, .025, .05, .075, .1, .25, .5, .75, 1.0, 2.5, 5.0, 7.5, 10.0],
-    registry=registry
+    "stacksense_request_duration_seconds",
+    "Request latency in seconds",
+    ["feature", "user_id"],
+    buckets=[0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0],
+    registry=registry,
 )
 
 # Request errors
 request_errors = Counter(
-    'stacksense_request_errors_total',
-    'Total request errors',
-    ['feature', 'error_type'],
-    registry=registry
+    "stacksense_request_errors_total",
+    "Total request errors",
+    ["feature", "error_type"],
+    registry=registry,
 )
 
 
@@ -91,34 +121,34 @@ request_errors = Counter(
 
 # Budget utilization (0.0-1.0)
 budget_utilization = Gauge(
-    'stacksense_budget_utilization_ratio',
-    'Current budget utilization (0-1)',
-    ['budget_id', 'scope', 'user_id'],
-    registry=registry
+    "stacksense_budget_utilization_ratio",
+    "Current budget utilization (0-1)",
+    ["budget_id", "scope", "user_id"],
+    registry=registry,
 )
 
 # Budget remaining (dollars)
 budget_remaining = Gauge(
-    'stacksense_budget_remaining_dollars',
-    'Budget remaining in dollars',
-    ['budget_id', 'scope', 'user_id'],
-    registry=registry
+    "stacksense_budget_remaining_dollars",
+    "Budget remaining in dollars",
+    ["budget_id", "scope", "user_id"],
+    registry=registry,
 )
 
 # Budget exceeded count
 budget_exceeded = Counter(
-    'stacksense_budget_exceeded_total',
-    'Number of times budget was exceeded',
-    ['budget_id', 'scope', 'action'],
-    registry=registry
+    "stacksense_budget_exceeded_total",
+    "Number of times budget was exceeded",
+    ["budget_id", "scope", "action"],
+    registry=registry,
 )
 
 # Spend recorded
 spend_recorded = Counter(
-    'stacksense_spend_recorded_dollars_total',
-    'Total spend recorded in dollars',
-    ['budget_id', 'scope', 'user_id'],
-    registry=registry
+    "stacksense_spend_recorded_dollars_total",
+    "Total spend recorded in dollars",
+    ["budget_id", "scope", "user_id"],
+    registry=registry,
 )
 
 
@@ -126,27 +156,27 @@ spend_recorded = Counter(
 
 # Routing decisions
 routing_decisions = Counter(
-    'stacksense_routing_decisions_total',
-    'Routing decisions by rule',
-    ['rule_id', 'target_model', 'user_id'],
-    registry=registry
+    "stacksense_routing_decisions_total",
+    "Routing decisions by rule",
+    ["rule_id", "target_model", "user_id"],
+    registry=registry,
 )
 
 # Routing latency
 routing_latency = Histogram(
-    'stacksense_routing_latency_seconds',
-    'Routing decision latency',
-    ['user_id'],
-    buckets=[.001, .0025, .005, .0075, .01, .025, .05, .075, .1],
-    registry=registry
+    "stacksense_routing_latency_seconds",
+    "Routing decision latency",
+    ["user_id"],
+    buckets=[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.075, 0.1],
+    registry=registry,
 )
 
 # Routing failures
 routing_failures = Counter(
-    'stacksense_routing_failures_total',
-    'Routing failures',
-    ['user_id', 'reason'],
-    registry=registry
+    "stacksense_routing_failures_total",
+    "Routing failures",
+    ["user_id", "reason"],
+    registry=registry,
 )
 
 
@@ -154,26 +184,26 @@ routing_failures = Counter(
 
 # Active agent runs
 active_agent_runs = Gauge(
-    'stacksense_active_agent_runs',
-    'Number of currently active agent runs',
-    ['agent_name', 'user_id'],
-    registry=registry
+    "stacksense_active_agent_runs",
+    "Number of currently active agent runs",
+    ["agent_name", "user_id"],
+    registry=registry,
 )
 
 # Agent cost per run
 agent_cost = Summary(
-    'stacksense_agent_cost_dollars',
-    'Agent cost per run in dollars',
-    ['agent_name', 'status'],
-    registry=registry
+    "stacksense_agent_cost_dollars",
+    "Agent cost per run in dollars",
+    ["agent_name", "status"],
+    registry=registry,
 )
 
 # Loop detections
 loop_detections = Counter(
-    'stacksense_agent_loop_detections_total',
-    'Agent infinite loop detections',
-    ['agent_name', 'user_id'],
-    registry=registry
+    "stacksense_agent_loop_detections_total",
+    "Agent infinite loop detections",
+    ["agent_name", "user_id"],
+    registry=registry,
 )
 
 
@@ -181,18 +211,18 @@ loop_detections = Counter(
 
 # Policy violations
 policy_violations = Counter(
-    'stacksense_policy_violations_total',
-    'Policy violations detected',
-    ['policy_type', 'enforcement_level', 'user_id'],
-    registry=registry
+    "stacksense_policy_violations_total",
+    "Policy violations detected",
+    ["policy_type", "enforcement_level", "user_id"],
+    registry=registry,
 )
 
 # Policy checks
 policy_checks = Counter(
-    'stacksense_policy_checks_total',
-    'Total policy checks performed',
-    ['policy_type', 'result'],
-    registry=registry
+    "stacksense_policy_checks_total",
+    "Total policy checks performed",
+    ["policy_type", "result"],
+    registry=registry,
 )
 
 
@@ -200,27 +230,24 @@ policy_checks = Counter(
 
 # Database connection pool
 db_connections_active = Gauge(
-    'stacksense_db_connections_active',
-    'Active database connections',
-    registry=registry
+    "stacksense_db_connections_active", "Active database connections", registry=registry
 )
 
 db_connections_idle = Gauge(
-    'stacksense_db_connections_idle',
-    'Idle database connections',
-    registry=registry
+    "stacksense_db_connections_idle", "Idle database connections", registry=registry
 )
 
 # System health
 system_health = Gauge(
-    'stacksense_system_health',
-    'System health status (1=healthy, 0=unhealthy)',
-    ['component'],
-    registry=registry
+    "stacksense_system_health",
+    "System health status (1=healthy, 0=unhealthy)",
+    ["component"],
+    registry=registry,
 )
 
 
 # ==================== MONITORING CLASS ====================
+
 
 class LiveMonitor:
     """
@@ -258,55 +285,38 @@ class LiveMonitor:
     # ==================== BUDGET TRACKING ====================
 
     def update_budget_metrics(
-        self,
-        budget_id: int,
-        scope: str,
-        user_id: str,
-        utilization: float,
-        remaining: float
+        self, budget_id: int, scope: str, user_id: str, utilization: float, remaining: float
     ):
         """Update budget metrics."""
-        budget_utilization.labels(
-            budget_id=str(budget_id),
-            scope=scope,
-            user_id=user_id
-        ).set(utilization)
+        budget_utilization.labels(budget_id=str(budget_id), scope=scope, user_id=user_id).set(
+            utilization
+        )
 
-        budget_remaining.labels(
-            budget_id=str(budget_id),
-            scope=scope,
-            user_id=user_id
-        ).set(remaining)
+        budget_remaining.labels(budget_id=str(budget_id), scope=scope, user_id=user_id).set(
+            remaining
+        )
 
         # Alert if utilization > 90%
         if utilization > 0.9:
             self._add_alert(
                 severity="warning",
                 message=f"Budget {budget_id} at {utilization*100:.1f}% utilization",
-                budget_id=budget_id
+                budget_id=budget_id,
             )
 
     def track_budget_exceeded(self, budget_id: int, scope: str, action: str):
         """Track budget exceeded event."""
-        budget_exceeded.labels(
-            budget_id=str(budget_id),
-            scope=scope,
-            action=action
-        ).inc()
+        budget_exceeded.labels(budget_id=str(budget_id), scope=scope, action=action).inc()
 
         self._add_alert(
             severity="critical",
             message=f"Budget {budget_id} exceeded, action: {action}",
-            budget_id=budget_id
+            budget_id=budget_id,
         )
 
     def track_spend(self, budget_id: int, scope: str, user_id: str, amount: float):
         """Track spend recorded."""
-        spend_recorded.labels(
-            budget_id=str(budget_id),
-            scope=scope,
-            user_id=user_id
-        ).inc(amount)
+        spend_recorded.labels(budget_id=str(budget_id), scope=scope, user_id=user_id).inc(amount)
 
     # ==================== ROUTING TRACKING ====================
 
@@ -317,20 +327,15 @@ class LiveMonitor:
         user_id: str,
         duration: float,
         success: bool = True,
-        failure_reason: Optional[str] = None
+        failure_reason: Optional[str] = None,
     ):
         """Track routing decision."""
         if success and rule_id:
             routing_decisions.labels(
-                rule_id=str(rule_id),
-                target_model=target_model,
-                user_id=user_id
+                rule_id=str(rule_id), target_model=target_model, user_id=user_id
             ).inc()
         else:
-            routing_failures.labels(
-                user_id=user_id,
-                reason=failure_reason or "unknown"
-            ).inc()
+            routing_failures.labels(user_id=user_id, reason=failure_reason or "unknown").inc()
 
         routing_latency.labels(user_id=user_id).observe(duration)
 
@@ -341,12 +346,7 @@ class LiveMonitor:
         active_agent_runs.labels(agent_name=agent_name, user_id=user_id).inc()
 
     def agent_completed(
-        self,
-        agent_name: str,
-        user_id: str,
-        cost: float,
-        status: str,
-        loop_detected: bool = False
+        self, agent_name: str, user_id: str, cost: float, status: str, loop_detected: bool = False
     ):
         """Track agent completion."""
         active_agent_runs.labels(agent_name=agent_name, user_id=user_id).dec()
@@ -357,7 +357,7 @@ class LiveMonitor:
             self._add_alert(
                 severity="warning",
                 message=f"Infinite loop detected in agent {agent_name}",
-                agent_name=agent_name
+                agent_name=agent_name,
             )
 
     # ==================== POLICY TRACKING ====================
@@ -367,7 +367,7 @@ class LiveMonitor:
         policy_type: str,
         compliant: bool,
         enforcement_level: str = "advisory",
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
     ):
         """Track policy check."""
         result = "compliant" if compliant else "violation"
@@ -377,14 +377,14 @@ class LiveMonitor:
             policy_violations.labels(
                 policy_type=policy_type,
                 enforcement_level=enforcement_level,
-                user_id=user_id or "unknown"
+                user_id=user_id or "unknown",
             ).inc()
 
             if enforcement_level == "blocking":
                 self._add_alert(
                     severity="critical",
                     message=f"Blocking policy violation: {policy_type}",
-                    policy_type=policy_type
+                    policy_type=policy_type,
                 )
 
     # ==================== SYSTEM HEALTH ====================
@@ -397,10 +397,7 @@ class LiveMonitor:
     def set_component_health(self, component: str, healthy: bool):
         """Set health status for a component."""
         system_health.labels(component=component).set(1 if healthy else 0)
-        self._health_checks[component] = {
-            "healthy": healthy,
-            "last_check": datetime.utcnow()
-        }
+        self._health_checks[component] = {"healthy": healthy, "last_check": datetime.utcnow()}
 
     def _health_check_loop(self):
         """Background thread for health checks."""
@@ -412,15 +409,14 @@ class LiveMonitor:
 
                 # Check if any component is unhealthy
                 unhealthy = [
-                    comp for comp, status in self._health_checks.items()
-                    if not status["healthy"]
+                    comp for comp, status in self._health_checks.items() if not status["healthy"]
                 ]
 
                 if unhealthy:
                     self._add_alert(
                         severity="critical",
                         message=f"Unhealthy components: {', '.join(unhealthy)}",
-                        components=unhealthy
+                        components=unhealthy,
                     )
 
                 time.sleep(30)  # Check every 30 seconds
@@ -438,7 +434,7 @@ class LiveMonitor:
                 "timestamp": datetime.utcnow().isoformat(),
                 "severity": severity,
                 "message": message,
-                "metadata": metadata
+                "metadata": metadata,
             }
             self._alerts.append(alert)
 
@@ -477,7 +473,7 @@ class LiveMonitor:
             "timestamp": datetime.utcnow().isoformat(),
             "prometheus_available": PROMETHEUS_AVAILABLE,
             "alerts_count": len(self._alerts),
-            "health_checks": self._health_checks
+            "health_checks": self._health_checks,
         }
 
 
@@ -488,6 +484,7 @@ monitor = LiveMonitor()
 
 # ==================== DECORATOR FOR AUTOMATIC TRACKING ====================
 
+
 def track_operation(feature: str):
     """
     Decorator to automatically track operation metrics.
@@ -497,10 +494,13 @@ def track_operation(feature: str):
         def check_budget(self, cost):
             ...
     """
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             start = time.time()
-            user_id = kwargs.get('user_id') or (args[0].user_id if hasattr(args[0], 'user_id') else 'unknown')
+            user_id = kwargs.get("user_id") or (
+                args[0].user_id if hasattr(args[0], "user_id") else "unknown"
+            )
 
             try:
                 result = func(*args, **kwargs)
@@ -515,4 +515,5 @@ def track_operation(feature: str):
                 raise
 
         return wrapper
+
     return decorator

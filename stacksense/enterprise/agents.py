@@ -24,11 +24,7 @@ class AgentTracker:
         self.db_session = db_session
         self.user_id = user_id
 
-    def start_run(
-        self,
-        agent_name: str,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> str:
+    def start_run(self, agent_name: str, metadata: Optional[Dict[str, Any]] = None) -> str:
         """
         Start tracking a new agent run.
 
@@ -52,7 +48,7 @@ class AgentTracker:
             total_latency=0.0,
             loop_detected=False,
             loop_count=0,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         self.db_session.add(agent_run)
@@ -69,7 +65,7 @@ class AgentTracker:
         step_cost: float = 0.0,
         step_latency: float = 0.0,
         status: Optional[str] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ) -> Optional[AgentRun]:
         """
         Update an agent run with step metrics.
@@ -82,10 +78,7 @@ class AgentTracker:
 
         agent_run = (
             self.db_session.query(AgentRun)
-            .filter(
-                AgentRun.run_id == run_id,
-                AgentRun.user_id == self.user_id
-            )
+            .filter(AgentRun.run_id == run_id, AgentRun.user_id == self.user_id)
             .first()
         )
 
@@ -117,10 +110,7 @@ class AgentTracker:
         return agent_run
 
     def complete_run(
-        self,
-        run_id: str,
-        status: str = "completed",
-        error: Optional[str] = None
+        self, run_id: str, status: str = "completed", error: Optional[str] = None
     ) -> Optional[AgentRun]:
         """Mark an agent run as completed."""
         if not self.db_session or not self.user_id:
@@ -128,10 +118,7 @@ class AgentTracker:
 
         agent_run = (
             self.db_session.query(AgentRun)
-            .filter(
-                AgentRun.run_id == run_id,
-                AgentRun.user_id == self.user_id
-            )
+            .filter(AgentRun.run_id == run_id, AgentRun.user_id == self.user_id)
             .first()
         )
 
@@ -162,18 +149,12 @@ class AgentTracker:
 
         return (
             self.db_session.query(AgentRun)
-            .filter(
-                AgentRun.run_id == run_id,
-                AgentRun.user_id == self.user_id
-            )
+            .filter(AgentRun.run_id == run_id, AgentRun.user_id == self.user_id)
             .first()
         )
 
     def get_runs(
-        self,
-        agent_name: Optional[str] = None,
-        status: Optional[str] = None,
-        limit: int = 50
+        self, agent_name: Optional[str] = None, status: Optional[str] = None, limit: int = 50
     ) -> List[AgentRun]:
         """Get agent runs with optional filtering."""
         if not self.db_session or not self.user_id:
@@ -195,6 +176,7 @@ class AgentTracker:
             return {}
 
         from datetime import timedelta
+
         since = datetime.utcnow() - timedelta(days=days)
 
         runs = (
@@ -202,7 +184,7 @@ class AgentTracker:
             .filter(
                 AgentRun.user_id == self.user_id,
                 AgentRun.agent_name == agent_name,
-                AgentRun.start_time >= since
+                AgentRun.start_time >= since,
             )
             .all()
         )
@@ -216,7 +198,7 @@ class AgentTracker:
                 "avg_cost_per_run": 0.0,
                 "total_tokens": 0,
                 "avg_tokens_per_run": 0,
-                "loop_detections": 0
+                "loop_detections": 0,
             }
 
         completed = [r for r in runs if r.status == "completed"]
@@ -234,5 +216,5 @@ class AgentTracker:
             "avg_cost_per_run": total_cost / len(runs) if runs else 0.0,
             "total_tokens": total_tokens,
             "avg_tokens_per_run": total_tokens / len(runs) if runs else 0,
-            "loop_detections": len(loops)
+            "loop_detections": len(loops),
         }

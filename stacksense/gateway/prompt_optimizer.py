@@ -32,9 +32,21 @@ class PromptOptimizer:
 
         # Common filler words to remove
         self.filler_words = {
-            "actually", "basically", "essentially", "literally", "really",
-            "very", "quite", "just", "simply", "merely", "rather",
-            "somewhat", "pretty", "fairly", "relatively"
+            "actually",
+            "basically",
+            "essentially",
+            "literally",
+            "really",
+            "very",
+            "quite",
+            "just",
+            "simply",
+            "merely",
+            "rather",
+            "somewhat",
+            "pretty",
+            "fairly",
+            "relatively",
         }
 
         # Compression patterns (verbose → concise)
@@ -57,7 +69,7 @@ class PromptOptimizer:
         self,
         messages: List[Dict[str, str]],
         model: str,
-        target_reduction: float = 0.15  # 15% reduction target
+        target_reduction: float = 0.15,  # 15% reduction target
     ) -> Dict[str, Any]:
         """
         Optimize messages for token efficiency.
@@ -97,10 +109,7 @@ class PromptOptimizer:
             else:
                 optimized_content = self._optimize_assistant_prompt(content)
 
-            optimized_messages.append({
-                "role": role,
-                "content": optimized_content
-            })
+            optimized_messages.append({"role": role, "content": optimized_content})
 
         optimized_tokens = self._estimate_tokens(optimized_messages)
 
@@ -119,7 +128,7 @@ class PromptOptimizer:
                 "optimized": True,
                 "original_tokens": original_tokens,
                 "optimized_tokens": optimized_tokens,
-                "savings_percent": savings_percent
+                "savings_percent": savings_percent,
             }
         else:
             # Insufficient savings, return original
@@ -128,13 +137,13 @@ class PromptOptimizer:
                 "optimized": False,
                 "original_tokens": original_tokens,
                 "optimized_tokens": original_tokens,
-                "savings_percent": 0.0
+                "savings_percent": 0.0,
             }
 
     def _optimize_system_prompt(self, content: str) -> str:
         """Optimize system prompt (moderate optimization)."""
         # Remove extra whitespace
-        content = re.sub(r'\s+', ' ', content).strip()
+        content = re.sub(r"\s+", " ", content).strip()
 
         # Apply compression patterns
         for pattern, replacement in self.compression_patterns:
@@ -144,14 +153,14 @@ class PromptOptimizer:
         if self.aggressive_mode:
             words = content.split()
             words = [w for w in words if w.lower() not in self.filler_words]
-            content = ' '.join(words)
+            content = " ".join(words)
 
         return content
 
     def _optimize_user_prompt(self, content: str) -> str:
         """Optimize user prompt (aggressive optimization)."""
         # Remove extra whitespace
-        content = re.sub(r'\s+', ' ', content).strip()
+        content = re.sub(r"\s+", " ", content).strip()
 
         # Apply compression patterns
         for pattern, replacement in self.compression_patterns:
@@ -160,18 +169,18 @@ class PromptOptimizer:
         # Remove filler words
         words = content.split()
         words = [w for w in words if w.lower() not in self.filler_words]
-        content = ' '.join(words)
+        content = " ".join(words)
 
         # Remove redundant punctuation
-        content = re.sub(r'\.{2,}', '.', content)
-        content = re.sub(r'\?{2,}', '?', content)
-        content = re.sub(r'!{2,}', '!', content)
+        content = re.sub(r"\.{2,}", ".", content)
+        content = re.sub(r"\?{2,}", "?", content)
+        content = re.sub(r"!{2,}", "!", content)
 
         # Compress common phrases
-        content = re.sub(r'please\s+', '', content, flags=re.IGNORECASE)
-        content = re.sub(r'could you\s+', '', content, flags=re.IGNORECASE)
-        content = re.sub(r'would you\s+', '', content, flags=re.IGNORECASE)
-        content = re.sub(r'can you\s+', '', content, flags=re.IGNORECASE)
+        content = re.sub(r"please\s+", "", content, flags=re.IGNORECASE)
+        content = re.sub(r"could you\s+", "", content, flags=re.IGNORECASE)
+        content = re.sub(r"would you\s+", "", content, flags=re.IGNORECASE)
+        content = re.sub(r"can you\s+", "", content, flags=re.IGNORECASE)
 
         return content
 
@@ -179,7 +188,7 @@ class PromptOptimizer:
         """Optimize assistant prompt (light optimization)."""
         # Just remove extra whitespace for assistant messages
         # Preserve response quality
-        content = re.sub(r'\s+', ' ', content).strip()
+        content = re.sub(r"\s+", " ", content).strip()
         return content
 
     def _estimate_tokens(self, messages: List[Dict[str, str]]) -> int:
@@ -193,9 +202,7 @@ class PromptOptimizer:
         return total_chars // 4
 
     def compress_context(
-        self,
-        messages: List[Dict[str, str]],
-        max_tokens: int
+        self, messages: List[Dict[str, str]], max_tokens: int
     ) -> List[Dict[str, str]]:
         """
         Compress conversation history to fit within token limit.

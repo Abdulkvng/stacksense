@@ -44,7 +44,7 @@ class AsyncAIGateway:
         enable_cache: bool = True,
         enable_optimization: bool = True,
         enable_smart_routing: bool = True,
-        fail_open: bool = True  # Allow requests if gateway fails
+        fail_open: bool = True,  # Allow requests if gateway fails
     ):
         self.db_session = db_session
         self.user_id = user_id
@@ -72,10 +72,7 @@ class AsyncAIGateway:
         )
 
     async def intercept(
-        self,
-        messages: List[Dict[str, str]],
-        model: str,
-        **kwargs
+        self, messages: List[Dict[str, str]], model: str, **kwargs
     ) -> Dict[str, Any]:
         """
         Async intercept with parallel execution.
@@ -89,14 +86,17 @@ class AsyncAIGateway:
 
         try:
             # Step 1: Run all checks in PARALLEL
-            throttle_check, budget_result, cache_result, optimization_result = \
-                await asyncio.gather(
-                    self._check_throttling_async(),
-                    self._check_budget_async(messages, model),
-                    self._check_cache_async(messages, model) if self.enable_cache else self._no_cache(),
-                    self._optimize_prompt_async(messages, model) if self.enable_optimization else self._no_optimization(messages),
-                    return_exceptions=True  # Don't fail if one check fails
-                )
+            throttle_check, budget_result, cache_result, optimization_result = await asyncio.gather(
+                self._check_throttling_async(),
+                self._check_budget_async(messages, model),
+                self._check_cache_async(messages, model) if self.enable_cache else self._no_cache(),
+                (
+                    self._optimize_prompt_async(messages, model)
+                    if self.enable_optimization
+                    else self._no_optimization(messages)
+                ),
+                return_exceptions=True,  # Don't fail if one check fails
+            )
 
             # Handle exceptions in checks (fail open)
             if isinstance(throttle_check, Exception):
@@ -128,7 +128,7 @@ class AsyncAIGateway:
                     "from_cache": True,
                     "cost": 0.0,
                     "model": model,
-                    "latency_ms": duration
+                    "latency_ms": duration,
                 }
 
             # Step 4: Check budget
@@ -155,9 +155,7 @@ class AsyncAIGateway:
 
             if self.enable_smart_routing and self._smart_router:
                 routing_result = await self._smart_route_async(
-                    model=selected_model,
-                    messages=final_messages,
-                    context=kwargs
+                    model=selected_model, messages=final_messages, context=kwargs
                 )
 
                 if routing_result and routing_result.get("switched"):
@@ -178,7 +176,7 @@ class AsyncAIGateway:
                 "optimized": optimized,
                 "intercepted": True,
                 "budget_action": budget_result.get("action"),
-                "latency_ms": duration
+                "latency_ms": duration,
             }
 
         except Exception as e:
@@ -192,7 +190,7 @@ class AsyncAIGateway:
                     "messages": messages,
                     "intercepted": False,
                     "error": str(e),
-                    "failed_open": True
+                    "failed_open": True,
                 }
             else:
                 raise
@@ -206,9 +204,7 @@ class AsyncAIGateway:
         return self._throttler.check_request()
 
     async def _check_budget_async(
-        self,
-        messages: List[Dict[str, str]],
-        model: str
+        self, messages: List[Dict[str, str]], model: str
     ) -> Dict[str, Any]:
         """
         Async budget check with in-memory caching.
@@ -235,32 +231,23 @@ class AsyncAIGateway:
                         "allowed": False,
                         "action": "block",
                         "message": "Budget exceeded",
-                        "budget_remaining": cached_budget["remaining"]
+                        "budget_remaining": cached_budget["remaining"],
                     }
 
                 return {"allowed": True, "action": "allow"}
 
         # Cache miss - fetch from DB (this is slow, so we cache it)
         estimated_cost = self._estimate_cost(messages, model)
-        budget_result = self._budget_enforcer.check_budget(
-            cost=estimated_cost,
-            scope="global"
-        )
+        budget_result = self._budget_enforcer.check_budget(cost=estimated_cost, scope="global")
 
         # Update cache (TTL: 60s)
         if budget_result.get("budget_remaining") is not None:
-            self._budget_cache[cache_key] = {
-                "remaining": budget_result["budget_remaining"]
-            }
+            self._budget_cache[cache_key] = {"remaining": budget_result["budget_remaining"]}
             self._budget_cache_expires[cache_key] = time.time() + 60
 
         return budget_result
 
-    async def _check_cache_async(
-        self,
-        messages: List[Dict[str, str]],
-        model: str
-    ) -> Optional[Any]:
+    async def _check_cache_async(self, messages: List[Dict[str, str]], model: str) -> Optional[Any]:
         """
         Async cache check using Redis.
 
@@ -277,6 +264,7 @@ class AsyncAIGateway:
                 cached = await self.redis_client.get(cache_key)
                 if cached:
                     import json
+
                     return json.loads(cached)
             except Exception as e:
                 logger.error(f"Redis cache failed: {e}")
@@ -286,9 +274,7 @@ class AsyncAIGateway:
         return self._cache.get(cache_key)
 
     async def _optimize_prompt_async(
-        self,
-        messages: List[Dict[str, str]],
-        model: str
+        self, messages: List[Dict[str, str]], model: str
     ) -> Dict[str, Any]:
         """
         Async prompt optimization.
@@ -300,31 +286,19 @@ class AsyncAIGateway:
 
         # Optimization is CPU-bound, run in thread pool
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            None,
-            self._prompt_optimizer.optimize,
-            messages,
-            model
-        )
+        result = await loop.run_in_executor(None, self._prompt_optimizer.optimize, messages, model)
 
         return result
 
     async def _smart_route_async(
-        self,
-        model: str,
-        messages: List[Dict[str, str]],
-        context: Dict[str, Any]
+        self, model: str, messages: List[Dict[str, str]], context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """Async smart routing (in-memory, fast)."""
         if not self._smart_router:
             return None
 
         # Smart router is in-memory, can be sync
-        return self._smart_router.select_provider(
-            model=model,
-            messages=messages,
-            context=context
-        )
+        return self._smart_router.select_provider(model=model, messages=messages, context=context)
 
     async def _no_cache(self) -> None:
         """No-op for cache when disabled."""
@@ -359,7 +333,7 @@ class AsyncAIGateway:
             "error": "rate_limit_exceeded",
             "message": throttle_result.get("message", "Too many requests"),
             "retry_after": throttle_result.get("retry_after", 60),
-            "intercepted": True
+            "intercepted": True,
         }
 
     def _blocked_response(self, budget_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -369,15 +343,11 @@ class AsyncAIGateway:
             "error": "budget_exceeded",
             "message": budget_result.get("message", "Budget exceeded"),
             "budget_remaining": budget_result.get("budget_remaining", 0),
-            "intercepted": True
+            "intercepted": True,
         }
 
     async def post_execution_tracking(
-        self,
-        request: Dict[str, Any],
-        response: Any,
-        actual_cost: float,
-        latency: float
+        self, request: Dict[str, Any], response: Any, actual_cost: float, latency: float
     ):
         """
         Async post-execution tracking.
@@ -398,15 +368,11 @@ class AsyncAIGateway:
 
             # Update provider performance (if smart router enabled)
             if self._smart_router:
-                tasks.append(
-                    self._record_performance_async(request, latency, actual_cost)
-                )
+                tasks.append(self._record_performance_async(request, latency, actual_cost))
 
             # Track quality (if quality tracker enabled)
             if self._quality_tracker:
-                tasks.append(
-                    self._track_quality_async(request, response, latency, actual_cost)
-                )
+                tasks.append(self._track_quality_async(request, response, latency, actual_cost))
 
             # Run all in parallel
             if tasks:
@@ -420,20 +386,14 @@ class AsyncAIGateway:
         if not self._cache:
             return
 
-        cache_key = self._cache.generate_key(
-            request.get("messages", []),
-            request.get("model", "")
-        )
+        cache_key = self._cache.generate_key(request.get("messages", []), request.get("model", ""))
 
         # Use Redis if available
         if self.redis_client:
             try:
                 import json
-                await self.redis_client.setex(
-                    cache_key,
-                    3600,  # TTL: 1 hour
-                    json.dumps(response)
-                )
+
+                await self.redis_client.setex(cache_key, 3600, json.dumps(response))  # TTL: 1 hour
                 return
             except Exception as e:
                 logger.error(f"Redis cache set failed: {e}")
@@ -448,19 +408,9 @@ class AsyncAIGateway:
 
         # Run in thread pool (DB operation)
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            None,
-            self._budget_enforcer.record_spend,
-            cost,
-            "global"
-        )
+        await loop.run_in_executor(None, self._budget_enforcer.record_spend, cost, "global")
 
-    async def _record_performance_async(
-        self,
-        request: Dict[str, Any],
-        latency: float,
-        cost: float
-    ):
+    async def _record_performance_async(self, request: Dict[str, Any], latency: float, cost: float):
         """Record provider performance."""
         if not self._smart_router:
             return
@@ -470,26 +420,18 @@ class AsyncAIGateway:
             model=request.get("model", ""),
             latency=latency,
             success=True,
-            cost=cost
+            cost=cost,
         )
 
     async def _track_quality_async(
-        self,
-        request: Dict[str, Any],
-        response: Any,
-        latency: float,
-        cost: float
+        self, request: Dict[str, Any], response: Any, latency: float, cost: float
     ):
         """Track response quality."""
         if not self._quality_tracker:
             return
 
         self._quality_tracker.track_response(
-            model=request.get("model"),
-            response=response,
-            cost=cost,
-            latency=latency,
-            error=False
+            model=request.get("model"), response=response, cost=cost, latency=latency, error=False
         )
 
     @property
@@ -497,10 +439,8 @@ class AsyncAIGateway:
         """Lazy load budget enforcer."""
         if self._budget_enforcer is None and self.db_session and self.user_id:
             from stacksense.enterprise.budget import BudgetEnforcer
-            self._budget_enforcer = BudgetEnforcer(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._budget_enforcer = BudgetEnforcer(db_session=self.db_session, user_id=self.user_id)
         return self._budget_enforcer
 
     @property
@@ -508,10 +448,8 @@ class AsyncAIGateway:
         """Lazy load smart router."""
         if self._smart_router is None and self.enable_smart_routing:
             from stacksense.gateway.smart_router import SmartRouter
-            self._smart_router = SmartRouter(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._smart_router = SmartRouter(db_session=self.db_session, user_id=self.user_id)
         return self._smart_router
 
     @property
@@ -519,6 +457,7 @@ class AsyncAIGateway:
         """Lazy load prompt optimizer."""
         if self._prompt_optimizer is None and self.enable_optimization:
             from stacksense.gateway.prompt_optimizer import PromptOptimizer
+
             self._prompt_optimizer = PromptOptimizer()
         return self._prompt_optimizer
 
@@ -527,6 +466,7 @@ class AsyncAIGateway:
         """Lazy load cache."""
         if self._cache is None and self.enable_cache:
             from stacksense.gateway.cache import SemanticCache
+
             self._cache = SemanticCache()
         return self._cache
 
@@ -535,10 +475,8 @@ class AsyncAIGateway:
         """Lazy load throttler."""
         if self._throttler is None:
             from stacksense.gateway.throttler import RequestThrottler
-            self._throttler = RequestThrottler(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._throttler = RequestThrottler(db_session=self.db_session, user_id=self.user_id)
         return self._throttler
 
     @property
@@ -546,8 +484,6 @@ class AsyncAIGateway:
         """Lazy load quality tracker."""
         if self._quality_tracker is None:
             from stacksense.gateway.quality_tracker import QualityTracker
-            self._quality_tracker = QualityTracker(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._quality_tracker = QualityTracker(db_session=self.db_session, user_id=self.user_id)
         return self._quality_tracker

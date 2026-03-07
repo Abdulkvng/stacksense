@@ -34,15 +34,17 @@ class SmartRouter:
         self.user_id = user_id
 
         # Real-time provider performance tracking
-        self.provider_stats = defaultdict(lambda: {
-            "latencies": [],
-            "errors": 0,
-            "requests": 0,
-            "last_latency": 0.0,
-            "avg_latency": 0.0,
-            "error_rate": 0.0,
-            "last_error_time": None
-        })
+        self.provider_stats = defaultdict(
+            lambda: {
+                "latencies": [],
+                "errors": 0,
+                "requests": 0,
+                "last_latency": 0.0,
+                "avg_latency": 0.0,
+                "error_rate": 0.0,
+                "last_error_time": None,
+            }
+        )
 
         # Model equivalency map (for tier dropping)
         self.model_tiers = {
@@ -50,44 +52,44 @@ class SmartRouter:
                 "tier": "premium",
                 "cost": 0.00003,
                 "quality": 1.0,
-                "downgrades": ["gpt-4-turbo", "gpt-4o", "gpt-4o-mini"]
+                "downgrades": ["gpt-4-turbo", "gpt-4o", "gpt-4o-mini"],
             },
             "gpt-4-turbo": {
                 "tier": "high",
                 "cost": 0.00001,
                 "quality": 0.95,
-                "downgrades": ["gpt-4o", "gpt-4o-mini"]
+                "downgrades": ["gpt-4o", "gpt-4o-mini"],
             },
             "gpt-4o": {
                 "tier": "medium",
                 "cost": 0.000005,
                 "quality": 0.90,
-                "downgrades": ["gpt-4o-mini"]
+                "downgrades": ["gpt-4o-mini"],
             },
             "gpt-4o-mini": {
                 "tier": "budget",
                 "cost": 0.00000015,
                 "quality": 0.85,
-                "downgrades": []
+                "downgrades": [],
             },
             "claude-3-opus": {
                 "tier": "premium",
                 "cost": 0.000015,
                 "quality": 1.0,
-                "downgrades": ["claude-3-sonnet", "claude-3-haiku"]
+                "downgrades": ["claude-3-sonnet", "claude-3-haiku"],
             },
             "claude-3-sonnet": {
                 "tier": "high",
                 "cost": 0.000003,
                 "quality": 0.95,
-                "downgrades": ["claude-3-haiku"]
+                "downgrades": ["claude-3-haiku"],
             },
             "claude-3-haiku": {
                 "tier": "budget",
                 "cost": 0.00000025,
                 "quality": 0.85,
-                "downgrades": []
-            }
+                "downgrades": [],
+            },
         }
 
         # Provider to model mapping
@@ -100,10 +102,7 @@ class SmartRouter:
         logger.info("Smart Router initialized")
 
     def select_provider(
-        self,
-        model: str,
-        messages: List[Dict[str, str]],
-        context: Optional[Dict[str, Any]] = None
+        self, model: str, messages: List[Dict[str, str]], context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Select the best provider and model in real-time.
@@ -153,7 +152,7 @@ class SmartRouter:
                     "reason": f"latency_spike_{current_stats['avg_latency']:.0f}ms",
                     "original_model": original_model,
                     "estimated_latency": alternative["estimated_latency"],
-                    "estimated_cost": alternative["estimated_cost"]
+                    "estimated_cost": alternative["estimated_cost"],
                 }
 
         # Decision 2: Check if we can drop to cheaper tier
@@ -179,7 +178,7 @@ class SmartRouter:
                         "reason": f"cost_optimization_{cheaper_option['cost_savings']:.0f}%_savings",
                         "original_model": original_model,
                         "estimated_latency": cheaper_option["estimated_latency"],
-                        "estimated_cost": cheaper_option["estimated_cost"]
+                        "estimated_cost": cheaper_option["estimated_cost"],
                     }
 
         # Decision 3: Check provider health (error rate)
@@ -200,7 +199,7 @@ class SmartRouter:
                     "reason": f"provider_health_error_rate_{current_stats['error_rate']*100:.0f}%",
                     "original_model": original_model,
                     "estimated_latency": healthy_alternative["estimated_latency"],
-                    "estimated_cost": healthy_alternative["estimated_cost"]
+                    "estimated_cost": healthy_alternative["estimated_cost"],
                 }
 
         # No switch needed - use original
@@ -211,16 +210,11 @@ class SmartRouter:
             "reason": "optimal_choice",
             "original_model": original_model,
             "estimated_latency": current_stats.get("avg_latency", 1000),
-            "estimated_cost": self.model_tiers.get(model, {}).get("cost", 0.00001)
+            "estimated_cost": self.model_tiers.get(model, {}).get("cost", 0.00001),
         }
 
     def record_performance(
-        self,
-        provider: str,
-        model: str,
-        latency: float,
-        success: bool,
-        cost: float
+        self, provider: str, model: str, latency: float, success: bool, cost: float
     ):
         """
         Record provider performance for future routing decisions.
@@ -290,7 +284,7 @@ class SmartRouter:
         # Pick fastest based on current stats
         fastest = min(
             equivalent_models,
-            key=lambda x: self.provider_stats[x[2]].get("avg_latency", float('inf'))
+            key=lambda x: self.provider_stats[x[2]].get("avg_latency", float("inf")),
         )
 
         model, info, provider = fastest
@@ -299,13 +293,11 @@ class SmartRouter:
             "model": model,
             "provider": provider,
             "estimated_latency": self.provider_stats[provider].get("avg_latency", 1000),
-            "estimated_cost": info["cost"]
+            "estimated_cost": info["cost"],
         }
 
     def _find_cheaper_equivalent(
-        self,
-        current_model: str,
-        min_quality: float
+        self, current_model: str, min_quality: float
     ) -> Optional[Dict[str, Any]]:
         """Find cheaper model that meets quality threshold."""
         if current_model not in self.model_tiers:
@@ -324,8 +316,7 @@ class SmartRouter:
             if downgrade_info["quality"] >= min_quality:
                 provider = self._get_provider_for_model(downgrade_model)
                 cost_savings = (
-                    (current_info["cost"] - downgrade_info["cost"]) /
-                    current_info["cost"] * 100
+                    (current_info["cost"] - downgrade_info["cost"]) / current_info["cost"] * 100
                 )
 
                 return {
@@ -333,7 +324,7 @@ class SmartRouter:
                     "provider": provider,
                     "estimated_latency": self.provider_stats[provider].get("avg_latency", 1000),
                     "estimated_cost": downgrade_info["cost"],
-                    "cost_savings": cost_savings
+                    "cost_savings": cost_savings,
                 }
 
         return None
@@ -360,7 +351,7 @@ class SmartRouter:
                     "model": model,
                     "provider": provider,
                     "estimated_latency": stats.get("avg_latency", 1000),
-                    "estimated_cost": info["cost"]
+                    "estimated_cost": info["cost"],
                 }
 
         return None

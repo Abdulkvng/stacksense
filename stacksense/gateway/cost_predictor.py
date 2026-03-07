@@ -42,10 +42,7 @@ class CostPredictor:
         logger.info("Cost Predictor initialized")
 
     def predict_monthly_cost(
-        self,
-        current_spend: float,
-        days_elapsed: int,
-        days_in_month: int = 30
+        self, current_spend: float, days_elapsed: int, days_in_month: int = 30
     ) -> Dict[str, Any]:
         """
         Predict end-of-month cost based on current spend.
@@ -76,7 +73,7 @@ class CostPredictor:
                 "confidence": 0.0,
                 "days_remaining": days_in_month,
                 "daily_average": 0.0,
-                "trend": "unknown"
+                "trend": "unknown",
             }
 
         # Calculate daily average
@@ -104,8 +101,7 @@ class CostPredictor:
             confidence = 0.85
 
         logger.info(
-            f"Monthly cost prediction: ${predicted_cost:.2f} "
-            f"(method={method}, trend={trend})"
+            f"Monthly cost prediction: ${predicted_cost:.2f} " f"(method={method}, trend={trend})"
         )
 
         return {
@@ -114,7 +110,7 @@ class CostPredictor:
             "confidence": confidence,
             "days_remaining": days_remaining,
             "daily_average": daily_average,
-            "trend": trend
+            "trend": trend,
         }
 
     def check_budget_overrun(
@@ -122,7 +118,7 @@ class CostPredictor:
         current_spend: float,
         monthly_budget: float,
         days_elapsed: int,
-        days_in_month: int = 30
+        days_in_month: int = 30,
     ) -> Dict[str, Any]:
         """
         Check if current trajectory will exceed monthly budget.
@@ -174,14 +170,11 @@ class CostPredictor:
             "overage": overage,
             "overage_percent": overage_percent,
             "days_until_exceeded": days_until_exceeded,
-            "recommended_action": action
+            "recommended_action": action,
         }
 
     def simulate_scenario(
-        self,
-        scenario: Dict[str, Any],
-        current_spend: float,
-        days_elapsed: int
+        self, scenario: Dict[str, Any], current_spend: float, days_elapsed: int
     ) -> Dict[str, Any]:
         """
         Simulate "what if" cost scenarios.
@@ -220,10 +213,9 @@ class CostPredictor:
         if "model_switch" in scenario:
             switch = scenario["model_switch"]
             cost_reduction = self._estimate_model_switch_savings(
-                switch.get("from"),
-                switch.get("to")
+                switch.get("from"), switch.get("to")
             )
-            projected_daily *= (1 - cost_reduction)
+            projected_daily *= 1 - cost_reduction
             changes.append(f"switch {switch.get('from')} → {switch.get('to')}")
 
         # Optimization savings (15-30% typical)
@@ -234,7 +226,7 @@ class CostPredictor:
         # Rate reduction
         if "rate_reduction" in scenario:
             reduction = scenario["rate_reduction"]
-            projected_daily *= (1 - reduction)
+            projected_daily *= 1 - reduction
             changes.append(f"reduce rate by {reduction*100:.0f}%")
 
         # Calculate new projection
@@ -253,14 +245,10 @@ class CostPredictor:
             "projected_cost": projected_cost,
             "savings": savings,
             "savings_percent": savings_percent,
-            "scenario_description": description
+            "scenario_description": description,
         }
 
-    def detect_anomaly(
-        self,
-        current_cost: float,
-        window_size: int = 7
-    ) -> Dict[str, Any]:
+    def detect_anomaly(self, current_cost: float, window_size: int = 7) -> Dict[str, Any]:
         """
         Detect cost anomalies (unexpected spikes).
 
@@ -279,7 +267,7 @@ class CostPredictor:
                 "is_anomaly": False,
                 "severity": "normal",
                 "deviation": 0.0,
-                "expected_range": (0.0, float('inf'))
+                "expected_range": (0.0, float("inf")),
             }
 
         # Get recent costs
@@ -315,7 +303,7 @@ class CostPredictor:
             "is_anomaly": is_anomaly,
             "severity": severity,
             "deviation": deviation,
-            "expected_range": (lower_bound, upper_bound)
+            "expected_range": (lower_bound, upper_bound),
         }
 
     def record_cost(self, date: datetime, cost: float, model: str):
@@ -359,11 +347,7 @@ class CostPredictor:
         else:
             return "stable", 1.0
 
-    def _estimate_model_switch_savings(
-        self,
-        from_model: str,
-        to_model: str
-    ) -> float:
+    def _estimate_model_switch_savings(self, from_model: str, to_model: str) -> float:
         """
         Estimate cost savings from model switch.
 

@@ -59,7 +59,7 @@ class SelectiveGateway:
         self,
         gateway: AsyncAIGateway,
         strategy: str = "auto",
-        custom_filter: Optional[Callable] = None
+        custom_filter: Optional[Callable] = None,
     ):
         """
         Initialize selective gateway.
@@ -78,16 +78,13 @@ class SelectiveGateway:
             "total_requests": 0,
             "gateway_used": 0,
             "gateway_skipped": 0,
-            "cost_savings": 0.0
+            "cost_savings": 0.0,
         }
 
         logger.info(f"Selective Gateway initialized (strategy={strategy})")
 
     async def intercept(
-        self,
-        messages: List[Dict[str, str]],
-        model: str,
-        **kwargs
+        self, messages: List[Dict[str, str]], model: str, **kwargs
     ) -> Dict[str, Any]:
         """
         Intercept request with selective optimization.
@@ -111,11 +108,7 @@ class SelectiveGateway:
             # Use gateway (2-6ms overhead)
             self.stats["gateway_used"] += 1
 
-            result = await self.gateway.intercept(
-                messages=messages,
-                model=model,
-                **kwargs
-            )
+            result = await self.gateway.intercept(messages=messages, model=model, **kwargs)
 
             # Track cost savings
             if result.get("optimized"):
@@ -138,14 +131,11 @@ class SelectiveGateway:
                 "intercepted": False,
                 "gateway_skipped": True,
                 "reason": "cheap_model_skip",
-                "latency_ms": 0.0
+                "latency_ms": 0.0,
             }
 
     def _should_optimize(
-        self,
-        model: str,
-        messages: List[Dict[str, str]],
-        context: Dict[str, Any]
+        self, model: str, messages: List[Dict[str, str]], context: Dict[str, Any]
     ) -> bool:
         """
         Decide if gateway should be used for this request.
@@ -199,11 +189,7 @@ class SelectiveGateway:
             else 0.0
         )
 
-        return {
-            **self.stats,
-            "skip_rate": skip_rate,
-            "skip_rate_percent": skip_rate * 100
-        }
+        return {**self.stats, "skip_rate": skip_rate, "skip_rate_percent": skip_rate * 100}
 
     def reset_stats(self):
         """Reset statistics."""
@@ -211,7 +197,7 @@ class SelectiveGateway:
             "total_requests": 0,
             "gateway_used": 0,
             "gateway_skipped": 0,
-            "cost_savings": 0.0
+            "cost_savings": 0.0,
         }
 
 
@@ -221,7 +207,7 @@ async def selective_intercept(
     messages: List[Dict[str, str]],
     model: str,
     strategy: str = "auto",
-    **kwargs
+    **kwargs,
 ) -> Dict[str, Any]:
     """
     Convenience function for selective interception.
@@ -241,6 +227,7 @@ async def selective_intercept(
 
 
 # Example custom filters
+
 
 def streaming_aware_filter(model: str, messages: List[Dict], context: Dict) -> bool:
     """Skip gateway for streaming requests (latency-sensitive)."""

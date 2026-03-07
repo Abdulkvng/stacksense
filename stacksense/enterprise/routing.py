@@ -35,11 +35,7 @@ class DynamicRouter:
         self.db_session = db_session
         self.user_id = user_id
 
-    def route(
-        self,
-        prompt: str,
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def route(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Route a prompt to the appropriate model based on active routing rules.
 
@@ -55,17 +51,14 @@ class DynamicRouter:
                 "model": None,
                 "provider": None,
                 "fallback": None,
-                "reason": "No routing rules configured"
+                "reason": "No routing rules configured",
             }
 
         try:
             # Get active routing rules, ordered by priority
             rules = (
                 self.db_session.query(RoutingRule)
-                .filter(
-                    RoutingRule.user_id == self.user_id,
-                    RoutingRule.is_active == True
-                )
+                .filter(RoutingRule.user_id == self.user_id, RoutingRule.is_active == True)
                 .order_by(RoutingRule.priority.desc())
                 .all()
             )
@@ -75,7 +68,7 @@ class DynamicRouter:
                     "model": None,
                     "provider": None,
                     "fallback": None,
-                    "reason": "No active routing rules found"
+                    "reason": "No active routing rules found",
                 }
 
             # Evaluate rules in priority order
@@ -91,14 +84,14 @@ class DynamicRouter:
                         "provider": self._extract_provider(rule.target_model),
                         "fallback": rule.fallback_model,
                         "reason": f"Matched rule: {rule.name}",
-                        "rule_id": rule.id
+                        "rule_id": rule.id,
                     }
 
             return {
                 "model": None,
                 "provider": None,
                 "fallback": None,
-                "reason": "No matching routing rules"
+                "reason": "No matching routing rules",
             }
 
         except Exception as e:
@@ -107,7 +100,7 @@ class DynamicRouter:
                 "model": None,
                 "provider": None,
                 "fallback": None,
-                "reason": f"Routing error: {str(e)}"
+                "reason": f"Routing error: {str(e)}",
             }
 
     def _evaluate_conditions(self, conditions: Dict[str, Any], context: Dict[str, Any]) -> bool:
@@ -203,7 +196,7 @@ class DynamicRouter:
                 target_model=data.target_model,
                 fallback_model=data.fallback_model,
                 priority=data.priority,
-                is_active=True
+                is_active=True,
             )
 
             self.db_session.add(rule)
@@ -255,10 +248,7 @@ class DynamicRouter:
         try:
             rule = (
                 self.db_session.query(RoutingRule)
-                .filter(
-                    RoutingRule.id == rule_id,
-                    RoutingRule.user_id == self.user_id
-                )
+                .filter(RoutingRule.id == rule_id, RoutingRule.user_id == self.user_id)
                 .first()
             )
 
@@ -291,10 +281,7 @@ class DynamicRouter:
         try:
             rule = (
                 self.db_session.query(RoutingRule)
-                .filter(
-                    RoutingRule.id == rule_id,
-                    RoutingRule.user_id == self.user_id
-                )
+                .filter(RoutingRule.id == rule_id, RoutingRule.user_id == self.user_id)
                 .first()
             )
 

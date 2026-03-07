@@ -35,31 +35,28 @@ class QualityTracker:
         self.user_id = user_id
 
         # Quality metrics by model
-        self.model_metrics = defaultdict(lambda: {
-            "response_count": 0,
-            "avg_response_length": 0.0,
-            "avg_latency": 0.0,
-            "error_rate": 0.0,
-            "quality_scores": [],  # Rolling window of quality scores
-            "cost_per_response": 0.0,
-            "last_updated": None
-        })
+        self.model_metrics = defaultdict(
+            lambda: {
+                "response_count": 0,
+                "avg_response_length": 0.0,
+                "avg_latency": 0.0,
+                "error_rate": 0.0,
+                "quality_scores": [],  # Rolling window of quality scores
+                "cost_per_response": 0.0,
+                "last_updated": None,
+            }
+        )
 
         # Model tier hierarchy (for downgrade suggestions)
         self.tier_hierarchy = {
             "premium": ["gpt-4", "claude-3-opus"],
             "high": ["gpt-4-turbo", "claude-3-sonnet"],
             "medium": ["gpt-4o", "gemini-pro"],
-            "budget": ["gpt-4o-mini", "claude-3-haiku", "gemini-flash"]
+            "budget": ["gpt-4o-mini", "claude-3-haiku", "gemini-flash"],
         }
 
         # Quality thresholds
-        self.thresholds = {
-            "excellent": 0.95,
-            "good": 0.85,
-            "acceptable": 0.70,
-            "poor": 0.50
-        }
+        self.thresholds = {"excellent": 0.95, "good": 0.85, "acceptable": 0.70, "poor": 0.50}
 
         logger.info("Quality Tracker initialized")
 
@@ -70,7 +67,7 @@ class QualityTracker:
         cost: float,
         latency: float,
         error: bool = False,
-        user_feedback: Optional[float] = None
+        user_feedback: Optional[float] = None,
     ):
         """
         Track response quality metrics.
@@ -90,10 +87,7 @@ class QualityTracker:
 
         # Calculate quality score
         quality_score = self._calculate_quality_score(
-            response=response,
-            latency=latency,
-            error=error,
-            user_feedback=user_feedback
+            response=response, latency=latency, error=error, user_feedback=user_feedback
         )
 
         # Update rolling quality scores (last 100 responses)
@@ -105,14 +99,12 @@ class QualityTracker:
         if not error and response:
             response_length = len(str(response))
             metrics["avg_response_length"] = (
-                (metrics["avg_response_length"] * (metrics["response_count"] - 1) + response_length) /
-                metrics["response_count"]
-            )
+                metrics["avg_response_length"] * (metrics["response_count"] - 1) + response_length
+            ) / metrics["response_count"]
 
         metrics["avg_latency"] = (
-            (metrics["avg_latency"] * (metrics["response_count"] - 1) + latency) /
-            metrics["response_count"]
-        )
+            metrics["avg_latency"] * (metrics["response_count"] - 1) + latency
+        ) / metrics["response_count"]
 
         # Update error rate
         if error:
@@ -121,9 +113,8 @@ class QualityTracker:
 
         # Update cost per response
         metrics["cost_per_response"] = (
-            (metrics["cost_per_response"] * (metrics["response_count"] - 1) + cost) /
-            metrics["response_count"]
-        )
+            metrics["cost_per_response"] * (metrics["response_count"] - 1) + cost
+        ) / metrics["response_count"]
 
         metrics["last_updated"] = datetime.utcnow()
 
@@ -133,11 +124,7 @@ class QualityTracker:
         )
 
     def _calculate_quality_score(
-        self,
-        response: Any,
-        latency: float,
-        error: bool,
-        user_feedback: Optional[float] = None
+        self, response: Any, latency: float, error: bool, user_feedback: Optional[float] = None
     ) -> float:
         """
         Calculate quality score (0-1).
@@ -203,7 +190,7 @@ class QualityTracker:
                 "error_rate": 0.0,
                 "avg_latency": 0.0,
                 "cost_per_response": 0.0,
-                "cost_per_quality": 0.0
+                "cost_per_quality": 0.0,
             }
 
         # Calculate average quality
@@ -221,9 +208,7 @@ class QualityTracker:
 
         # Cost per quality point
         cost_per_quality = (
-            metrics["cost_per_response"] / avg_quality
-            if avg_quality > 0
-            else float('inf')
+            metrics["cost_per_response"] / avg_quality if avg_quality > 0 else float("inf")
         )
 
         return {
@@ -233,13 +218,11 @@ class QualityTracker:
             "error_rate": metrics["error_rate"],
             "avg_latency": metrics["avg_latency"],
             "cost_per_response": metrics["cost_per_response"],
-            "cost_per_quality": cost_per_quality
+            "cost_per_quality": cost_per_quality,
         }
 
     def recommend_tier_downgrade(
-        self,
-        current_model: str,
-        min_quality_threshold: float = 0.85
+        self, current_model: str, min_quality_threshold: float = 0.85
     ) -> Optional[Dict[str, Any]]:
         """
         Recommend cheaper model if quality threshold is met.
@@ -272,7 +255,7 @@ class QualityTracker:
         current_tier_index = tier_order.index(current_tier)
 
         # Check each cheaper tier
-        for tier in tier_order[current_tier_index + 1:]:
+        for tier in tier_order[current_tier_index + 1 :]:
             tier_models = self.tier_hierarchy[tier]
 
             # Find best model in this tier
@@ -283,8 +266,10 @@ class QualityTracker:
                 candidate_quality = self.get_model_quality(candidate_model)
 
                 # Must have sufficient data and meet threshold
-                if (candidate_quality["response_count"] >= 10 and
-                    candidate_quality["avg_quality"] >= min_quality_threshold):
+                if (
+                    candidate_quality["response_count"] >= 10
+                    and candidate_quality["avg_quality"] >= min_quality_threshold
+                ):
 
                     if candidate_quality["avg_quality"] > best_quality:
                         best_quality = candidate_quality["avg_quality"]
@@ -294,8 +279,9 @@ class QualityTracker:
             if best_candidate:
                 candidate_quality = self.get_model_quality(best_candidate)
                 cost_savings = (
-                    (current_quality["cost_per_response"] - candidate_quality["cost_per_response"]) /
-                    current_quality["cost_per_response"] * 100
+                    (current_quality["cost_per_response"] - candidate_quality["cost_per_response"])
+                    / current_quality["cost_per_response"]
+                    * 100
                     if current_quality["cost_per_response"] > 0
                     else 0
                 )
@@ -313,7 +299,7 @@ class QualityTracker:
                     "quality_delta": best_quality - current_quality["avg_quality"],
                     "cost_savings": cost_savings,
                     "current_cost": current_quality["cost_per_response"],
-                    "recommended_cost": candidate_quality["cost_per_response"]
+                    "recommended_cost": candidate_quality["cost_per_response"],
                 }
 
         return None
@@ -333,25 +319,23 @@ class QualityTracker:
 
             quality_data = self.get_model_quality(model)
 
-            leaderboard.append({
-                "model": model,
-                "avg_quality": quality_data["avg_quality"],
-                "quality_rating": quality_data["quality_rating"],
-                "cost_per_quality": quality_data["cost_per_quality"],
-                "cost_per_response": quality_data["cost_per_response"],
-                "response_count": quality_data["response_count"]
-            })
+            leaderboard.append(
+                {
+                    "model": model,
+                    "avg_quality": quality_data["avg_quality"],
+                    "quality_rating": quality_data["quality_rating"],
+                    "cost_per_quality": quality_data["cost_per_quality"],
+                    "cost_per_response": quality_data["cost_per_response"],
+                    "response_count": quality_data["response_count"],
+                }
+            )
 
         # Sort by cost-per-quality (lower is better)
         leaderboard.sort(key=lambda x: x["cost_per_quality"])
 
         return leaderboard
 
-    def compare_models(
-        self,
-        model1: str,
-        model2: str
-    ) -> Dict[str, Any]:
+    def compare_models(self, model1: str, model2: str) -> Dict[str, Any]:
         """
         Compare quality metrics between two models.
 
@@ -373,15 +357,8 @@ class QualityTracker:
         else:
             recommendation = "Similar value"
 
-        return {
-            model1: quality1,
-            model2: quality2,
-            "recommendation": recommendation
-        }
+        return {model1: quality1, model2: quality2, "recommendation": recommendation}
 
     def get_all_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Get quality metrics for all tracked models."""
-        return {
-            model: self.get_model_quality(model)
-            for model in self.model_metrics.keys()
-        }
+        return {model: self.get_model_quality(model) for model in self.model_metrics.keys()}

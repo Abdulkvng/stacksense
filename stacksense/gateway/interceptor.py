@@ -35,7 +35,7 @@ class AIGateway:
         user_id: Optional[int] = None,
         enable_cache: bool = True,
         enable_optimization: bool = True,
-        enable_smart_routing: bool = True
+        enable_smart_routing: bool = True,
     ):
         self.db_session = db_session
         self.user_id = user_id
@@ -57,10 +57,7 @@ class AIGateway:
     def budget_enforcer(self):
         """Lazy load budget enforcer."""
         if self._budget_enforcer is None and self.db_session and self.user_id:
-            self._budget_enforcer = BudgetEnforcer(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+            self._budget_enforcer = BudgetEnforcer(db_session=self.db_session, user_id=self.user_id)
         return self._budget_enforcer
 
     @property
@@ -68,10 +65,8 @@ class AIGateway:
         """Lazy load smart router."""
         if self._smart_router is None and self.enable_smart_routing:
             from stacksense.gateway.smart_router import SmartRouter
-            self._smart_router = SmartRouter(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._smart_router = SmartRouter(db_session=self.db_session, user_id=self.user_id)
         return self._smart_router
 
     @property
@@ -79,6 +74,7 @@ class AIGateway:
         """Lazy load prompt optimizer."""
         if self._prompt_optimizer is None and self.enable_optimization:
             from stacksense.gateway.prompt_optimizer import PromptOptimizer
+
             self._prompt_optimizer = PromptOptimizer()
         return self._prompt_optimizer
 
@@ -87,6 +83,7 @@ class AIGateway:
         """Lazy load semantic cache."""
         if self._cache is None and self.enable_cache:
             from stacksense.gateway.cache import SemanticCache
+
             self._cache = SemanticCache()
         return self._cache
 
@@ -95,10 +92,8 @@ class AIGateway:
         """Lazy load request throttler."""
         if self._throttler is None:
             from stacksense.gateway.throttler import RequestThrottler
-            self._throttler = RequestThrottler(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._throttler = RequestThrottler(db_session=self.db_session, user_id=self.user_id)
         return self._throttler
 
     @property
@@ -106,18 +101,11 @@ class AIGateway:
         """Lazy load quality tracker."""
         if self._quality_tracker is None:
             from stacksense.gateway.quality_tracker import QualityTracker
-            self._quality_tracker = QualityTracker(
-                db_session=self.db_session,
-                user_id=self.user_id
-            )
+
+            self._quality_tracker = QualityTracker(db_session=self.db_session, user_id=self.user_id)
         return self._quality_tracker
 
-    def intercept(
-        self,
-        messages: List[Dict[str, str]],
-        model: str,
-        **kwargs
-    ) -> Dict[str, Any]:
+    def intercept(self, messages: List[Dict[str, str]], model: str, **kwargs) -> Dict[str, Any]:
         """
         Intercept and control an LLM request.
 
@@ -182,7 +170,7 @@ class AIGateway:
                         "response": cached_response,
                         "from_cache": True,
                         "cost": 0.0,
-                        "model": model
+                        "model": model,
                     }
 
             # Step 5: Smart routing (if enabled)
@@ -191,9 +179,7 @@ class AIGateway:
 
             if self.enable_smart_routing and self.smart_router:
                 routing_result = self.smart_router.select_provider(
-                    model=model,
-                    messages=messages,
-                    context=kwargs
+                    model=model, messages=messages, context=kwargs
                 )
 
                 if routing_result["switched"]:
@@ -213,7 +199,7 @@ class AIGateway:
                 "optimized": messages != original_messages,
                 "intercepted": True,
                 "budget_action": budget_result.get("action"),
-                "estimated_cost": estimated_cost
+                "estimated_cost": estimated_cost,
             }
 
             # Step 7: Track quality (post-execution)
@@ -230,12 +216,7 @@ class AIGateway:
         except Exception as e:
             logger.error(f"Gateway interception failed: {e}", exc_info=True)
             # Fail open - allow request to proceed
-            return {
-                "model": model,
-                "messages": messages,
-                "intercepted": False,
-                "error": str(e)
-            }
+            return {"model": model, "messages": messages, "intercepted": False, "error": str(e)}
 
     def _check_throttling(self) -> Dict[str, Any]:
         """Check if request should be throttled."""
@@ -249,10 +230,7 @@ class AIGateway:
         if not self.budget_enforcer:
             return {"allowed": True, "action": "allow"}
 
-        return self.budget_enforcer.check_budget(
-            cost=estimated_cost,
-            scope="global"
-        )
+        return self.budget_enforcer.check_budget(cost=estimated_cost, scope="global")
 
     def _estimate_cost(self, messages: List[Dict[str, str]], model: str) -> float:
         """Estimate request cost."""
@@ -282,7 +260,7 @@ class AIGateway:
             "error": "rate_limit_exceeded",
             "message": throttle_result.get("message", "Too many requests"),
             "retry_after": throttle_result.get("retry_after", 60),
-            "intercepted": True
+            "intercepted": True,
         }
 
     def _blocked_response(self, budget_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -293,15 +271,11 @@ class AIGateway:
             "message": budget_result["message"],
             "budget_remaining": budget_result["budget_remaining"],
             "budget_utilization": budget_result["budget_utilization"],
-            "intercepted": True
+            "intercepted": True,
         }
 
     def post_execution_tracking(
-        self,
-        request: Dict[str, Any],
-        response: Any,
-        actual_cost: float,
-        latency: float
+        self, request: Dict[str, Any], response: Any, actual_cost: float, latency: float
     ):
         """
         Track metrics after request execution.
@@ -316,26 +290,19 @@ class AIGateway:
             # Track quality
             if self.quality_tracker:
                 self.quality_tracker.track_response(
-                    model=request.get("model"),
-                    response=response,
-                    cost=actual_cost,
-                    latency=latency
+                    model=request.get("model"), response=response, cost=actual_cost, latency=latency
                 )
 
             # Cache response
             if self.enable_cache and self.cache and response:
                 cache_key = self.cache.generate_key(
-                    request.get("messages", []),
-                    request.get("model", "")
+                    request.get("messages", []), request.get("model", "")
                 )
                 self.cache.set(cache_key, response, ttl=3600)  # 1 hour TTL
 
             # Record actual spend
             if self.budget_enforcer:
-                self.budget_enforcer.record_spend(
-                    cost=actual_cost,
-                    scope="global"
-                )
+                self.budget_enforcer.record_spend(cost=actual_cost, scope="global")
 
             # Update provider performance stats
             if self.smart_router:
@@ -344,7 +311,7 @@ class AIGateway:
                     model=request.get("model"),
                     latency=latency,
                     success=True,
-                    cost=actual_cost
+                    cost=actual_cost,
                 )
 
         except Exception as e:
