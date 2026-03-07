@@ -55,20 +55,25 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: false
 
-  docker:
+  package:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Build Docker image
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Build and verify package
       run: |
-        docker build -t stacksense:test -f docker/Dockerfile.example .
-    
-    - name: Test Docker image
+        pip install build twine
+        python -m build
+        twine check dist/*
+
+    - name: Test install from wheel
       run: |
-        docker run --rm stacksense:test python -c "import stacksense; print('StackSense imported successfully')"
+        pip install dist/*.whl
+        python -c "from stacksense import StackSense, track; print('Package install OK')"

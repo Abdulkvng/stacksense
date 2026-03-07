@@ -563,17 +563,10 @@ def create_app(db_manager=None, debug=False):
                 # Token usage stats
                 token_stats = (
                     session_db.query(
-<<<<<<< Updated upstream
                         func.sum(Event.input_tokens).label("total_prompt_tokens"),
                         func.sum(Event.output_tokens).label("total_completion_tokens"),
                         func.avg(Event.input_tokens).label("avg_prompt_tokens"),
                         func.avg(Event.output_tokens).label("avg_completion_tokens")
-=======
-                        func.sum(Event.prompt_tokens).label("total_prompt_tokens"),
-                        func.sum(Event.completion_tokens).label("total_completion_tokens"),
-                        func.avg(Event.prompt_tokens).label("avg_prompt_tokens"),
-                        func.avg(Event.completion_tokens).label("avg_completion_tokens")
->>>>>>> Stashed changes
                     )
                     .filter(Event.timestamp >= cutoff)
                     .first()
