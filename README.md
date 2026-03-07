@@ -5,7 +5,7 @@
   </p>
   <p align="center">
     Open-source Python SDK that monitors every AI API call — tokens, cost, latency, errors.<br/>
-    Drop it in. Zero config. Works across 8 providers.
+    Drop it in. Zero config. Works across 13 providers.
   </p>
 </p>
 
@@ -40,7 +40,7 @@ StackSense gives you **full visibility** into your AI spend with **two lines of 
 - ⚡ **Zero overhead** — wraps your existing client, no code changes
 - 🚨 **Alerts** — get notified before costs spiral
 - 📈 **Dashboard** — real-time web UI out of the box
-- 🔌 **8 providers** — one SDK to monitor them all
+- 🔌 **13 providers** — one SDK to monitor them all
 
 ---
 
@@ -83,6 +83,11 @@ Auto-detected. Just pass any client to `ss.monitor()`.
 | **Mistral** | Large, Small, Nemo, Codestral | ✅ per-token |
 | **Cohere** | Command R/R+, Embed v4 | ✅ per-token |
 | **DeepSeek** | Chat, Reasoner | ✅ per-token |
+| **AI21 Labs** | Jamba 1.5 Large/Mini, Jamba Instruct | ✅ per-token |
+| **Together AI** | Llama 3.1 405B/70B/8B, Mixtral 8x22B | ✅ per-token |
+| **Groq** | Llama 3.3 70B, Llama 3.1 8B, Mixtral, Gemma2 | ✅ per-token |
+| **Perplexity** | Sonar Pro, Sonar, Sonar Reasoning | ✅ per-token |
+| **Replicate** | Llama 3 70B/8B, SDXL, any model | ✅ per-token |
 | **ElevenLabs** | All voice models | ✅ per-character |
 | **Pinecone** | Vector operations | ✅ per-query |
 
