@@ -1,27 +1,49 @@
 <p align="center">
   <a href="https://github.com/Abdulkvng/stacksense">
-    <img src="banner.svg" alt="StackSense — Know exactly what your AI costs" width="100%">
+    <img src="banner.svg" alt="StackSense" width="100%">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/v/stacksense.svg?style=flat-square" alt="PyPI version"></a>
-  <a href="https://github.com/Abdulkvng/stacksense/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
-  <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/pyversions/stacksense.svg?style=flat-square" alt="Python versions"></a>
-  <img src="https://komarev.com/ghpvc/?username=Abdulkvng&repo=stacksense&label=views&color=6366f1&style=flat-square" alt="Profile views">
+  <strong>AI cost monitoring for Python. Two lines of code. Thirteen providers.</strong>
 </p>
 
 <p align="center">
-  <a href="#getting-started">Getting Started</a>&nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="#providers">Providers</a>&nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="#features">Features</a>&nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="#documentation">Documentation</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/v/stacksense.svg?style=flat&labelColor=0a0a0a&color=6366f1" alt="PyPI"></a>
+  &nbsp;
+  <a href="https://github.com/Abdulkvng/stacksense/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat&labelColor=0a0a0a&color=6366f1" alt="License"></a>
+  &nbsp;
+  <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/pyversions/stacksense?style=flat&labelColor=0a0a0a&color=6366f1" alt="Python"></a>
+  &nbsp;
+  <img src="https://komarev.com/ghpvc/?username=Abdulkvng&repo=stacksense&label=views&color=6366f1&style=flat" alt="Views">
+</p>
+
+<p align="center">
+  <a href="#quickstart">Quickstart</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#supported-providers">Providers</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#features">Features</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#framework-middleware">Middleware</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#configuration">Config</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
   <a href="#contributing">Contributing</a>
 </p>
 
-<br/>
+<br>
 
-## Getting Started
+## The Problem
+
+You're shipping AI features. Costs are invisible until the invoice hits.
+
+```
+Month 1    $12        "No big deal."
+Month 3    $480       "Wait, what?"
+Month 5    $2,100     "Which call is doing this??"
+```
+
+StackSense wraps your existing AI clients and tracks every call — tokens, latency, cost — with **zero config** and **zero code changes** to your business logic.
+
+<br>
+
+## Quickstart
 
 ```bash
 pip install stacksense
@@ -44,43 +66,46 @@ print(ss.get_metrics())
 # {'total_calls': 1, 'total_tokens': 28, 'total_cost': 0.0004, ...}
 ```
 
-No config files. No dashboard setup. Just `monitor()` and go.
+That's it. No dashboards to configure. No agents to deploy. Just `monitor()` and go.
 
-## The Problem
+<br>
 
-You're shipping AI features. Costs are climbing. You have no idea which endpoint, which model, or which user is burning through your budget.
+## Supported Providers
 
-```
-Month 1:  $12 in API costs. No big deal.
-Month 3:  $480. Wait, what?
-Month 5:  $2,100. Which call is doing this??
-```
+Pass any supported client to `ss.monitor()` — the provider is auto-detected.
 
-Most teams find out they're overspending **after** the invoice hits. StackSense gives you **full visibility** with two lines of code.
+<table>
+  <tr>
+    <td><strong>OpenAI</strong><br><sub>GPT-4o &bull; o1 &bull; o3 &bull; Embeddings</sub></td>
+    <td><strong>Anthropic</strong><br><sub>Opus 4 &bull; Sonnet 4 &bull; Haiku</sub></td>
+    <td><strong>Google</strong><br><sub>Gemini 2.0 Flash &bull; 1.5 Pro</sub></td>
+    <td><strong>Mistral</strong><br><sub>Large &bull; Small &bull; Codestral</sub></td>
+  </tr>
+  <tr>
+    <td><strong>Cohere</strong><br><sub>Command R/R+ &bull; Embed v4</sub></td>
+    <td><strong>DeepSeek</strong><br><sub>Chat &bull; Reasoner</sub></td>
+    <td><strong>AI21 Labs</strong><br><sub>Jamba 1.5 Large/Mini</sub></td>
+    <td><strong>Together AI</strong><br><sub>Llama 3.1 &bull; Mixtral</sub></td>
+  </tr>
+  <tr>
+    <td><strong>Groq</strong><br><sub>Llama 3.3 &bull; Mixtral &bull; Gemma2</sub></td>
+    <td><strong>Perplexity</strong><br><sub>Sonar Pro &bull; Reasoning</sub></td>
+    <td><strong>Replicate</strong><br><sub>Llama &bull; SDXL &bull; any model</sub></td>
+    <td><strong>ElevenLabs</strong><br><sub>Voice models &bull; per-character</sub></td>
+  </tr>
+  <tr>
+    <td><strong>Pinecone</strong><br><sub>Vector ops &bull; per-query</sub></td>
+    <td colspan="3"><sub>More coming soon — <a href="https://github.com/Abdulkvng/stacksense/issues">request a provider</a></sub></td>
+  </tr>
+</table>
 
-## Providers
-
-Auto-detected. Just pass any client to `ss.monitor()`.
-
-| Provider | Models | Pricing |
-|----------|--------|---------|
-| **OpenAI** | GPT-4o, GPT-4, o1, o3, embeddings | per-token |
-| **Anthropic** | Claude Opus 4, Sonnet 4, 3.5 family | per-token |
-| **Google** | Gemini 2.0 Flash, 1.5 Pro/Flash | per-token |
-| **Mistral** | Large, Small, Nemo, Codestral | per-token |
-| **Cohere** | Command R/R+, Embed v4 | per-token |
-| **DeepSeek** | Chat, Reasoner | per-token |
-| **AI21 Labs** | Jamba 1.5 Large/Mini, Jamba Instruct | per-token |
-| **Together AI** | Llama 3.1 405B/70B/8B, Mixtral 8x22B | per-token |
-| **Groq** | Llama 3.3 70B, Llama 3.1 8B, Mixtral, Gemma2 | per-token |
-| **Perplexity** | Sonar Pro, Sonar, Sonar Reasoning | per-token |
-| **Replicate** | Llama 3 70B/8B, SDXL, any model | per-token |
-| **ElevenLabs** | All voice models | per-character |
-| **Pinecone** | Vector operations | per-query |
+<br>
 
 ## Features
 
-### Multi-Provider Tracking
+### Multi-Provider Cost Breakdown
+
+Track spend across providers from a single `StackSense` instance.
 
 ```python
 ss = StackSense()
@@ -95,7 +120,7 @@ ss.get_cost_breakdown()
 # {'openai': 0.003, 'anthropic': 0.002}
 ```
 
-### Decorator
+### Decorator API
 
 Track any function without wrapping a client:
 
@@ -112,26 +137,9 @@ def generate(prompt):
 
 Works with `async` functions too.
 
-### Middleware
+### Alerts & Webhooks
 
-**FastAPI**
-```python
-from stacksense.middleware import FastAPIMiddleware
-app.add_middleware(FastAPIMiddleware, stacksense=ss)
-```
-
-**Flask**
-```python
-from stacksense.middleware import FlaskMiddleware
-FlaskMiddleware(app, stacksense=ss)
-```
-
-**Django**
-```python
-MIDDLEWARE = [..., 'stacksense.middleware.DjangoMiddleware']
-```
-
-### Alerts
+Get notified when costs spike.
 
 ```python
 from stacksense.alerts import AlertManager, AlertRule
@@ -157,7 +165,63 @@ exporter.to_csv("metrics.csv")
 exporter.to_json("metrics.json")
 ```
 
-### CLI
+<br>
+
+## Framework Middleware
+
+Drop-in middleware for popular frameworks — automatically tracks all AI calls per request.
+
+<table>
+<tr>
+<td width="33%">
+
+**FastAPI**
+
+```python
+from stacksense.middleware import (
+    FastAPIMiddleware
+)
+
+app.add_middleware(
+    FastAPIMiddleware,
+    stacksense=ss
+)
+```
+
+</td>
+<td width="33%">
+
+**Flask**
+
+```python
+from stacksense.middleware import (
+    FlaskMiddleware
+)
+
+FlaskMiddleware(app, stacksense=ss)
+```
+
+</td>
+<td width="33%">
+
+**Django**
+
+```python
+# settings.py
+MIDDLEWARE = [
+    ...,
+    'stacksense.middleware'
+    '.DjangoMiddleware',
+]
+```
+
+</td>
+</tr>
+</table>
+
+<br>
+
+## CLI
 
 ```bash
 stacksense status              # View current metrics
@@ -166,26 +230,26 @@ stacksense export csv -o out.csv
 stacksense db init             # Initialize database
 ```
 
-## Documentation
+<br>
 
-### Database
+## Configuration
 
-SQLite by default (zero config). PostgreSQL for production:
+SQLite by default — zero config. PostgreSQL for production:
 
 ```bash
 pip install stacksense[postgresql]
-export STACKSENSE_DB_URL="postgresql://user:pass@host:5432/stacksense"
 ```
 
-### Configuration
-
 ```bash
+# Environment variables
 STACKSENSE_PROJECT_ID=my-project
 STACKSENSE_ENABLE_DB=true
-STACKSENSE_DB_URL=sqlite:///stacksense.db
+STACKSENSE_DB_URL=postgresql://user:pass@host:5432/stacksense
 STACKSENSE_ENVIRONMENT=production
 STACKSENSE_DEBUG=false
 ```
+
+<br>
 
 ## Contributing
 
@@ -196,8 +260,10 @@ pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
----
+PRs welcome. Please open an issue first for large changes.
 
-## License
+<br>
 
-MIT
+<p align="center">
+  <sub>MIT License &copy; 2025 StackSense Contributors</sub>
+</p>
