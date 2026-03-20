@@ -1,99 +1,87 @@
-<svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="340" viewBox="0 0 1200 340" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="360" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#050510"/>
-      <stop offset="50%" stop-color="#0c0c24"/>
-      <stop offset="100%" stop-color="#10082e"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#09090b"/>
+      <stop offset="100%" stop-color="#18181b"/>
     </linearGradient>
     <linearGradient id="accent" x1="0" y1="0" x2="400" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="50%" stop-color="#8b5cf6"/>
       <stop offset="100%" stop-color="#a855f7"/>
     </linearGradient>
-    <linearGradient id="shimmer" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#6366f1" stop-opacity="0"/>
-      <stop offset="30%" stop-color="#6366f1" stop-opacity="0.06"/>
-      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.12"/>
-      <stop offset="70%" stop-color="#a855f7" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+    <linearGradient id="textGrad" x1="420" y1="140" x2="780" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#ffffff"/>
     </linearGradient>
-    <radialGradient id="glow1" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glow2" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.12"/>
+    <linearGradient id="iconGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="line1" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#6366f1" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.25"/>
+      <stop offset="80%" stop-color="#a855f7" stop-opacity="0.15"/>
       <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="40"/>
-    </filter>
-    <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2"/>
-    </filter>
-    <linearGradient id="topFade" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.08"/>
-      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
   <!-- Background -->
-  <rect width="1200" height="360" fill="url(#bg)"/>
+  <rect width="1200" height="340" fill="url(#bg)"/>
 
-  <!-- Ambient glow orbs -->
-  <ellipse cx="350" cy="180" rx="300" ry="200" fill="url(#glow1)" filter="url(#blur1)"/>
-  <ellipse cx="850" cy="180" rx="280" ry="180" fill="url(#glow2)" filter="url(#blur1)"/>
+  <!-- Subtle horizontal lines -->
+  <rect x="0" y="85" width="1200" height="1" fill="url(#line1)" opacity="0.5"/>
+  <rect x="0" y="170" width="1200" height="1" fill="url(#line1)" opacity="0.3"/>
+  <rect x="0" y="255" width="1200" height="1" fill="url(#line1)" opacity="0.5"/>
 
-  <!-- Horizontal shimmer band -->
-  <rect x="0" y="130" width="1200" height="100" fill="url(#shimmer)"/>
+  <!-- Left decorative bar -->
+  <rect x="80" y="70" width="3" height="200" rx="1.5" fill="url(#accent)" opacity="0.12"/>
+  <rect x="100" y="90" width="2" height="160" rx="1" fill="url(#accent)" opacity="0.07"/>
 
-  <!-- Subtle dot grid -->
-  <g opacity="0.08" fill="#8b5cf6">
-    <circle cx="100" cy="60" r="1"/><circle cx="200" cy="60" r="1"/><circle cx="300" cy="60" r="1"/><circle cx="400" cy="60" r="1"/><circle cx="500" cy="60" r="1"/><circle cx="600" cy="60" r="1"/><circle cx="700" cy="60" r="1"/><circle cx="800" cy="60" r="1"/><circle cx="900" cy="60" r="1"/><circle cx="1000" cy="60" r="1"/><circle cx="1100" cy="60" r="1"/>
-    <circle cx="100" cy="120" r="1"/><circle cx="200" cy="120" r="1"/><circle cx="300" cy="120" r="1"/><circle cx="400" cy="120" r="1"/><circle cx="500" cy="120" r="1"/><circle cx="600" cy="120" r="1"/><circle cx="700" cy="120" r="1"/><circle cx="800" cy="120" r="1"/><circle cx="900" cy="120" r="1"/><circle cx="1000" cy="120" r="1"/><circle cx="1100" cy="120" r="1"/>
-    <circle cx="100" cy="180" r="1"/><circle cx="200" cy="180" r="1"/><circle cx="300" cy="180" r="1"/><circle cx="400" cy="180" r="1"/><circle cx="500" cy="180" r="1"/><circle cx="600" cy="180" r="1"/><circle cx="700" cy="180" r="1"/><circle cx="800" cy="180" r="1"/><circle cx="900" cy="180" r="1"/><circle cx="1000" cy="180" r="1"/><circle cx="1100" cy="180" r="1"/>
-    <circle cx="100" cy="240" r="1"/><circle cx="200" cy="240" r="1"/><circle cx="300" cy="240" r="1"/><circle cx="400" cy="240" r="1"/><circle cx="500" cy="240" r="1"/><circle cx="600" cy="240" r="1"/><circle cx="700" cy="240" r="1"/><circle cx="800" cy="240" r="1"/><circle cx="900" cy="240" r="1"/><circle cx="1000" cy="240" r="1"/><circle cx="1100" cy="240" r="1"/>
-    <circle cx="100" cy="300" r="1"/><circle cx="200" cy="300" r="1"/><circle cx="300" cy="300" r="1"/><circle cx="400" cy="300" r="1"/><circle cx="500" cy="300" r="1"/><circle cx="600" cy="300" r="1"/><circle cx="700" cy="300" r="1"/><circle cx="800" cy="300" r="1"/><circle cx="900" cy="300" r="1"/><circle cx="1000" cy="300" r="1"/><circle cx="1100" cy="300" r="1"/>
-  </g>
+  <!-- Right decorative bar -->
+  <rect x="1117" y="70" width="3" height="200" rx="1.5" fill="url(#accent)" opacity="0.12"/>
+  <rect x="1098" y="90" width="2" height="160" rx="1" fill="url(#accent)" opacity="0.07"/>
 
-  <!-- Lightning icon with glow -->
-  <g transform="translate(540, 68)">
-    <path d="M36 0 L12 44 L26 44 L16 80 L52 32 L36 32 Z" fill="url(#accent)" opacity="0.15" filter="url(#blur2)" transform="translate(2,2)"/>
-    <path d="M36 0 L12 44 L26 44 L16 80 L52 32 L36 32 Z" fill="url(#accent)"/>
+  <!-- Icon: stacked layers (represents monitoring/stacking) -->
+  <g transform="translate(564, 52)">
+    <!-- Bottom layer -->
+    <path d="M36 48 L0 32 L36 16 L72 32 Z" fill="#6366f1" opacity="0.2"/>
+    <!-- Middle layer -->
+    <path d="M36 38 L0 22 L36 6 L72 22 Z" fill="#6366f1" opacity="0.4"/>
+    <!-- Top layer -->
+    <path d="M36 28 L0 12 L36 -4 L72 12 Z" fill="url(#iconGrad)" opacity="0.85"/>
   </g>
 
   <!-- Title -->
-  <text x="600" y="188" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="56" font-weight="800" letter-spacing="-2">
-    StackSense
-  </text>
+  <text x="600" y="160" text-anchor="middle" fill="url(#textGrad)" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="54" font-weight="800" letter-spacing="-2">StackSense</text>
 
   <!-- Tagline -->
-  <text x="600" y="228" text-anchor="middle" fill="#a1a1aa" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="400" letter-spacing="0.5">
-    Know exactly what your AI costs.
-  </text>
+  <text x="600" y="196" text-anchor="middle" fill="#71717a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="400" letter-spacing="0.5">Know exactly what your AI costs.</text>
+
+  <!-- Divider line -->
+  <rect x="540" y="216" width="120" height="1" rx="0.5" fill="url(#accent)" opacity="0.4"/>
 
   <!-- Stat pills -->
-  <g transform="translate(600, 278)">
-    <!-- Pill: 13 Providers -->
-    <rect x="-268" y="-15" width="116" height="30" rx="15" fill="#6366f1" fill-opacity="0.1" stroke="#6366f1" stroke-opacity="0.25" stroke-width="1"/>
-    <text x="-210" y="4" text-anchor="middle" fill="#a5b4fc" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="600">13 Providers</text>
+  <g font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="600">
+    <!-- Pill 1 -->
+    <rect x="298" y="238" width="112" height="28" rx="14" fill="none" stroke="#6366f1" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="354" y="256" text-anchor="middle" fill="#818cf8">13 Providers</text>
 
-    <!-- Pill: Zero Config -->
-    <rect x="-128" y="-15" width="106" height="30" rx="15" fill="#8b5cf6" fill-opacity="0.1" stroke="#8b5cf6" stroke-opacity="0.25" stroke-width="1"/>
-    <text x="-75" y="4" text-anchor="middle" fill="#c4b5fd" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="600">Zero Config</text>
+    <!-- Pill 2 -->
+    <rect x="430" y="238" width="102" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="481" y="256" text-anchor="middle" fill="#a78bfa">Zero Config</text>
 
-    <!-- Pill: Open Source -->
-    <rect x="2" y="-15" width="112" height="30" rx="15" fill="#8b5cf6" fill-opacity="0.1" stroke="#8b5cf6" stroke-opacity="0.25" stroke-width="1"/>
-    <text x="58" y="4" text-anchor="middle" fill="#c4b5fd" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="600">Open Source</text>
+    <!-- Pill 3 -->
+    <rect x="552" y="238" width="108" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="606" y="256" text-anchor="middle" fill="#a78bfa">Open Source</text>
 
-    <!-- Pill: 2 Lines -->
-    <rect x="138" y="-15" width="130" height="30" rx="15" fill="#a855f7" fill-opacity="0.1" stroke="#a855f7" stroke-opacity="0.25" stroke-width="1"/>
-    <text x="203" y="4" text-anchor="middle" fill="#d8b4fe" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="600">2 Lines of Code</text>
+    <!-- Pill 4 -->
+    <rect x="680" y="238" width="126" height="28" rx="14" fill="none" stroke="#a855f7" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="743" y="256" text-anchor="middle" fill="#c084fc">2 Lines of Code</text>
   </g>
 
-  <!-- Top edge line -->
-  <rect x="0" y="0" width="1200" height="1" fill="url(#accent)" opacity="0.3"/>
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1200" height="2" fill="url(#accent)" opacity="0.6"/>
 
-  <!-- Bottom accent bar -->
-  <rect x="0" y="356" width="1200" height="4" fill="url(#accent)" opacity="0.8"/>
+  <!-- Bottom accent line -->
+  <rect x="0" y="338" width="1200" height="2" fill="url(#accent)" opacity="0.6"/>
 </svg>
