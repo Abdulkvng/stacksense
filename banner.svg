@@ -1,6 +1,6 @@
-<svg width="1200" height="340" viewBox="0 0 1200 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="340" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#09090b"/>
       <stop offset="100%" stop-color="#18181b"/>
     </linearGradient>
@@ -8,80 +8,60 @@
       <stop offset="0%" stop-color="#6366f1"/>
       <stop offset="100%" stop-color="#a855f7"/>
     </linearGradient>
-    <linearGradient id="textGrad" x1="420" y1="140" x2="780" y2="140" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#e2e8f0"/>
-      <stop offset="100%" stop-color="#ffffff"/>
-    </linearGradient>
-    <linearGradient id="iconGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#818cf8"/>
-      <stop offset="100%" stop-color="#a855f7"/>
-    </linearGradient>
-    <linearGradient id="line1" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+    <linearGradient id="fadeLine" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#6366f1" stop-opacity="0"/>
-      <stop offset="20%" stop-color="#6366f1" stop-opacity="0.15"/>
-      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.25"/>
-      <stop offset="80%" stop-color="#a855f7" stop-opacity="0.15"/>
+      <stop offset="30%" stop-color="#6366f1" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.35"/>
+      <stop offset="70%" stop-color="#a855f7" stop-opacity="0.2"/>
       <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
   <!-- Background -->
-  <rect width="1200" height="340" fill="url(#bg)"/>
+  <rect width="1200" height="300" fill="url(#bg)"/>
 
-  <!-- Subtle horizontal lines -->
-  <rect x="0" y="85" width="1200" height="1" fill="url(#line1)" opacity="0.5"/>
-  <rect x="0" y="170" width="1200" height="1" fill="url(#line1)" opacity="0.3"/>
-  <rect x="0" y="255" width="1200" height="1" fill="url(#line1)" opacity="0.5"/>
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="1200" height="2" fill="url(#accent)" opacity="0.7"/>
 
-  <!-- Left decorative bar -->
-  <rect x="80" y="70" width="3" height="200" rx="1.5" fill="url(#accent)" opacity="0.12"/>
-  <rect x="100" y="90" width="2" height="160" rx="1" fill="url(#accent)" opacity="0.07"/>
+  <!-- Faint horizontal accent lines for texture -->
+  <rect x="0" y="100" width="1200" height="1" fill="url(#fadeLine)" opacity="0.4"/>
+  <rect x="0" y="200" width="1200" height="1" fill="url(#fadeLine)" opacity="0.4"/>
 
-  <!-- Right decorative bar -->
-  <rect x="1117" y="70" width="3" height="200" rx="1.5" fill="url(#accent)" opacity="0.12"/>
-  <rect x="1098" y="90" width="2" height="160" rx="1" fill="url(#accent)" opacity="0.07"/>
-
-  <!-- Icon: stacked layers (represents monitoring/stacking) -->
-  <g transform="translate(564, 52)">
-    <!-- Bottom layer -->
-    <path d="M36 48 L0 32 L36 16 L72 32 Z" fill="#6366f1" opacity="0.2"/>
-    <!-- Middle layer -->
-    <path d="M36 38 L0 22 L36 6 L72 22 Z" fill="#6366f1" opacity="0.4"/>
-    <!-- Top layer -->
-    <path d="M36 28 L0 12 L36 -4 L72 12 Z" fill="url(#iconGrad)" opacity="0.85"/>
+  <!-- Left icon: stacked layers -->
+  <g transform="translate(365, 72)">
+    <path d="M30 40 L0 26 L30 12 L60 26 Z" fill="#6366f1" opacity="0.15"/>
+    <path d="M30 30 L0 16 L30 2 L60 16 Z" fill="#6366f1" opacity="0.3"/>
+    <path d="M30 20 L0 6 L30 -8 L60 6 Z" fill="#818cf8" opacity="0.7"/>
   </g>
 
   <!-- Title -->
-  <text x="600" y="160" text-anchor="middle" fill="url(#textGrad)" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="54" font-weight="800" letter-spacing="-2">StackSense</text>
+  <text x="600" y="112" text-anchor="middle" fill="#fafafa" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="50" font-weight="800" letter-spacing="-1.5">StackSense</text>
 
   <!-- Tagline -->
-  <text x="600" y="196" text-anchor="middle" fill="#71717a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="400" letter-spacing="0.5">Know exactly what your AI costs.</text>
+  <text x="600" y="148" text-anchor="middle" fill="#71717a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="400" letter-spacing="0.3">Know exactly what your AI costs.</text>
 
-  <!-- Divider line -->
-  <rect x="540" y="216" width="120" height="1" rx="0.5" fill="url(#accent)" opacity="0.4"/>
+  <!-- Divider -->
+  <rect x="555" y="168" width="90" height="1" rx="0.5" fill="url(#accent)" opacity="0.35"/>
 
-  <!-- Stat pills -->
+  <!-- Stat pills row -->
   <g font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="600">
-    <!-- Pill 1 -->
-    <rect x="298" y="238" width="112" height="28" rx="14" fill="none" stroke="#6366f1" stroke-opacity="0.3" stroke-width="1"/>
-    <text x="354" y="256" text-anchor="middle" fill="#818cf8">13 Providers</text>
+    <rect x="310" y="190" width="112" height="28" rx="14" fill="none" stroke="#6366f1" stroke-opacity="0.35" stroke-width="1"/>
+    <text x="366" y="208" text-anchor="middle" fill="#818cf8">13 Providers</text>
 
-    <!-- Pill 2 -->
-    <rect x="430" y="238" width="102" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-opacity="0.3" stroke-width="1"/>
-    <text x="481" y="256" text-anchor="middle" fill="#a78bfa">Zero Config</text>
+    <rect x="440" y="190" width="100" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="490" y="208" text-anchor="middle" fill="#a78bfa">Zero Config</text>
 
-    <!-- Pill 3 -->
-    <rect x="552" y="238" width="108" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-opacity="0.3" stroke-width="1"/>
-    <text x="606" y="256" text-anchor="middle" fill="#a78bfa">Open Source</text>
+    <rect x="558" y="190" width="108" height="28" rx="14" fill="none" stroke="#7c3aed" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="612" y="208" text-anchor="middle" fill="#a78bfa">Open Source</text>
 
-    <!-- Pill 4 -->
-    <rect x="680" y="238" width="126" height="28" rx="14" fill="none" stroke="#a855f7" stroke-opacity="0.3" stroke-width="1"/>
-    <text x="743" y="256" text-anchor="middle" fill="#c084fc">2 Lines of Code</text>
+    <rect x="684" y="190" width="126" height="28" rx="14" fill="none" stroke="#a855f7" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="747" y="208" text-anchor="middle" fill="#c084fc">2 Lines of Code</text>
   </g>
 
-  <!-- Top accent line -->
-  <rect x="0" y="0" width="1200" height="2" fill="url(#accent)" opacity="0.6"/>
+  <!-- Install hint -->
+  <rect x="460" y="240" width="280" height="32" rx="6" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+  <text x="600" y="261" text-anchor="middle" fill="#52525b" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13" font-weight="400">$ pip install stacksense</text>
 
-  <!-- Bottom accent line -->
-  <rect x="0" y="338" width="1200" height="2" fill="url(#accent)" opacity="0.6"/>
+  <!-- Bottom accent bar -->
+  <rect x="0" y="298" width="1200" height="2" fill="url(#accent)" opacity="0.7"/>
 </svg>
