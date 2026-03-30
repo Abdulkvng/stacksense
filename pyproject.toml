@@ -46,6 +46,7 @@ dev = [
     "types-requests>=2.31.0",
 ]
 dashboard = [
+    "click>=8.0.0",
     "flask>=3.0.0",
     "plotly>=5.0.0",
     "pandas>=2.0.0",
@@ -71,10 +72,10 @@ Repository = "https://github.com/Abdulkvng/stacksense"
 "Bug Tracker" = "https://github.com/Abdulkvng/stacksense/issues"
 
 [tool.setuptools.packages.find]
-include = ["stacksense*"]
+include = ["stacksense", "stacksense.*"]
 
 [tool.setuptools]
-include-package-data = true
+include-package-data = false
 
 [tool.setuptools.package-data]
 stacksense = [

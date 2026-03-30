@@ -774,14 +774,42 @@ class StackSenseDashboard {
                 return;
             }
 
-            // Update routing rules count
-            const routingElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(1)');
+            const statusMessage = document.getElementById("enterpriseStatusMessage");
+            const installCommand = document.getElementById("enterpriseInstallCommand");
+            const statusBadges = Array.from(document.querySelectorAll("[data-enterprise-status]"));
+
+            if (!stats.available) {
+                statusBadges.forEach((badge) => {
+                    badge.textContent = "Add-on";
+                });
+
+                if (statusMessage) {
+                    statusMessage.textContent =
+                        stats.message || "Enterprise features are available as a separate private package.";
+                }
+
+                if (installCommand && stats.install_hint) {
+                    installCommand.textContent = stats.install_hint;
+                }
+
+                return;
+            }
+
+            statusBadges.forEach((badge) => {
+                badge.textContent = "Enabled";
+            });
+
+            if (statusMessage) {
+                statusMessage.textContent =
+                    "Enterprise add-on detected. Live feature counts are shown below.";
+            }
+
+            const routingElement = document.getElementById("routingRulesCount");
             if (routingElement) {
                 routingElement.textContent = `${stats.routing_rules} Rules Configured`;
             }
 
-            // Update budgets count
-            const budgetsElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(2)');
+            const budgetsElement = document.getElementById("budgetsCount");
             if (budgetsElement) {
                 budgetsElement.textContent = `${stats.budgets} Budgets Set`;
             }
@@ -797,25 +825,21 @@ class StackSenseDashboard {
                 wastePercentageElement.textContent = `${stats.waste_percentage}%`;
             }
 
-            // Update SLA configs count
-            const slaElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(3)');
+            const slaElement = document.getElementById("slaConfigsCount");
             if (slaElement) {
                 slaElement.textContent = `${stats.sla_configs} SLA Configs`;
             }
 
-            // Update audit events
             const auditCountElement = document.getElementById("auditEventCount");
             if (auditCountElement) {
                 auditCountElement.textContent = this.formatNumber(stats.audit_events);
             }
 
-            // Update violations (placeholder - would need actual violation tracking)
             const violationElement = document.getElementById("violationCount");
             if (violationElement) {
                 violationElement.textContent = "0";
             }
 
-            // Update agent stats
             const activeRunsElement = document.getElementById("activeAgentRuns");
             if (activeRunsElement) {
                 activeRunsElement.textContent = this.formatNumber(stats.active_agent_runs);
@@ -826,12 +850,10 @@ class StackSenseDashboard {
                 loopDetectionsElement.textContent = this.formatNumber(stats.loop_detections);
             }
 
-            // Update policies count
-            const policiesElement = document.querySelector('[data-pane="enterprise"] .metric-value:nth-of-type(4)');
+            const policiesElement = document.getElementById("policiesCount");
             if (policiesElement) {
                 policiesElement.textContent = `${stats.policies} Policies Set`;
             }
-
         } catch (error) {
             console.error("Failed to load enterprise stats", error);
         }

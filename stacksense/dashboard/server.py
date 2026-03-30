@@ -18,7 +18,8 @@ from sqlalchemy import Integer, desc, func
 from stacksense.database import get_db_manager
 from stacksense.database.models import Event, User, UserAPIKey
 from stacksense.dashboard.security import EncryptionError, encrypt_secret, mask_secret
-from stacksense.enterprise.monitoring import monitor
+from stacksense.monitoring.live import monitor
+from stacksense.plugins import enterprise_available, load_enterprise_models
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -803,19 +804,36 @@ def create_app(db_manager=None, debug=False):
     def get_enterprise_stats():
         """Get enterprise feature statistics."""
         try:
+            if not enterprise_available():
+                return jsonify(
+                    {
+                        "available": False,
+                        "message": "Enterprise features are packaged separately from the open-source SDK.",
+                        "install_hint": "pip install stacksense-enterprise",
+                    }
+                )
+
+            enterprise_models = load_enterprise_models()
+            if enterprise_models is None:
+                return jsonify(
+                    {
+                        "available": False,
+                        "message": "Enterprise package is not available in this environment.",
+                        "install_hint": "pip install stacksense-enterprise",
+                    }
+                )
+
             with db_manager.get_session() as session_db:
                 user = _current_user(session_db)
                 if not user:
                     return jsonify({"error": "User not found"}), 404
 
-                from stacksense.database.models import (
-                    RoutingRule,
-                    Budget,
-                    SLAConfig,
-                    AuditLog,
-                    AgentRun,
-                    Policy,
-                )
+                RoutingRule = enterprise_models.RoutingRule
+                Budget = enterprise_models.Budget
+                SLAConfig = enterprise_models.SLAConfig
+                AuditLog = enterprise_models.AuditLog
+                AgentRun = enterprise_models.AgentRun
+                Policy = enterprise_models.Policy
 
                 # Count configured features
                 routing_rules_count = (
@@ -860,10 +878,6 @@ def create_app(db_manager=None, debug=False):
                     .count()
                 )
 
-                # Calculate cost optimization metrics
-                from sqlalchemy import func
-                from stacksense.database.models import Event
-
                 # Get events for analysis
                 total_events = session_db.query(Event).count()
 
@@ -897,6 +911,7 @@ def create_app(db_manager=None, debug=False):
 
                 return jsonify(
                     {
+                        "available": True,
                         "routing_rules": routing_rules_count,
                         "budgets": budgets_count,
                         "sla_configs": sla_configs_count,

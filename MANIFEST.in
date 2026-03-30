@@ -3,16 +3,8 @@ include README.md
 include LICENSE
 include pyproject.toml
 
-# Recursive include for stacksense package (includes all subdirectories)
-recursive-include stacksense *.py
-recursive-include stacksense *.html
-recursive-include stacksense *.css
-recursive-include stacksense *.js
+graft stacksense/dashboard/static
+graft stacksense/dashboard/templates
 
-# Explicitly include database module (ensures it's packaged)
-recursive-include stacksense/database *.py
-
-# Include dashboard static files
-recursive-include stacksense/dashboard/static *
-recursive-include stacksense/dashboard/templates *
-
+prune tests
+prune enterprise

@@ -1,4 +1,17 @@
-.PHONY: help install dev-install test lint format build publish clean docker-build docker-up docker-down docker-logs
+.PHONY: help check-python release-tools install dev-install enterprise-install test lint format build check-dist publish-test publish dashboard clean docker-build docker-up docker-down docker-logs
+
+PYTHON ?= $(shell ./scripts/resolve_python.sh)
+PIP := $(PYTHON) -m pip
+BUILD := $(PYTHON) -m build
+TWINE := $(PYTHON) -m twine
+PYTEST := $(PYTHON) -m pytest
+BLACK := $(PYTHON) -m black
+ISORT := $(PYTHON) -m isort
+FLAKE8 := $(PYTHON) -m flake8
+MYPY := $(PYTHON) -m mypy
+
+check-python: ## Verify that a supported Python interpreter is available
+	@$(PYTHON) --version >/dev/null
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -6,32 +19,44 @@ help: ## Show this help message
 	@echo 'Available targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: ## Install StackSense
-	pip install -e .
+install: check-python ## Install StackSense
+	$(PIP) install -e .
 
-dev-install: ## Install StackSense with dev dependencies
-	pip install -e ".[dev]"
+enterprise-install: check-python ## Install the private enterprise add-on package
+	$(PIP) install -e ./enterprise
 
-test: ## Run tests
-	pytest tests/ -v
+release-tools: check-python ## Install build and publishing tools
+	$(PIP) install build twine
 
-lint: ## Run linters
-	flake8 stacksense/ --count --select=E9,F63,F7,F82 --show-source --statistics
-	black --check stacksense/
-	mypy stacksense/ || true
+dev-install: check-python ## Install StackSense with dev dependencies
+	$(PIP) install -e ".[dev]"
 
-format: ## Format code
-	black stacksense/
-	isort stacksense/
+test: check-python ## Run tests
+	$(PYTEST) tests/ -v
 
-build: ## Build package
-	python -m build
+lint: check-python ## Run linters
+	$(FLAKE8) stacksense/ --count --select=E9,F63,F7,F82 --show-source --statistics
+	$(BLACK) --check stacksense/
+	$(MYPY) stacksense/ || true
 
-publish-test: ## Publish to TestPyPI
-	twine upload --repository testpypi dist/*
+format: check-python ## Format code
+	$(BLACK) stacksense/
+	$(ISORT) stacksense/
 
-publish: ## Publish to PyPI
-	twine upload dist/*
+build: check-python ## Build package
+	$(BUILD) --no-isolation
+
+check-dist: check-python ## Validate built package metadata
+	$(TWINE) check dist/*
+
+publish-test: check-python ## Publish to TestPyPI
+	$(TWINE) upload --repository testpypi dist/*
+
+publish: check-python ## Publish to PyPI
+	$(TWINE) upload dist/*
+
+dashboard: check-python ## Run the StackSense dashboard
+	$(PYTHON) -m stacksense.dashboard
 
 clean: ## Clean build artifacts
 	rm -rf build/
@@ -56,9 +81,8 @@ docker-clean: ## Clean Docker resources
 	docker-compose down -v
 	docker system prune -f
 
-db-init: ## Initialize database tables
-	python -c "from stacksense.database import get_db_manager; get_db_manager().create_tables()"
+db-init: check-python ## Initialize database tables
+	$(PYTHON) -c "from stacksense.database import get_db_manager; get_db_manager().create_tables()"
 
-db-reset: ## Reset database (WARNING: deletes all data)
-	python -c "from stacksense.database import get_db_manager; db = get_db_manager(); db.drop_tables(); db.create_tables()"
-
+db-reset: check-python ## Reset database (WARNING: deletes all data)
+	$(PYTHON) -c "from stacksense.database import get_db_manager; db = get_db_manager(); db.drop_tables(); db.create_tables()"

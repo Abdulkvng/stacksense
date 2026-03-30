@@ -57,10 +57,10 @@ def main():
 
 def _cmd_dashboard(args):
     try:
-        from stacksense.dashboard.server import app
+        from stacksense.dashboard.server import run_server
 
         print(f"Starting StackSense dashboard on http://{args.host}:{args.port}")
-        app.run(host=args.host, port=args.port, debug=args.debug)
+        run_server(host=args.host, port=args.port, debug=args.debug)
     except ImportError:
         print("Dashboard requires extra dependencies: pip install stacksense[dashboard]")
         sys.exit(1)

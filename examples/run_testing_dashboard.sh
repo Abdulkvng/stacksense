@@ -3,6 +3,12 @@
 # StackSense Gateway Testing Dashboard
 # Quick start script
 
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PYTHON_BIN="$("$PROJECT_ROOT/scripts/resolve_python.sh")"
+
 echo "========================================================================"
 echo "🧪 StackSense Live Testing Dashboard"
 echo "========================================================================"
@@ -14,8 +20,7 @@ echo "Press Ctrl+C to stop"
 echo "========================================================================"
 echo ""
 
-# Change to project directory
-cd "$(dirname "$0")"
+cd "$PROJECT_ROOT"
 
 # Start dashboard server
-python3 tests/dashboard_server.py
+"$PYTHON_BIN" tests/dashboard_server.py

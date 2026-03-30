@@ -3,6 +3,12 @@
 # StackSense Ultimate Testing Hub
 # One dashboard for ALL testing
 
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PYTHON_BIN="$("$PROJECT_ROOT/scripts/resolve_python.sh")"
+
 echo "================================================================================"
 echo "🧪 StackSense Ultimate Testing Hub"
 echo "================================================================================"
@@ -23,11 +29,10 @@ echo "⚠️  Press Ctrl+C to stop"
 echo "================================================================================"
 echo ""
 
-# Change to project directory
-cd "$(dirname "$0")"
+cd "$PROJECT_ROOT"
 
 # Install pytest-json-report if not installed
-pip install -q pytest-json-report 2>/dev/null
+"$PYTHON_BIN" -m pip install -q pytest-json-report 2>/dev/null
 
 # Start unified testing hub
-python3 tests/unified_testing_hub.py
+"$PYTHON_BIN" tests/unified_testing_hub.py

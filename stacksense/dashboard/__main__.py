@@ -3,6 +3,7 @@ Entry point for running the StackSense dashboard as a module.
 
 Usage:
     python -m stacksense.dashboard
+    python3 -m stacksense.dashboard
 """
 
 from stacksense.dashboard import run_server

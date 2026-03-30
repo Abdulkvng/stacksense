@@ -221,7 +221,11 @@
             </section>
 
             <section class="section-pane" data-pane="enterprise">
-                <h2 style="margin-bottom: 24px; font-size: 24px; font-weight: 700;">Enterprise Features</h2>
+                <h2 style="margin-bottom: 24px; font-size: 24px; font-weight: 700;">Enterprise Add-On</h2>
+                <p id="enterpriseStatusMessage" class="body-muted" style="margin: 0 0 24px; line-height: 1.6;">
+                    Enterprise runtime controls, governance, and gateway features ship as a separate private package.
+                    Install the add-on to enable these capabilities in the dashboard.
+                </p>
                 <div class="enterprise-grid">
                     <article class="card">
                         <div class="card-header">
@@ -229,8 +233,8 @@
                         </div>
                         <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Route prompts to cost-effective models based on task complexity</p>
                         <div class="feature-status" style="margin-top: 16px;">
-                            <span class="status-badge active">Active</span>
-                            <span class="metric-value" style="font-size: 14px;">0 Rules Configured</span>
+                            <span class="status-badge" data-enterprise-status>Add-on</span>
+                            <span class="metric-value" id="routingRulesCount" style="font-size: 14px;">Install to enable</span>
                         </div>
                     </article>
 
@@ -240,8 +244,8 @@
                         </div>
                         <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Set spend limits with automatic circuit breakers</p>
                         <div class="feature-status" style="margin-top: 16px;">
-                            <span class="status-badge active">Active</span>
-                            <span class="metric-value" style="font-size: 14px;">0 Budgets Set</span>
+                            <span class="status-badge" data-enterprise-status>Add-on</span>
+                            <span class="metric-value" id="budgetsCount" style="font-size: 14px;">Install to enable</span>
                         </div>
                     </article>
 
@@ -268,8 +272,8 @@
                         </div>
                         <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Route based on latency requirements</p>
                         <div class="feature-status" style="margin-top: 16px;">
-                            <span class="status-badge active">Active</span>
-                            <span class="metric-value" style="font-size: 14px;">0 SLA Configs</span>
+                            <span class="status-badge" data-enterprise-status>Add-on</span>
+                            <span class="metric-value" id="slaConfigsCount" style="font-size: 14px;">Install to enable</span>
                         </div>
                     </article>
 
@@ -313,23 +317,22 @@
                         </div>
                         <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">Allowlists, PII detection</p>
                         <div class="feature-status" style="margin-top: 16px;">
-                            <span class="status-badge active">Active</span>
-                            <span class="metric-value" style="font-size: 14px;">0 Policies Set</span>
+                            <span class="status-badge" data-enterprise-status>Add-on</span>
+                            <span class="metric-value" id="policiesCount" style="font-size: 14px;">Install to enable</span>
                         </div>
                     </article>
 
                     <article class="card full-width">
                         <div class="card-header">
-                            <h3>Enterprise Features Overview</h3>
+                            <h3>Separate Package Boundary</h3>
                         </div>
                         <p class="body-muted">
-                            All enterprise features are now available in your StackSense instance.
-                            These features help you optimize costs, enforce budgets, maintain compliance,
-                            and track complex AI workflows. Configure each feature using the backend API or
-                            contact support for assistance.
+                            The open-source StackSense SDK stays clean and self-hosted. Enterprise routing,
+                            budgets, policies, audit tooling, agents, and the AI gateway live in a separate
+                            private package so they are not bundled into the OSS release artifact.
                         </p>
                         <div class="enterprise-links">
-                            <a href="https://github.com/Abdulkvng/stacksense/blob/main/docs/" class="text-btn">View Documentation</a>
+                            <code id="enterpriseInstallCommand">pip install stacksense-enterprise</code>
                             <a href="mailto:abdulkvng@gmail.com?subject=Enterprise Features Help" class="text-btn">Get Support</a>
                         </div>
                     </article>
@@ -337,16 +340,6 @@
             </section>
 
             <section class="section-pane" data-pane="monitoring">
-<<<<<<< Updated upstream
-                <div class="monitoring-header" style="margin-bottom: 24px;">
-                    <div class="card">
-                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 20px;">📡 Live Monitoring</h3>
-                            <span id="liveStreamStatus" class="stream-status status-disconnected" style="font-size: 12px; padding: 6px 12px;">Disconnected</span>
-                        </div>
-                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5;">
-                            Real-time metrics, alerts, and system health monitoring.
-=======
                 <div class="monitoring-header">
                     <div class="card">
                         <div class="card-header">
@@ -354,8 +347,7 @@
                             <span id="liveStreamStatus" class="stream-status status-disconnected">Disconnected</span>
                         </div>
                         <p class="body-muted">
-                            Real-time metrics, alerts, and system health monitoring powered by Prometheus.
->>>>>>> Stashed changes
+                            Real-time request metrics, alerts, and system health monitoring for the open-source SDK.
                         </p>
                     </div>
                 </div>
@@ -363,33 +355,19 @@
                 <div class="monitoring-grid">
                     <article class="card">
                         <div class="card-header">
-<<<<<<< Updated upstream
-                            <h3 style="font-size: 16px;">🏥 System Health</h3>
-                        </div>
-                        <div id="liveHealthStatus" class="health-status" style="margin-top: 16px; min-height: 100px;">
-=======
                             <h3>🏥 System Health</h3>
                         </div>
                         <div id="liveHealthStatus" class="health-status">
->>>>>>> Stashed changes
                             <p class="no-data">Loading health status...</p>
                         </div>
                     </article>
 
                     <article class="card full-width">
-<<<<<<< Updated upstream
-                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 16px;">🚨 Live Alerts</h3>
-                            <button id="clearAlertsBtn" class="ghost-btn" style="font-size: 13px;">Clear All</button>
-                        </div>
-                        <div class="alerts-container" style="margin-top: 16px;">
-=======
                         <div class="card-header">
                             <h3>🚨 Live Alerts</h3>
                             <button id="clearAlertsBtn" class="ghost-btn">Clear All</button>
                         </div>
                         <div class="alerts-container">
->>>>>>> Stashed changes
                             <ul id="liveAlertsList" class="alerts-list"></ul>
                             <p id="liveAlertsEmpty" class="no-data" hidden>No active alerts</p>
                         </div>
@@ -397,31 +375,6 @@
 
                     <article class="card full-width">
                         <div class="card-header">
-<<<<<<< Updated upstream
-                            <h3 style="font-size: 16px;">📊 Prometheus Metrics</h3>
-                        </div>
-                        <p class="body-muted" style="margin: 12px 0; line-height: 1.5; word-wrap: break-word;">
-                            Access raw Prometheus metrics at <code style="font-size: 12px;"><a href="/metrics" target="_blank">/metrics</a></code>
-                        </p>
-                        <div class="metrics-info" style="margin-top: 16px;">
-                            <div class="info-item" style="margin-bottom: 12px;">
-                                <span class="info-label" style="font-size: 12px; color: #94a3b8;">Endpoint:</span>
-                                <code class="info-value" style="font-size: 12px;">/metrics</code>
-                            </div>
-                            <div class="info-item" style="margin-bottom: 12px;">
-                                <span class="info-label" style="font-size: 12px; color: #94a3b8;">Format:</span>
-                                <code class="info-value" style="font-size: 12px; word-wrap: break-word;">Prometheus Exposition Format</code>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label" style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 8px;">Available Metrics:</span>
-                                <ul class="metrics-list" style="max-height: 200px; overflow-y: auto; font-size: 13px; line-height: 1.6; padding-left: 20px;">
-                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_requests_total - Total requests by feature</li>
-                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_request_duration_seconds - Request latency</li>
-                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_budget_utilization_ratio - Budget utilization</li>
-                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_routing_decisions_total - Routing decisions</li>
-                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_agent_cost_dollars - Agent costs</li>
-                                    <li style="margin-bottom: 4px; word-wrap: break-word;">stacksense_policy_violations_total - Policy violations</li>
-=======
                             <h3>📊 Prometheus Metrics</h3>
                         </div>
                         <p class="body-muted">
@@ -441,12 +394,12 @@
                                 <ul class="metrics-list">
                                     <li>stacksense_requests_total - Total requests by feature</li>
                                     <li>stacksense_request_duration_seconds - Request latency</li>
-                                    <li>stacksense_budget_utilization_ratio - Budget utilization</li>
-                                    <li>stacksense_routing_decisions_total - Routing decisions</li>
-                                    <li>stacksense_agent_cost_dollars - Agent costs</li>
-                                    <li>stacksense_policy_violations_total - Policy violations</li>
->>>>>>> Stashed changes
+                                    <li>stacksense_request_errors_total - Request errors</li>
+                                    <li>stacksense_system_health - Component health</li>
                                 </ul>
+                                <p class="body-muted" style="margin-top: 12px;">
+                                    Additional enterprise metrics appear when the private add-on package is installed.
+                                </p>
                             </div>
                         </div>
                     </article>

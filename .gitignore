@@ -92,7 +92,10 @@ dmypy.json
 # Internal Documentation
 INTERNAL_README.md
 
-# Enterprise & Gateway (private - not on GitHub)
+# Private enterprise workspace (not part of the OSS repo/release)
+enterprise/
+
+# Legacy private enterprise/gateway files if recreated at repo root
 stacksense/enterprise/
 stacksense/gateway/
 AI_GATEWAY_GUIDE.md
@@ -119,3 +122,5 @@ QUICK_START.md
 TELEMETRY_GUIDE.md
 TESTING_GUIDE.md
 docs/
+test_report.json
+test_results.json

@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/Abdulkvng/stacksense">
-    <img src="banner.svg" alt="StackSense" width="100%">
+    <img src="https://raw.githubusercontent.com/Abdulkvng/stacksense/main/banner.svg" alt="StackSense" width="100%">
   </a>
 </p>
 
@@ -248,6 +248,20 @@ STACKSENSE_DB_URL=postgresql://user:pass@host:5432/stacksense
 STACKSENSE_ENVIRONMENT=production
 STACKSENSE_DEBUG=false
 ```
+
+<br>
+
+## OSS vs Enterprise
+
+`pip install stacksense` ships only the open-source SDK, dashboard, and database helpers.
+
+The AI gateway, routing, budget enforcement, governance, and other runtime control features live in a separate private add-on and are not included in the OSS wheel or source distribution.
+
+Local repo layout:
+
+- `stacksense/` — open-source package published to PyPI
+- `tests/` — OSS test suite
+- `enterprise/` — private local add-on workspace, kept out of the OSS git history
 
 <br>
 

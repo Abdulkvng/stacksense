@@ -9,8 +9,9 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
 from sqlalchemy.pool import StaticPool
 
-from stacksense.database.models import Base
+from stacksense.database.base import Base
 from stacksense.logger.logger import get_logger
+from stacksense.plugins import load_enterprise
 
 
 class DatabaseManager:
@@ -82,11 +83,13 @@ class DatabaseManager:
 
     def create_tables(self) -> None:
         """Create all database tables."""
+        load_enterprise()
         Base.metadata.create_all(bind=self.engine)
         self.logger.info("Database tables created")
 
     def drop_tables(self) -> None:
         """Drop all database tables."""
+        load_enterprise()
         Base.metadata.drop_all(bind=self.engine)
         self.logger.warning("Database tables dropped")
 
