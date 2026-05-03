@@ -1,15 +1,17 @@
 <p align="center">
   <a href="https://github.com/Abdulkvng/stacksense">
-    <img src="https://raw.githubusercontent.com/Abdulkvng/stacksense/main/docs/assets/banner.svg" alt="StackSense" width="100%">
+    <img src="https://raw.githubusercontent.com/Abdulkvng/stacksense/main/docs/assets/banner.svg" alt="StackSense — LLM cost monitoring and token usage tracking for Python" width="100%">
   </a>
 </p>
 
 <p align="center">
-  <strong>AI cost monitoring for Python. Two lines of code. Thirteen providers.</strong>
+  <strong>Monitor LLM costs, token usage, and latency across 13 AI providers — in two lines of Python.</strong>
 </p>
 
 <p align="center">
   <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/v/stacksense.svg?style=flat&labelColor=0a0a0a&color=6366f1" alt="PyPI"></a>
+  &nbsp;
+  <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/dm/stacksense?style=flat&labelColor=0a0a0a&color=6366f1" alt="Downloads"></a>
   &nbsp;
   <a href="https://github.com/Abdulkvng/stacksense/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat&labelColor=0a0a0a&color=6366f1" alt="License"></a>
   &nbsp;
@@ -29,7 +31,11 @@
 
 <br>
 
-## The Problem
+**StackSense** is a Python library for tracking LLM costs, token usage, and API latency across OpenAI, Anthropic, Gemini, Groq, and 9 more providers. It wraps your existing AI clients — no new infrastructure, no code changes to your business logic, no agents to run. Add one line, get full observability.
+
+<br>
+
+## Why Track LLM Costs?
 
 You're shipping AI features. Costs are invisible until the invoice hits.
 
@@ -95,7 +101,7 @@ Pass any supported client to `ss.monitor()` — the provider is auto-detected.
   </tr>
   <tr>
     <td><strong>Pinecone</strong><br><sub>Vector ops &bull; per-query</sub></td>
-    <td colspan="3"><sub>More coming soon — <a href="https://github.com/Abdulkvng/stacksense/issues">request a provider</a></sub></td>
+    <td colspan="3"><sub>More coming — <a href="https://github.com/Abdulkvng/stacksense/issues">request a provider</a></sub></td>
   </tr>
 </table>
 
@@ -241,7 +247,6 @@ pip install stacksense[postgresql]
 ```
 
 ```bash
-# Environment variables
 STACKSENSE_PROJECT_ID=my-project
 STACKSENSE_ENABLE_DB=true
 STACKSENSE_DB_URL=postgresql://user:pass@host:5432/stacksense
