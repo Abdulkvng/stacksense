@@ -121,6 +121,5 @@ PRODUCTION_READINESS.md
 QUICK_START.md
 TELEMETRY_GUIDE.md
 TESTING_GUIDE.md
-docs/
 test_report.json
 test_results.json

@@ -1,0 +1,11 @@
+# Example requirements.txt for applications using StackSense
+# Customize this for your application
+
+# StackSense with PostgreSQL support
+stacksense[postgres]>=0.1.0
+
+# Add your application dependencies below
+# flask>=2.0.0
+# fastapi>=0.100.0
+# requests>=2.31.0
+

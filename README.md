@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/Abdulkvng/stacksense">
-    <img src="https://raw.githubusercontent.com/Abdulkvng/stacksense/main/banner.svg" alt="StackSense" width="100%">
+    <img src="https://raw.githubusercontent.com/Abdulkvng/stacksense/main/docs/assets/banner.svg" alt="StackSense" width="100%">
   </a>
 </p>
 
