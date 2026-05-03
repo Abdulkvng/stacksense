@@ -5,7 +5,11 @@
 </p>
 
 <p align="center">
-  <strong>AI cost monitoring for Python. Two lines of code. Thirteen providers.</strong>
+  <strong>Open-source AI cost monitoring for Python developers.</strong>
+</p>
+
+<p align="center">
+  Track tokens, latency, cost, and provider usage across your AI stack with a simple Python SDK.
 </p>
 
 <p align="center">
@@ -14,40 +18,76 @@
   <a href="https://github.com/Abdulkvng/stacksense/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat&labelColor=0a0a0a&color=6366f1" alt="License"></a>
   &nbsp;
   <a href="https://pypi.org/project/stacksense/"><img src="https://img.shields.io/pypi/pyversions/stacksense?style=flat&labelColor=0a0a0a&color=6366f1" alt="Python"></a>
-  &nbsp;
-  <img src="https://komarev.com/ghpvc/?username=Abdulkvng&repo=stacksense&label=views&color=6366f1&style=flat" alt="Views">
 </p>
 
 <p align="center">
+  <a href="#why-stacksense">Why StackSense</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
   <a href="#quickstart">Quickstart</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#what-it-tracks">What it tracks</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
   <a href="#supported-providers">Providers</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
   <a href="#features">Features</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
-  <a href="#framework-middleware">Middleware</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
-  <a href="#configuration">Config</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
   <a href="#contributing">Contributing</a>
 </p>
 
 <br>
 
-## The Problem
+## Why StackSense
 
-You're shipping AI features. Costs are invisible until the invoice hits.
+AI apps are easy to prototype but hard to monitor.
 
-```
+You can ship a feature using OpenAI, Anthropic, Gemini, Pinecone, ElevenLabs, or another provider in a few lines of code. But once users start using it, the important questions get harder to answer:
+
+- How much are we spending?
+- Which provider is costing the most?
+- Which model is the slowest?
+- Which request caused the spike?
+- How many tokens are we using?
+- What did this feature cost us today, this week, or this month?
+
+StackSense gives developers a simple way to track AI usage before the invoice becomes a surprise.
+
+```text
 Month 1    $12        "No big deal."
 Month 3    $480       "Wait, what?"
-Month 5    $2,100     "Which call is doing this??"
+Month 5    $2,100     "Which call is doing this?"
 ```
 
-StackSense wraps your existing AI clients and tracks every call — tokens, latency, cost — with **zero config** and **zero code changes** to your business logic.
+StackSense wraps your existing AI clients and tracks every call, including tokens, latency, estimated cost, and provider usage.
+
+No hosted dashboard required.  
+No agent to deploy.  
+No major rewrite.
+
+<br>
+
+## What StackSense does
+
+StackSense is an open-source Python SDK that helps you monitor AI usage across providers.
+
+It helps you:
+
+- Track AI API calls
+- Estimate model costs
+- Measure latency
+- Monitor token usage
+- Compare provider usage
+- Export metrics
+- Add alerts for cost spikes
+- Use middleware with FastAPI, Flask, and Django
+
+The open-source version is focused on visibility: helping developers understand what their AI systems are doing and how much they cost.
 
 <br>
 
 ## Quickstart
 
+Install StackSense:
+
 ```bash
 pip install stacksense
 ```
+
+Use it with your existing AI client:
 
 ```python
 from stacksense import StackSense
@@ -56,131 +96,163 @@ import openai
 ss = StackSense()
 client = ss.monitor(openai.OpenAI())
 
-# Use client exactly as before — every call is now tracked
 response = client.chat.completions.create(
     model="gpt-4o",
-    messages=[{"role": "user", "content": "Hello!"}]
+    messages=[
+        {"role": "user", "content": "Hello!"}
+    ]
 )
 
 print(ss.get_metrics())
-# {'total_calls': 1, 'total_tokens': 28, 'total_cost': 0.0004, ...}
 ```
 
-That's it. No dashboards to configure. No agents to deploy. Just `monitor()` and go.
+Example output:
+
+```python
+{
+    "total_calls": 1,
+    "total_tokens": 28,
+    "total_cost": 0.0004,
+    "average_latency": 0.82
+}
+```
+
+That is it. Wrap the client once and keep using it like normal.
 
 <br>
 
-## Supported Providers
+## What it tracks
 
-Pass any supported client to `ss.monitor()` — the provider is auto-detected.
+StackSense can track:
 
-<table>
-  <tr>
-    <td><strong>OpenAI</strong><br><sub>GPT-4o &bull; o1 &bull; o3 &bull; Embeddings</sub></td>
-    <td><strong>Anthropic</strong><br><sub>Opus 4 &bull; Sonnet 4 &bull; Haiku</sub></td>
-    <td><strong>Google</strong><br><sub>Gemini 2.0 Flash &bull; 1.5 Pro</sub></td>
-    <td><strong>Mistral</strong><br><sub>Large &bull; Small &bull; Codestral</sub></td>
-  </tr>
-  <tr>
-    <td><strong>Cohere</strong><br><sub>Command R/R+ &bull; Embed v4</sub></td>
-    <td><strong>DeepSeek</strong><br><sub>Chat &bull; Reasoner</sub></td>
-    <td><strong>AI21 Labs</strong><br><sub>Jamba 1.5 Large/Mini</sub></td>
-    <td><strong>Together AI</strong><br><sub>Llama 3.1 &bull; Mixtral</sub></td>
-  </tr>
-  <tr>
-    <td><strong>Groq</strong><br><sub>Llama 3.3 &bull; Mixtral &bull; Gemma2</sub></td>
-    <td><strong>Perplexity</strong><br><sub>Sonar Pro &bull; Reasoning</sub></td>
-    <td><strong>Replicate</strong><br><sub>Llama &bull; SDXL &bull; any model</sub></td>
-    <td><strong>ElevenLabs</strong><br><sub>Voice models &bull; per-character</sub></td>
-  </tr>
-  <tr>
-    <td><strong>Pinecone</strong><br><sub>Vector ops &bull; per-query</sub></td>
-    <td colspan="3"><sub>More coming soon — <a href="https://github.com/Abdulkvng/stacksense/issues">request a provider</a></sub></td>
-  </tr>
-</table>
+| Metric | Description |
+|---|---|
+| Calls | Number of AI requests made |
+| Tokens | Input, output, and total token usage |
+| Cost | Estimated cost by provider and model |
+| Latency | Time taken for each AI call |
+| Provider | OpenAI, Anthropic, Gemini, Mistral, and more |
+| Model | Model-level usage and cost breakdown |
+| Errors | Failed requests and exceptions |
+| Exports | CSV and JSON exports for analysis |
+
+<br>
+
+## Supported providers
+
+StackSense supports multiple AI providers through one monitoring interface.
+
+| Provider | Examples |
+|---|---|
+| OpenAI | GPT-4o, o1, o3, embeddings |
+| Anthropic | Claude Opus, Sonnet, Haiku |
+| Google | Gemini 2.0 Flash, Gemini 1.5 Pro |
+| Mistral | Large, Small, Codestral |
+| Cohere | Command R, Command R+, Embed |
+| DeepSeek | Chat, Reasoner |
+| AI21 Labs | Jamba models |
+| Together AI | Llama, Mixtral |
+| Groq | Llama, Mixtral, Gemma |
+| Perplexity | Sonar models |
+| Replicate | Hosted model calls |
+| ElevenLabs | Voice and character-based usage |
+| Pinecone | Vector database operations |
+
+More providers can be added over time.
 
 <br>
 
 ## Features
 
-### Multi-Provider Cost Breakdown
+### Multi-provider tracking
 
-Track spend across providers from a single `StackSense` instance.
+Track usage across different providers in one place.
 
 ```python
 ss = StackSense()
 
-oai = ss.monitor(openai.OpenAI())
-claude = ss.monitor(anthropic.Anthropic())
+openai_client = ss.monitor(openai.OpenAI())
+anthropic_client = ss.monitor(anthropic.Anthropic())
 
-oai.chat.completions.create(model="gpt-4o", messages=[...])
-claude.messages.create(model="claude-sonnet-4-20250514", messages=[...])
-
-ss.get_cost_breakdown()
-# {'openai': 0.003, 'anthropic': 0.002}
+print(ss.get_cost_breakdown())
 ```
+
+Example:
+
+```python
+{
+    "openai": 0.003,
+    "anthropic": 0.002
+}
+```
+
+<br>
 
 ### Decorator API
 
-Track any function without wrapping a client:
+Track custom functions with a decorator.
 
 ```python
 import stacksense
 
 @stacksense.track(provider="openai", model="gpt-4o")
-def generate(prompt):
+def generate_response(prompt):
     return client.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}]
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
     )
 ```
 
-Works with `async` functions too.
+Async functions are supported too.
 
-### Alerts & Webhooks
+<br>
 
-Get notified when costs spike.
+### Alerts and webhooks
+
+Create alerts when cost or usage crosses a threshold.
 
 ```python
 from stacksense.alerts import AlertManager, AlertRule
 
 alerts = AlertManager(tracker=ss.tracker)
+
 alerts.add_rule(AlertRule(
     name="Cost spike",
     metric="cost",
     threshold=5.0,
-    window="1h",
+    window="1h"
 ))
-alerts.add_webhook("https://hooks.slack.com/services/...")
+
 alerts.check()
 ```
 
-### Export
+<br>
+
+### Export metrics
+
+Export your metrics for analysis.
 
 ```python
 from stacksense.exporters import Exporter
 
 exporter = Exporter(ss.tracker)
+
 exporter.to_csv("metrics.csv")
 exporter.to_json("metrics.json")
 ```
 
 <br>
 
-## Framework Middleware
+## Framework middleware
 
-Drop-in middleware for popular frameworks — automatically tracks all AI calls per request.
+StackSense includes middleware for common Python web frameworks.
 
-<table>
-<tr>
-<td width="33%">
-
-**FastAPI**
+### FastAPI
 
 ```python
-from stacksense.middleware import (
-    FastAPIMiddleware
-)
+from stacksense.middleware import FastAPIMiddleware
 
 app.add_middleware(
     FastAPIMiddleware,
@@ -188,60 +260,51 @@ app.add_middleware(
 )
 ```
 
-</td>
-<td width="33%">
-
-**Flask**
+### Flask
 
 ```python
-from stacksense.middleware import (
-    FlaskMiddleware
-)
+from stacksense.middleware import FlaskMiddleware
 
 FlaskMiddleware(app, stacksense=ss)
 ```
 
-</td>
-<td width="33%">
-
-**Django**
+### Django
 
 ```python
-# settings.py
 MIDDLEWARE = [
-    ...,
-    'stacksense.middleware'
-    '.DjangoMiddleware',
+    ...
+    "stacksense.middleware.DjangoMiddleware",
 ]
 ```
-
-</td>
-</tr>
-</table>
 
 <br>
 
 ## CLI
 
+StackSense also includes a CLI.
+
 ```bash
-stacksense status              # View current metrics
-stacksense dashboard           # Launch web dashboard
-stacksense export csv -o out.csv
-stacksense db init             # Initialize database
+stacksense status
+stacksense dashboard
+stacksense export csv -o metrics.csv
+stacksense db init
 ```
 
 <br>
 
 ## Configuration
 
-SQLite by default — zero config. PostgreSQL for production:
+StackSense works with SQLite by default.
+
+For PostgreSQL:
 
 ```bash
 pip install stacksense[postgresql]
 ```
 
+Example environment variables:
+
 ```bash
-# Environment variables
 STACKSENSE_PROJECT_ID=my-project
 STACKSENSE_ENABLE_DB=true
 STACKSENSE_DB_URL=postgresql://user:pass@host:5432/stacksense
@@ -251,21 +314,56 @@ STACKSENSE_DEBUG=false
 
 <br>
 
-## OSS vs Enterprise
+## OSS scope
 
-`pip install stacksense` ships only the open-source SDK, dashboard, and database helpers.
+The open-source version of StackSense focuses on monitoring and visibility.
 
-The AI gateway, routing, budget enforcement, governance, and other runtime control features live in a separate private add-on and are not included in the OSS wheel or source distribution.
+Included in OSS:
 
-Local repo layout:
+- Python SDK
+- Client monitoring
+- Metrics tracking
+- Cost estimation
+- Provider breakdowns
+- Middleware
+- CLI helpers
+- Export tools
+- Local database support
 
-- `stacksense/` — open-source package published to PyPI
-- `tests/` — OSS test suite
-- `enterprise/` — private local add-on workspace, kept out of the OSS git history
+Not included in OSS:
+
+- AI gateway
+- Runtime routing
+- Budget enforcement
+- Governance controls
+- Enterprise policy layer
+
+Those runtime control features are separate from the public OSS package.
+
+<br>
+
+## Local project structure
+
+The repository is organized like this:
+
+```text
+stacksense/
+  Core open-source Python package
+
+tests/
+  Test suite for the OSS package
+
+examples/
+  Example usage and demos
+```
 
 <br>
 
 ## Contributing
+
+Contributions are welcome.
+
+To run StackSense locally:
 
 ```bash
 git clone https://github.com/Abdulkvng/stacksense.git
@@ -274,10 +372,14 @@ pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
-PRs welcome. Please open an issue first for large changes.
+For larger changes, please open an issue first so we can discuss the direction.
 
 <br>
 
+## License
+
+StackSense is released under the MIT License.
+
 <p align="center">
-  <sub>MIT License &copy; 2025 StackSense Contributors</sub>
+  <sub>Built for developers shipping AI products with more visibility and less cost confusion.</sub>
 </p>
