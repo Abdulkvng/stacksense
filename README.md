@@ -43,21 +43,6 @@ StackSense wraps your existing AI clients and tracks every call — tokens, late
 
 <br>
 
-## What StackSense Tracks
-
-StackSense gives you visibility into the AI calls your app is already making.
-
-- **Usage** — total calls, model usage, and provider usage
-- **Tokens** — input, output, and total token counts
-- **Cost** — estimated spend by model and provider
-- **Latency** — request timing and performance tracking
-- **Exports** — CSV and JSON exports for deeper analysis
-- **Alerts** — cost spike alerts and webhook notifications
-
-The open-source version focuses on monitoring and visibility. Runtime control features like AI gateway routing, budget enforcement, governance, and policy controls are separate from the public OSS package.
-
-<br>
-
 ## Quickstart
 
 ```bash
